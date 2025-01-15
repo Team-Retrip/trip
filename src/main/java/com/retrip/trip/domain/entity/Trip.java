@@ -30,21 +30,18 @@ public class Trip extends BaseEntity {
     @Embedded
     private Itineraries Itineraries;
 
-    private Trip(String title, UUID destinationId, TripPeriod period, boolean open) {
+    private Trip(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.destinationId = destinationId;
         this.period = period;
         this.open = open;
-    }
-
-    public static Trip createWithItinerary(String title, UUID destinationId, TripPeriod period, boolean open) {
-        Trip trip = new Trip(title, destinationId, period, open);
-        trip.Itineraries = new Itineraries(period);
-        return trip;
-    }
-
-    public void registerLeader(UUID leaderId) {
         this.leaderId = leaderId;
+    }
+
+    public static Trip createWithItinerary(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
+        Trip trip = new Trip(title, destinationId, period, open, leaderId);
+        trip.Itineraries = new Itineraries(trip, period);
+        return trip;
     }
 }

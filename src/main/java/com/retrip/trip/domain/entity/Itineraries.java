@@ -15,17 +15,11 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Embeddable
 public class Itineraries {
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(
-            name = "trip_id",
-            nullable = false,
-            columnDefinition = "varbinary(16)",
-            foreignKey = @ForeignKey(name = "fk_itinerary_to_trip")
-    )
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Itinerary> itineraries = new ArrayList<>();
 
-    public Itineraries(TripPeriod period) {
+    public Itineraries(Trip trip, TripPeriod period) {
         int days = period.getDays();
-        IntStream.rangeClosed(1, days).forEach(n -> this.itineraries.add(Itinerary.create(n)));
+        IntStream.rangeClosed(1, days).forEach(n -> this.itineraries.add(Itinerary.create(trip, n)));
     }
 }

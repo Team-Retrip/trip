@@ -24,7 +24,6 @@ public class TripService implements CreateTripUseCase, GetTripUseCase {
     @Override
     public TripCreateResponse createTrip(TripCreateRequest request) {
         Trip trip = tripRepository.save(request.to());
-        trip.registerLeader(request.memberId());
         return TripCreateResponse.of(trip);
     }
 

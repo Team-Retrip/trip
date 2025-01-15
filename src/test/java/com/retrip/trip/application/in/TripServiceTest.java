@@ -20,7 +20,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.Commit;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -60,7 +59,6 @@ class TripServiceTest {
         }
     }
 
-    @Commit
     @DisplayName("여행을 생성 한다.")
     @Test
     void createTrip() {
@@ -85,10 +83,10 @@ class TripServiceTest {
                 LocalDate.of(2025, 3, 10),
                 LocalDate.of(2025, 3, 15)
         );
-        tripRepository.save(Trip.createWithItinerary("속초 여행 멤버 구함", UUID.randomUUID(), period, true));
-        tripRepository.save(Trip.createWithItinerary("강릉 여행 멤버 구함", UUID.randomUUID(), period, true));
-        tripRepository.save(Trip.createWithItinerary("대구 여행 멤버 구함", UUID.randomUUID(), period, true));
-        tripRepository.save(Trip.createWithItinerary("부산 여행 멤버 구함", UUID.randomUUID(), period, true));
+        tripRepository.save(Trip.createWithItinerary("속초 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
+        tripRepository.save(Trip.createWithItinerary("강릉 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
+        tripRepository.save(Trip.createWithItinerary("대구 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
+        tripRepository.save(Trip.createWithItinerary("부산 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
 
         Page<TripResponse> trips = tripService.getTrips(PageRequest.of(0, 2));
 

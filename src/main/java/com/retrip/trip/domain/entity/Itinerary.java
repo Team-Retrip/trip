@@ -1,8 +1,6 @@
 package com.retrip.trip.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,14 +17,24 @@ public class Itinerary extends BaseEntity {
     private UUID id;
     private String name;
 
-    private Itinerary(String name) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "trip_id",
+            nullable = false,
+            columnDefinition = "varbinary(16)",
+            foreignKey = @ForeignKey(name = "fk_itinerary_to_trip")
+    )
+    private Trip trip;
+
+    private Itinerary(String name, Trip trip) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.trip = trip;
     }
 
-    public static Itinerary create(int day) {
+    public static Itinerary create(Trip trip, int day) {
         validate(day);
-        return new Itinerary("day " + day);
+        return new Itinerary("day " + day, trip);
     }
 
     private static void validate(int day) {
