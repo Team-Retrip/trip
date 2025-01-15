@@ -1,0 +1,42 @@
+name: "🐛 Bug Report"
+description: 애플리케이션에서 발견한 버그를 신고합니다.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 버그 설명
+      description: 어떤 버그인지 간략하게 설명해주세요.
+      placeholder: 예) 로그인 시 오류가 발생합니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 재현 방법
+      description: 버그를 재현하는 단계를 상세히 작성해주세요.
+      placeholder: |
+        1. 홈페이지로 이동
+        2. 로그인 버튼 클릭
+        3. 오류 메시지 확인
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-result
+    attributes:
+      label: 예상 결과
+      description: 어떤 결과를 기대했는지 설명해주세요.
+      placeholder: 예) 사용자가 정상적으로 로그인되어 대시보드로 이동해야 합니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-result
+    attributes:
+      label: 실제 결과
+      description: 실제로 발생한 결과를 설명해주세요.
+      placeholder: 예) 로그인 시 "서버 오류" 메시지가 표시됩니다.
+    validations:
+      required: true
