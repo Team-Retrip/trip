@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -16,6 +17,7 @@ public class Itinerary extends BaseEntity {
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
     private String name;
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -26,20 +28,21 @@ public class Itinerary extends BaseEntity {
     )
     private Trip trip;
 
-    private Itinerary(String name, Trip trip) {
+    private Itinerary(String name, Trip trip, LocalDate date) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.trip = trip;
+        this.date = date;
     }
 
-    public static Itinerary create(Trip trip, int day) {
+    public static Itinerary create(Trip trip, int day, LocalDate date) {
         validate(day);
-        return new Itinerary("day " + day, trip);
+        return new Itinerary("day " + day, trip, date);
     }
 
     private static void validate(int day) {
         if (day < 1) {
-            throw new RuntimeException();
+            throw new IllegalArgumentException("여행 일차는 1보다 작을 수 없습니다.");
         }
     }
 }

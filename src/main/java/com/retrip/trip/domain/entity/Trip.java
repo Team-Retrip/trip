@@ -28,7 +28,7 @@ public class Trip extends BaseEntity {
     private boolean open;
 
     @Embedded
-    private Itineraries Itineraries;
+    private Itineraries itineraries;
 
     private Trip(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
         this.id = UUID.randomUUID();
@@ -39,9 +39,13 @@ public class Trip extends BaseEntity {
         this.leaderId = leaderId;
     }
 
-    public static Trip createWithItinerary(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
+    public static Trip create(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
+        return new Trip(title, destinationId, period, open, leaderId);
+    }
+
+    public static Trip createWithItineraries(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
         Trip trip = new Trip(title, destinationId, period, open, leaderId);
-        trip.Itineraries = new Itineraries(trip, period);
+        trip.itineraries = new Itineraries(trip, period);
         return trip;
     }
 }

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoLocalDate;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -28,16 +30,20 @@ public class TripPeriod {
     }
 
     private void validate(LocalDate start, LocalDate end) {
-        if (start.isBefore(LocalDate.now())) {
-            throw new RuntimeException();
+        if (start.isBefore(ChronoLocalDate.from(ZonedDateTime.now()))) {
+            throw new IllegalArgumentException("여행 시작 일자는 현재보다 이전일 수 없습니다.");
         }
 
         if (end.isBefore(start)) {
-            throw new RuntimeException();
+            throw new IllegalArgumentException("여행 종료 일자는 현재보다 이전일 수 없습니다.");
         }
     }
 
     public int getDays() {
         return Period.between(start, end).getDays() + 1;
+    }
+
+    public boolean isNotInclude(LocalDate date) {
+        return date.isBefore(start) || date.isAfter(end);
     }
 }

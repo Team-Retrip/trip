@@ -27,6 +27,10 @@ public record TripCreateRequest(
         boolean open
 ) {
     public Trip to() {
-        return Trip.createWithItinerary(title, locationId, new TripPeriod(start, end), open, memberId);
+        return Trip.create(title, locationId, new TripPeriod(start, end), open, memberId);
+    }
+
+    public Trip toWithItineraries() {
+        return Trip.createWithItineraries(title, locationId, new TripPeriod(start, end), open, memberId);
     }
 }

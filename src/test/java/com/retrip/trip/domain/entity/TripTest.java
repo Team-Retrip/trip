@@ -16,7 +16,20 @@ class TripTest {
     @DisplayName("제목, 여행지, 기간, 공개 여부를 입력해 여행을 생성할 수 있다.")
     @Test
     void create() {
-        assertThatCode(() -> Trip.createWithItinerary(
+        assertThatCode(() -> Trip.create(
+                "속초 여행 멤버 구함",
+                destinationId,
+                new TripPeriod(
+                        LocalDate.of(2025, 3, 10),
+                        LocalDate.of(2025, 3, 15)),
+                true,
+                memberId)).doesNotThrowAnyException();
+    }
+
+    @DisplayName("제목, 여행지, 기간, 공개 여부를 입력해 여행과 일정 목록을 생성할 수 있다.")
+    @Test
+    void createWithItinerary() {
+        assertThatCode(() -> Trip.createWithItineraries(
                 "속초 여행 멤버 구함",
                 destinationId,
                 new TripPeriod(
