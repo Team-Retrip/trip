@@ -21,7 +21,7 @@ public record TripCreateResponse(
         return new TripCreateResponse(
                 trip.getId(),
                 trip.getLeaderId(),
-                trip.getTitle(),
+                trip.getTitle().getValue(),
                 trip.getDestinationId(),
                 trip.getPeriod().getStart(),
                 trip.getPeriod().getEnd(),

@@ -25,7 +25,7 @@ public class TripQuerydslRepository implements TripQueryRepository {
                         Projections.constructor(TripResponse.class,
                                 trip.id,
                                 trip.leaderId,
-                                trip.title,
+                                trip.title.value,
                                 trip.destinationId,
                                 trip.period.start,
                                 trip.period.end,

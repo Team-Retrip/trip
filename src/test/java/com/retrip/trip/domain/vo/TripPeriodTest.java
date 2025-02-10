@@ -24,7 +24,7 @@ class TripPeriodTest {
         assertThatThrownBy(() -> new TripPeriod(
                 yesterday,
                 LocalDate.of(2025, 3, 15)))
-                .isExactlyInstanceOf(RuntimeException.class);
+                .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("여행 종료 일자가 시작 일자 보다 작을 수 없다.")
@@ -33,7 +33,7 @@ class TripPeriodTest {
         assertThatThrownBy(() -> new TripPeriod(
                 LocalDate.of(2025, 3, 10),
                 LocalDate.of(2025, 3, 9)))
-                .isExactlyInstanceOf(RuntimeException.class);
+                .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("여행 기간으로 총 여행일을 가져온다.")
