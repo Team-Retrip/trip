@@ -10,7 +10,7 @@ import java.util.UUID;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
-@NoArgsConstructor(access = PROTECTED)
+@NoArgsConstructor(access = PROTECTED, force = true)
 @Entity
 public class Itinerary extends BaseEntity {
     @Id

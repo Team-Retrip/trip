@@ -16,7 +16,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 @EqualsAndHashCode
 @Embeddable
-@NoArgsConstructor(access = PROTECTED)
+@NoArgsConstructor(access = PROTECTED, force = true)
 public class TripPeriod {
     @Column(name = "start_date")
     private LocalDate start;

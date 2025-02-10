@@ -1,6 +1,7 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripTitle;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,9 @@ public class Trip extends BaseEntity {
 
     @Version
     private long version;
-    private String title;
+
+    @Embedded
+    private TripTitle title;
     private UUID destinationId;
 
     @Embedded
@@ -32,7 +35,7 @@ public class Trip extends BaseEntity {
 
     private Trip(String title, UUID destinationId, TripPeriod period, boolean open, UUID leaderId) {
         this.id = UUID.randomUUID();
-        this.title = title;
+        this.title = new TripTitle(title);
         this.destinationId = destinationId;
         this.period = period;
         this.open = open;
