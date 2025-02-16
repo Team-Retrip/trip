@@ -14,8 +14,8 @@ import java.time.chrono.ChronoLocalDate;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
-@EqualsAndHashCode
 @Embeddable
+@EqualsAndHashCode
 @NoArgsConstructor(access = PROTECTED, force = true)
 public class TripPeriod {
     @Column(name = "start_date")

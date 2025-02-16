@@ -1,6 +1,9 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripTitle;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,11 +25,15 @@ class ItinerariesTest {
                 LocalDate.of(2025, 3, 10),
                 LocalDate.of(2025, 3, 15));
         Trip trip = Trip.createWithItineraries(
-                "속초 여행 멤버 구함",
-                locationId,
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("속초 여행 멤버 구함"),
+                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
-                memberId);
+                4,
+                TripCategory.DOMESTIC
+        );
         Itineraries itineraries = new Itineraries(trip, period);
         assertThat(itineraries.getValues().size()).isEqualTo(6);
     }
@@ -42,11 +49,15 @@ class ItinerariesTest {
                 LocalDate.of(2025, 3, 10));
 
         Trip trip = Trip.createWithItineraries(
-                "속초 여행 멤버 구함",
-                locationId,
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("속초 여행 멤버 구함"),
+                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
-                memberId);
+                4,
+                TripCategory.DOMESTIC
+        );
         assertThatThrownBy(() -> new Itineraries(trip, period, dates))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
 
@@ -64,11 +75,15 @@ class ItinerariesTest {
                 LocalDate.of(2025, 3, 15));
 
         Trip trip = Trip.createWithItineraries(
-                "속초 여행 멤버 구함",
-                locationId,
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("속초 여행 멤버 구함"),
+                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
-                memberId);
+                4,
+                TripCategory.DOMESTIC
+        );
         Itineraries itineraries = new Itineraries(trip, period, dates);
         assertThat(itineraries.getValues().size()).isEqualTo(3);
         assertThat(itineraries.getValues().get(0).getName()).isEqualTo("day 1");
