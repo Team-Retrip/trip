@@ -24,7 +24,6 @@ public class TripQuerydslRepository implements TripQueryRepository {
         List<TripResponse> trips = query.select(
                         Projections.constructor(TripResponse.class,
                                 trip.id,
-                                trip.leaderId,
                                 trip.title.value,
                                 trip.destinationId,
                                 trip.period.start,

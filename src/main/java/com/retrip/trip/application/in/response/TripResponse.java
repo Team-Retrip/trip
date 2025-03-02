@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public record TripResponse(
         UUID id,
-        UUID leaderId,
         String title,
         UUID destinationId,
         LocalDate start,

@@ -9,7 +9,10 @@ import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripTitle;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,15 +70,17 @@ class TripServiceTest {
     void createTrip() {
         TripCreateRequest request = new TripCreateRequest(
                 memberId,
-                "속초 여행 멤버 구함",
                 locationId,
+                "속초 여행 멤버 구함",
+                "속초 여행은 이렇게이렇게 갈겁니다~",
                 LocalDate.of(2025, 3, 10),
                 LocalDate.of(2025, 3, 15),
-                true
+                true,
+                4,
+                TripCategory.DOMESTIC
         );
         TripCreateResponse response = tripService.createTrip(request);
         assertThat(response.id()).isNotNull();
-        assertThat(response.leaderId()).isEqualTo(memberId);
         assertThat(response.destinationId()).isEqualTo(locationId);
     }
 
@@ -86,10 +91,10 @@ class TripServiceTest {
                 LocalDate.of(2025, 3, 10),
                 LocalDate.of(2025, 3, 15)
         );
-        tripRepository.save(Trip.createWithItineraries("속초 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
-        tripRepository.save(Trip.createWithItineraries("강릉 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
-        tripRepository.save(Trip.createWithItineraries("대구 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
-        tripRepository.save(Trip.createWithItineraries("부산 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
+        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("강릉 여행 멤버 구함"), new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("대구 여행 멤버 구함"), new TripDescription("대구 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("부산 여행 멤버 구함"), new TripDescription("부산 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
 
         Page<TripResponse> trips = tripService.getTrips(PageRequest.of(0, 2));
 
@@ -105,7 +110,7 @@ class TripServiceTest {
                 LocalDate.of(2025, 3, 10),
                 LocalDate.of(2025, 3, 15)
         );
-        Trip trip = tripRepository.save(Trip.createWithItineraries("속초 여행 멤버 구함", UUID.randomUUID(), period, true, memberId));
+        Trip trip = tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
         List<ItinerariesCreateRequest.ItineraryCreateRequest> itineraries = List.of(
                 new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 10)),
                 new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 12)),
