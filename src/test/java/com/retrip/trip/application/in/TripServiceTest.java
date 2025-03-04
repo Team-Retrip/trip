@@ -3,8 +3,10 @@ package com.retrip.trip.application.in;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
+import com.retrip.trip.application.in.request.TripJoinRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
+import com.retrip.trip.application.in.response.TripJoinResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
@@ -122,5 +124,28 @@ class TripServiceTest {
         ItinerariesCreateResponse response = tripService.createItineraries(request);
         assertThat(response.tripId()).isNotNull();
         assertThat(response.itineraries().size()).isEqualTo(3);
+    }
+    @DisplayName("여행 참여 요청을 보낸다.")
+    @Test
+    void joinTrip() {
+        // given: 리더(memberId)가 포함된 여행을 생성합니다.
+        TripPeriod period = new TripPeriod(
+                LocalDate.of(2025, 3, 10),
+                LocalDate.of(2025, 3, 15)
+        );
+        Trip trip = Trip.create(memberId, UUID.randomUUID(), new TripTitle("테스트 여행"), new TripDescription("여행 설명"), period, true, 4, TripCategory.DOMESTIC);
+        trip = tripRepository.save(trip);
+
+        // 새로운 참여자(newMemberId)가 참여 요청을 보냅니다.
+        UUID newMemberId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+        TripJoinRequest joinRequest = new TripJoinRequest(trip.getId(), newMemberId, "참여 요청 메시지");
+
+        // when
+        TripJoinResponse joinResponse = tripService.joinTrip(joinRequest);
+
+        // then: 응답 확인
+        assertThat(joinResponse).isNotNull();
+        assertThat(joinResponse.tripId()).isEqualTo(trip.getId());
+        assertThat(joinResponse.memberId()).isEqualTo(newMemberId);
     }
 }

@@ -105,5 +105,9 @@ public class Trip extends BaseEntity {
         trip.participants = new Participants(memberId, trip);
         return trip;
     }
+
+    public void addParticipant(TripParticipant participant) {
+        this.participants.addParticipant(participant);
+    }
 }
 

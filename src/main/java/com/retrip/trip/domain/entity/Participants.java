@@ -22,5 +22,10 @@ public class Participants {
         TripParticipant leader = TripParticipant.createTripLeader(memberId, trip);
         values.add(leader);
     }
+
+    public void addParticipant(TripParticipant participant) {
+        values.add(participant);
+    }
+
 }
 

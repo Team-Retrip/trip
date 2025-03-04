@@ -50,5 +50,15 @@ public class TripParticipant extends BaseEntity {
                 trip
         );
     }
+
+    public static TripParticipant createTripParticipant(UUID userId, Trip trip) {
+        return new TripParticipant(
+                UUID.randomUUID(),
+                userId,
+                ParticipantRole.PARTICIPANT,
+                ParticipantStatus.PENDING,
+                trip
+        );
+    }
 }
 
