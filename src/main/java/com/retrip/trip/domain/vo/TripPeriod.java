@@ -29,6 +29,7 @@ public class TripPeriod {
         this.end = end;
     }
 
+
     private void validate(LocalDate start, LocalDate end) {
         if (start.isBefore(ChronoLocalDate.from(ZonedDateTime.now()))) {
             throw new IllegalArgumentException("여행 시작 일자는 현재보다 이전일 수 없습니다.");

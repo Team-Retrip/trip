@@ -1,7 +1,9 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.vo.TripPeriod;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,6 +39,7 @@ public class Itineraries {
         }
     }
 
+
     private boolean isRegular(int days, int dates) {
         return days == dates;
     }
@@ -52,5 +55,10 @@ public class Itineraries {
         dates.forEach(d -> this.values.add(
                 Itinerary.create(trip, d.compareTo(period.getStart()) + 1, d))
         );
+    }
+
+    public void update(Itineraries itineraries) {
+        this.values.clear();
+        this.values.addAll(itineraries.values);
     }
 }

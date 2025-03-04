@@ -1,17 +1,18 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
+import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
-import com.retrip.trip.application.in.response.TripCategoryResponse;
-import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripResponse;
+import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
+import com.retrip.trip.application.in.usecase.UpdatePeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
+
 import java.util.Arrays;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RequestMapping("/trips")
@@ -28,6 +30,7 @@ public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
     private final CreateItinerariesUseCase createItinerariesUseCase;
+    private final UpdatePeriodUseCase updatePeriodUseCase;
 
     @GetMapping("/categories")
     public ResponseEntity<List<TripCategoryResponse>> getTripCategories() {
@@ -53,6 +56,15 @@ public class TripController {
     public ResponseEntity<ItinerariesCreateResponse> createItineraries(@RequestBody ItinerariesCreateRequest request) {
         ItinerariesCreateResponse itineraries = createItinerariesUseCase.createItineraries(request);
         return ResponseEntity.created(URI.create("/trips/" + itineraries.tripId() + "/itineraries")).body(itineraries);
+    }
+
+    @PutMapping("/period/{tripId}")
+    public ResponseEntity<PeriodUpdateResponse> updatePeriod(
+            @PathVariable UUID tripId,
+            @RequestBody PeriodUpdateRequest request
+    ) {
+        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriodUseCase(tripId, request);
+        return ResponseEntity.ok().body(period);
     }
 
     @GetMapping

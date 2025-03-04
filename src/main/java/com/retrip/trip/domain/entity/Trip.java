@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -104,6 +106,24 @@ public class Trip extends BaseEntity {
         trip.itineraries = new Itineraries(trip, period);
         trip.participants = new Participants(memberId, trip);
         return trip;
+    }
+
+    public void updateItineraries(TripPeriod period, List<LocalDate> dates, UUID updateId) {
+        validateUpdatePeriod(updateId);
+        this.itineraries.update(new Itineraries(this, period, dates));
+    }
+
+    public void updatePeriodWithItineraries(TripPeriod period, List<LocalDate> dates, UUID updateId) {
+        validateUpdatePeriod(updateId);
+        this.period = period;
+        this.itineraries.update(new Itineraries(this, period, dates));
+    }
+
+    private void validateUpdatePeriod(UUID updateId) {
+        TripParticipant participant = this.participants.getParticipant(updateId);
+        if (!participant.isLeader()) {
+            throw new IllegalArgumentException("리더만 일정을 변경할 수 있습니다.");
+        }
     }
 }
 

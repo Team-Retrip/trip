@@ -1,0 +1,10 @@
+package com.retrip.trip.application.in.usecase;
+
+import com.retrip.trip.application.in.request.PeriodUpdateRequest;
+import com.retrip.trip.application.in.response.PeriodUpdateResponse;
+
+import java.util.UUID;
+
+public interface UpdatePeriodUseCase {
+    PeriodUpdateResponse updatePeriodUseCase(UUID tripId, PeriodUpdateRequest request);
+}
