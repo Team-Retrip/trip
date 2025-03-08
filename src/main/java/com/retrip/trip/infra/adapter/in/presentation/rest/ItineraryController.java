@@ -15,12 +15,11 @@ import java.util.UUID;
 public class ItineraryController {
     private final UpdateItinerariesUseCase updateItinerariesUseCase;
 
-    @PutMapping("/{tripId}")
+    @PutMapping
     public ResponseEntity<ItinerariesUpdateResponse> updateItineraries(
-            @PathVariable UUID tripId,
             @RequestBody ItinerariesUpdateRequest request
     ) {
-        ItinerariesUpdateResponse itineraries = updateItinerariesUseCase.updateItineraries(tripId, request);
+        ItinerariesUpdateResponse itineraries = updateItinerariesUseCase.updateItineraries(request);
         return ResponseEntity.ok().body(itineraries);
     }
 }

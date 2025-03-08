@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public record ItinerariesUpdateRequest(
         @NotNull
+        UUID tripId,
+        @NotNull
         UUID updateId,
 
         @Size(min = 1)

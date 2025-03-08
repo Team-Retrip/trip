@@ -58,8 +58,8 @@ public class TripService implements CreateTripUseCase, CreateItinerariesUseCase,
     }
 
     @Override
-    public PeriodUpdateResponse updatePeriodUseCase(UUID tripId, PeriodUpdateRequest request) {
-        Trip trip = tripRepository.findById(tripId).orElseThrow(EntityNotFoundException::new);
+    public PeriodUpdateResponse updatePeriodUseCase(PeriodUpdateRequest request) {
+        Trip trip = tripRepository.findById(request.tripId()).orElseThrow(EntityNotFoundException::new);
         trip.updatePeriodWithItineraries(request.toPeriod(), request.getDates(), request.updateId());
         return PeriodUpdateResponse.of(trip.getId(), trip.getPeriod(), trip.getItineraries());
     }

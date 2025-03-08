@@ -58,12 +58,11 @@ public class TripController {
         return ResponseEntity.created(URI.create("/trips/" + itineraries.tripId() + "/itineraries")).body(itineraries);
     }
 
-    @PutMapping("/period/{tripId}")
+    @PutMapping("/period")
     public ResponseEntity<PeriodUpdateResponse> updatePeriod(
-            @PathVariable UUID tripId,
             @RequestBody PeriodUpdateRequest request
     ) {
-        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriodUseCase(tripId, request);
+        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriodUseCase(request);
         return ResponseEntity.ok().body(period);
     }
 

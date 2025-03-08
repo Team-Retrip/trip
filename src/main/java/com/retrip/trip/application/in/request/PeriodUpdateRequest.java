@@ -11,6 +11,9 @@ import java.util.UUID;
 
 public record PeriodUpdateRequest(
         @NotNull
+        UUID tripId,
+
+        @NotNull
         UUID updateId,
 
         @FutureOrPresent

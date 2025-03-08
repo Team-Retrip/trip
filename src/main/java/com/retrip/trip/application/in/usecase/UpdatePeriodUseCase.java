@@ -6,5 +6,5 @@ import com.retrip.trip.application.in.response.PeriodUpdateResponse;
 import java.util.UUID;
 
 public interface UpdatePeriodUseCase {
-    PeriodUpdateResponse updatePeriodUseCase(UUID tripId, PeriodUpdateRequest request);
+    PeriodUpdateResponse updatePeriodUseCase(PeriodUpdateRequest request);
 }
