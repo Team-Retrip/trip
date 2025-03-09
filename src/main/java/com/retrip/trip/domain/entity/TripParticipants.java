@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @Embeddable
 @NoArgsConstructor(access = PROTECTED, force = true)
-public class Participants {
+public class TripParticipants {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<TripParticipant> values = new ArrayList<>();
 
-    public Participants(UUID memberId, Trip trip){
+    public TripParticipants(UUID memberId, Trip trip){
         TripParticipant leader = TripParticipant.createTripLeader(memberId, trip);
         values.add(leader);
     }

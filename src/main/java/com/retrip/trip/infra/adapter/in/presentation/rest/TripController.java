@@ -15,6 +15,7 @@ import com.retrip.trip.application.in.usecase.JoinTripUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,9 +68,8 @@ public class TripController {
 
     @PostMapping("/{tripId}/join")
     public ResponseEntity<TripJoinResponse> joinTrip(@PathVariable("tripId")
-                                                     java.util.UUID tripId,
+                                                     UUID tripId,
                                                      @RequestBody TripJoinRequest request) {
-        // URL의 tripId와 요청 본문의 tripId가 일치하는지 확인
         if (!tripId.equals(request.tripId())) {
             throw new IllegalArgumentException("Trip ID in path and request body must match");
         }

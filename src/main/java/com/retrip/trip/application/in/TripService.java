@@ -60,7 +60,7 @@ public class TripService implements CreateTripUseCase, CreateItinerariesUseCase,
     public TripJoinResponse joinTrip(TripJoinRequest request) {
         Trip trip = tripRepository.findById(request.tripId())
                 .orElseThrow(() -> new EntityNotFoundException("Trip not found"));
-        TripParticipant participant = request.toParticipant(trip);
+        TripParticipant participant = request.to(trip);
         trip.addParticipant(participant);
         tripRepository.save(trip);
         return TripJoinResponse.of(participant);

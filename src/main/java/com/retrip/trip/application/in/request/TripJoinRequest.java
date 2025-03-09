@@ -7,11 +7,9 @@ import java.util.UUID;
 
 public record TripJoinRequest(
         @NotNull UUID tripId,
-        @NotNull UUID memberId,
-        String message // 선택적 요청 메시지
+        @NotNull UUID memberId
 ) {
-    public TripParticipant toParticipant(Trip trip) {
-        // Trip은 컨트롤러나 서비스에서 미리 조회한 객체를 전달한다고 가정
+    public TripParticipant to(Trip trip) {
         return TripParticipant.createTripParticipant(memberId, trip);
     }
 }
