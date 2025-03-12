@@ -29,7 +29,6 @@ import java.util.UUID;
 public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
-    private final CreateItinerariesUseCase createItinerariesUseCase;
     private final UpdatePeriodUseCase updatePeriodUseCase;
 
     @GetMapping("/categories")
@@ -52,17 +51,12 @@ public class TripController {
         return ResponseEntity.created(URI.create("/trips/" + trip.id())).body(trip);
     }
 
-    @PostMapping("/itineraries")
-    public ResponseEntity<ItinerariesCreateResponse> createItineraries(@RequestBody ItinerariesCreateRequest request) {
-        ItinerariesCreateResponse itineraries = createItinerariesUseCase.createItineraries(request);
-        return ResponseEntity.created(URI.create("/trips/" + itineraries.tripId() + "/itineraries")).body(itineraries);
-    }
-
-    @PutMapping("/period")
+    @PutMapping("/period/{tripId}")
     public ResponseEntity<PeriodUpdateResponse> updatePeriod(
+            @PathVariable UUID tripId,
             @RequestBody PeriodUpdateRequest request
     ) {
-        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriodUseCase(request);
+        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriodUseCase(tripId, request);
         return ResponseEntity.ok().body(period);
     }
 

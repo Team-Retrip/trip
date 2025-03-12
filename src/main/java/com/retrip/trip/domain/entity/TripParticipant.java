@@ -63,7 +63,6 @@ public class TripParticipant extends BaseEntity {
         );
     }
 
-
     public boolean isLeader() {
         return role == ParticipantRole.LEADER;
     }

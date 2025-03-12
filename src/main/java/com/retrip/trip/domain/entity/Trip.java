@@ -76,6 +76,7 @@ public class Trip extends BaseEntity {
                 .open(open)
                 .maxParticipants(maxParticipants)
                 .category(category)
+                .itineraries(new Itineraries())
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.participants = new Participants(memberId, trip);
@@ -108,22 +109,16 @@ public class Trip extends BaseEntity {
         return trip;
     }
 
-    public void updateItineraries(TripPeriod period, List<LocalDate> dates, UUID updateId) {
-        validateUpdatePeriod(updateId);
-        this.itineraries.update(new Itineraries(this, period, dates));
+    public void updateItineraries(Itineraries itineraries, UUID updateId) {
+        this.participants.updateByLeader(updateId);
+        this.itineraries.update(itineraries);
     }
 
-    public void updatePeriodWithItineraries(TripPeriod period, List<LocalDate> dates, UUID updateId) {
-        validateUpdatePeriod(updateId);
+    public void updatePeriod(TripPeriod period, UUID updateId) {
+        this.participants.updateByLeader(updateId);
         this.period = period;
-        this.itineraries.update(new Itineraries(this, period, dates));
+        this.itineraries.update();
     }
 
-    private void validateUpdatePeriod(UUID updateId) {
-        TripParticipant participant = this.participants.getParticipant(updateId);
-        if (!participant.isLeader()) {
-            throw new IllegalArgumentException("리더만 일정을 변경할 수 있습니다.");
-        }
-    }
 }
 

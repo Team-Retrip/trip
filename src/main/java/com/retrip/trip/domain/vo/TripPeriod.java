@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.vo;
 
+import com.retrip.trip.domain.entity.TripParticipant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.EqualsAndHashCode;
@@ -39,6 +40,7 @@ public class TripPeriod {
             throw new IllegalArgumentException("여행 종료 일자는 현재보다 이전일 수 없습니다.");
         }
     }
+
 
     public int getDays() {
         return Period.between(start, end).getDays() + 1;

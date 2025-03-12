@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -28,6 +29,18 @@ public class Itinerary extends BaseEntity {
     )
     private Trip trip;
 
+    @Embedded
+    ItineraryDetails itineraryDetails;
+
+    private Itinerary(String name, Trip trip, LocalDate date, List<ItineraryDetail> itineraryDetails) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.trip = trip;
+        this.date = date;
+        this.itineraryDetails = new ItineraryDetails(itineraryDetails);
+    }
+
+
     private Itinerary(String name, Trip trip, LocalDate date) {
         this.id = UUID.randomUUID();
         this.name = name;
@@ -35,14 +48,22 @@ public class Itinerary extends BaseEntity {
         this.date = date;
     }
 
-    public static Itinerary create(Trip trip, int day, LocalDate date) {
+    public static Itinerary create(Trip trip, LocalDate date, List<ItineraryDetail> itineraryDetails) {
+        int day = date.compareTo(trip.getPeriod().getStart()) + 1;
         validate(day);
-        return new Itinerary("day " + day, trip, date);
+        return new Itinerary("day " + day, trip, date, itineraryDetails);
     }
+
 
     private static void validate(int day) {
         if (day < 1) {
             throw new IllegalArgumentException("여행 일차는 1보다 작을 수 없습니다.");
         }
+    }
+
+
+    public static Itinerary create(Trip trip, int day, LocalDate date) {
+        validate(day);
+        return new Itinerary("day " + day, trip, date);
     }
 }

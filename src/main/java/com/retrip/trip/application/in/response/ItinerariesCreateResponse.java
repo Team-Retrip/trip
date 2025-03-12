@@ -3,6 +3,7 @@ package com.retrip.trip.application.in.response;
 import com.retrip.trip.domain.entity.Itineraries;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,15 +16,29 @@ public record ItinerariesCreateResponse(
         return new ItinerariesCreateResponse(
                 tripId,
                 itineraries.getValues().stream()
-                        .map(i -> new ItineraryCreateResponse(i.getId(), i.getName(), i.getDate()))
+                        .map(i -> new ItineraryCreateResponse(i.getId(), i.getName(), i.getDate(),
+                                i.getItineraryDetails().getValues().stream()
+                                        .map(id -> new ItineraryCreateResponse.ItineraryCreateDetailResponse(
+                                                id.getId(), id.getDescription(), id.getPrice(), id.getLocationId()))
+                                        .toList()
+                        ))
+                        .sorted(Comparator.comparing(i -> i.date))
                         .toList()
         );
     }
 
-    private record ItineraryCreateResponse(
+    public record ItineraryCreateResponse(
             UUID id,
             String name,
-            LocalDate date
+            LocalDate date,
+            List<ItineraryCreateDetailResponse> itineraryDetails
     ) {
+        private record ItineraryCreateDetailResponse(
+                UUID id,
+                String description,
+                Long price,
+                UUID locationId
+        ) {
+        }
     }
 }

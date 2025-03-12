@@ -1,9 +1,7 @@
 package com.retrip.trip.application.in;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
@@ -27,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +40,8 @@ class TripServiceTest {
     TripService tripService;
     UUID memberId = UUID.fromString("c076d246-7e6d-4191-bf5c-310aebf4c003");
     UUID locationId = UUID.fromString("13c8ab91-76bc-4f70-93e9-89f1a65dc64a");
+    LocalDate start = LocalDate.now().plusDays(1);
+    LocalDate end = start.plusDays(10);
 
     @BeforeEach
     void setUp() {
@@ -73,8 +72,8 @@ class TripServiceTest {
                 locationId,
                 "속초 여행 멤버 구함",
                 "속초 여행은 이렇게이렇게 갈겁니다~",
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15),
+                start,
+                end,
                 true,
                 4,
                 TripCategory.DOMESTIC
@@ -88,13 +87,13 @@ class TripServiceTest {
     @Test
     void getTrips() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15)
+                start,
+                end
         );
-        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
-        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("강릉 여행 멤버 구함"), new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
-        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("대구 여행 멤버 구함"), new TripDescription("대구 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
-        tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("부산 여행 멤버 구함"), new TripDescription("부산 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId, UUID.randomUUID(), new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId, UUID.randomUUID(), new TripTitle("강릉 여행 멤버 구함"), new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId, UUID.randomUUID(), new TripTitle("대구 여행 멤버 구함"), new TripDescription("대구 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
+        tripRepository.save(Trip.createWithItineraries(memberId, UUID.randomUUID(), new TripTitle("부산 여행 멤버 구함"), new TripDescription("부산 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
 
         Page<TripResponse> trips = tripService.getTrips(PageRequest.of(0, 2));
 
@@ -103,24 +102,27 @@ class TripServiceTest {
         assertThat(trips.getPageable().getPageSize()).isEqualTo(2);
     }
 
-    @DisplayName("여행의 일정 목록을 생성 한다.")
+    @DisplayName("여행을 일정을 수정한다.")
     @Test
-    void createItineraries() {
-        TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15)
-        );
-        Trip trip = tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
-        List<ItinerariesCreateRequest.ItineraryCreateRequest> itineraries = List.of(
-                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 10)),
-                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 12)),
-                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 15))
+    void updatePeriod() {
+        TripPeriod period = new TripPeriod(start, end);
+        Trip trip = tripRepository.save(
+                Trip.createWithItineraries(
+                        memberId,
+                        UUID.randomUUID(),
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        period,
+                        true,
+                        4, TripCategory.DOMESTIC)
         );
 
-        ItinerariesCreateRequest request = new ItinerariesCreateRequest(trip.getId(), itineraries);
+        TripPeriod updatePeriod = new TripPeriod(start.plusDays(3), end.plusDays(2));
+        trip.updatePeriod(updatePeriod, memberId);
 
-        ItinerariesCreateResponse response = tripService.createItineraries(request);
-        assertThat(response.tripId()).isNotNull();
-        assertThat(response.itineraries().size()).isEqualTo(3);
+        assertThat(trip.getId()).isNotNull();
+        assertThat(trip.getPeriod().getStart()).isEqualTo(updatePeriod.getStart());
+        assertThat(trip.getPeriod().getEnd()).isEqualTo(updatePeriod.getEnd());
     }
+
 }

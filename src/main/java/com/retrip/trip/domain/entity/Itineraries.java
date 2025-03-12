@@ -21,27 +21,25 @@ public class Itineraries {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Itinerary> values = new ArrayList<>();
 
+
     public Itineraries(Trip trip, TripPeriod period) {
         createRegular(trip, period);
     }
 
-    public Itineraries(Trip trip, TripPeriod period, List<LocalDate> dates) {
+    public Itineraries(TripPeriod period, List<Itinerary> itineraries) {
+        List<LocalDate> dates = getDates(itineraries);
         validate(period, dates);
-        if (isRegular(period.getDays(), dates.size())) {
-            createRegular(trip, period);
-        }
-        createIrregular(trip, period, dates);
+        this.values.addAll(itineraries);
+    }
+
+    private List<LocalDate> getDates(List<Itinerary> itineraries) {
+        return itineraries.stream().map(Itinerary::getDate).toList();
     }
 
     private void validate(TripPeriod period, List<LocalDate> dates) {
         if (dates.stream().anyMatch(period::isNotInclude)) {
             throw new IllegalArgumentException("일정의 날짜는 여행 기간을 벗어날 수 없습니다.");
         }
-    }
-
-
-    private boolean isRegular(int days, int dates) {
-        return days == dates;
     }
 
     private void createRegular(Trip trip, TripPeriod period) {
@@ -51,14 +49,15 @@ public class Itineraries {
                 ));
     }
 
-    private void createIrregular(Trip trip, TripPeriod period, List<LocalDate> dates) {
-        dates.forEach(d -> this.values.add(
-                Itinerary.create(trip, d.compareTo(period.getStart()) + 1, d))
-        );
+    public void update(Itineraries itineraries) {
+        update();
+        this.values.addAll(itineraries.values);
     }
 
-    public void update(Itineraries itineraries) {
+    public void update() {
+        if (this.values.isEmpty()) {
+            return;
+        }
         this.values.clear();
-        this.values.addAll(itineraries.values);
     }
 }
