@@ -24,4 +24,16 @@ public class ItineraryDetails {
     public ItineraryDetails(List<ItineraryDetail> itineraryDetails) {
         values = itineraryDetails;
     }
+
+    public void clear() {
+        if (this.values.isEmpty()) {
+            return;
+        }
+        this.values.clear();
+    }
+
+
+    public void update(ItineraryDetails itineraryDetails) {
+        this.values = itineraryDetails.values;
+    }
 }

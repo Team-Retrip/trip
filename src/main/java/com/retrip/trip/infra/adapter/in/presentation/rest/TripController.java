@@ -1,10 +1,8 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
-import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
 import com.retrip.trip.application.in.usecase.UpdatePeriodUseCase;
@@ -56,7 +54,7 @@ public class TripController {
             @PathVariable UUID tripId,
             @RequestBody PeriodUpdateRequest request
     ) {
-        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriodUseCase(tripId, request);
+        PeriodUpdateResponse period = updatePeriodUseCase.updatePeriod(tripId, request);
         return ResponseEntity.ok().body(period);
     }
 

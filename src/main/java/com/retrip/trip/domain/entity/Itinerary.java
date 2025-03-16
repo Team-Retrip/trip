@@ -32,15 +32,6 @@ public class Itinerary extends BaseEntity {
     @Embedded
     ItineraryDetails itineraryDetails;
 
-    private Itinerary(String name, Trip trip, LocalDate date, List<ItineraryDetail> itineraryDetails) {
-        this.id = UUID.randomUUID();
-        this.name = name;
-        this.trip = trip;
-        this.date = date;
-        this.itineraryDetails = new ItineraryDetails(itineraryDetails);
-    }
-
-
     private Itinerary(String name, Trip trip, LocalDate date) {
         this.id = UUID.randomUUID();
         this.name = name;
@@ -48,10 +39,9 @@ public class Itinerary extends BaseEntity {
         this.date = date;
     }
 
-    public static Itinerary create(Trip trip, LocalDate date, List<ItineraryDetail> itineraryDetails) {
+    public static Itinerary create(Trip trip, LocalDate date) {
         int day = date.compareTo(trip.getPeriod().getStart()) + 1;
-        validate(day);
-        return new Itinerary("day " + day, trip, date, itineraryDetails);
+        return create(trip, day, date);
     }
 
 
@@ -65,5 +55,9 @@ public class Itinerary extends BaseEntity {
     public static Itinerary create(Trip trip, int day, LocalDate date) {
         validate(day);
         return new Itinerary("day " + day, trip, date);
+    }
+
+    public void createItineraryDetails(List<ItineraryDetail> itineraryDetails) {
+        this.itineraryDetails = new ItineraryDetails(itineraryDetails);
     }
 }

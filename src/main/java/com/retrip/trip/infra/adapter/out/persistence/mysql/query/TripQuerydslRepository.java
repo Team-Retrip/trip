@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
+import com.retrip.trip.domain.entity.Trip;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,7 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+import static com.retrip.trip.domain.entity.QItinerary.itinerary;
+import static com.retrip.trip.domain.entity.QItineraryDetail.itineraryDetail;
 import static com.retrip.trip.domain.entity.QTrip.trip;
 
 @RequiredArgsConstructor
@@ -36,5 +41,15 @@ public class TripQuerydslRepository implements TripQueryRepository {
                 .orderBy(trip.createdAt.desc())
                 .fetch();
         return new PageImpl<>(trips, page, trips.size());
+    }
+
+    @Override
+    public Optional<Trip> findByIdWithItineraries(UUID tripId) {
+        return Optional.ofNullable(query.selectFrom(trip)
+                .leftJoin(itinerary).on(itinerary.trip.eq(trip)).fetchJoin()
+                .leftJoin(itineraryDetail).on(itineraryDetail.itinerary.eq(itinerary)).fetchJoin()
+                .where(trip.id.eq(tripId))
+                .orderBy(itinerary.date.desc())
+                .fetchOne());
     }
 }

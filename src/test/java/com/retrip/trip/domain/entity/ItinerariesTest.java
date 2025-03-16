@@ -57,7 +57,7 @@ class ItinerariesTest {
                 4,
                 TripCategory.DOMESTIC
         );
-        List<Itinerary> itineraries = dates.stream().map(d -> Itinerary.create(trip, d, null)).toList();
+        List<Itinerary> itineraries = dates.stream().map(d -> Itinerary.create(trip, d)).toList();
 
 
         assertThatThrownBy(() -> new Itineraries(period, itineraries))
@@ -81,7 +81,7 @@ class ItinerariesTest {
                 4,
                 TripCategory.DOMESTIC
         );
-        List<Itinerary> itineraries = dates.stream().map(d -> Itinerary.create(trip, d, null)).toList();
+        List<Itinerary> itineraries = dates.stream().map(d -> Itinerary.create(trip, d)).toList();
 
         Itineraries result = new Itineraries(period, itineraries);
         assertThat(result.getValues().size()).isEqualTo(3);
@@ -103,19 +103,21 @@ class ItinerariesTest {
                 TripCategory.DOMESTIC
         );
         List<Itinerary> itineraries = List.of(
-                Itinerary.create(trip, start.plusDays(2), List.of(
-                        ItineraryDetail.create(10000L, "해수욕장에서 사진 및 카페 사진 찍기", 속초_해수욕장_Id),
-                        ItineraryDetail.create(50000L, "속초 중앙 시장에서 오징어 순대, 닭강정 먹기", 속초_중앙_시장_Id),
-                        ItineraryDetail.create(null, "숙소에서 쉬기", null)
-                )),
-                Itinerary.create(trip, start.plusDays(3), null),
-                Itinerary.create(trip, start.plusDays(5), List.of(
-                        ItineraryDetail.create(0L, "집가기", null)
-                ))
-        );
+                Itinerary.create(trip, start.plusDays(2)),
+                Itinerary.create(trip, start.plusDays(3)),
+                Itinerary.create(trip, start.plusDays(5)));
+        itineraries.getFirst().createItineraryDetails(
+                List.of(
+                        ItineraryDetail.create(10000L, "해수욕장에서 사진 및 카페 사진 찍기", itineraries.getFirst(), 속초_해수욕장_Id),
+                        ItineraryDetail.create(50000L, "속초 중앙 시장에서 오징어 순대, 닭강정 먹기", itineraries.getFirst(), 속초_중앙_시장_Id),
+                        ItineraryDetail.create(null, "숙소에서 쉬기", itineraries.getFirst(), null)));
+        itineraries.getLast().createItineraryDetails(
+                List.of(
+                        ItineraryDetail.create(0L, "집가기", itineraries.getLast(), null)
+                ));
 
 
-        assertThatCode(() -> trip.updateItineraries(new Itineraries(updatePeriod, itineraries), memberId)).doesNotThrowAnyException();
+        assertThatCode(() -> trip.updateItineraries(itineraries, memberId)).doesNotThrowAnyException();
     }
 
     @DisplayName("사용자는 여행 일자와 여행 기간을 수정할 수 없다.")
@@ -133,23 +135,24 @@ class ItinerariesTest {
                 TripCategory.DOMESTIC
         );
         List<Itinerary> itineraries = List.of(
-                Itinerary.create(trip, start.plusDays(2), List.of(
-                        ItineraryDetail.create(10000L, "해수욕장에서 사진 및 카페 사진 찍기", 속초_해수욕장_Id),
-                        ItineraryDetail.create(50000L, "속초 중앙 시장에서 오징어 순대, 닭강정 먹기", 속초_중앙_시장_Id),
-                        ItineraryDetail.create(null, "숙소에서 쉬기", null)
-                )),
-                Itinerary.create(trip, start.plusDays(3), null),
-                Itinerary.create(trip, start.plusDays(5), List.of(
-                        ItineraryDetail.create(0L, "집가기", null)
-                ))
-        );
-
+                Itinerary.create(trip, start.plusDays(2)),
+                Itinerary.create(trip, start.plusDays(3)),
+                Itinerary.create(trip, start.plusDays(5)));
+        itineraries.getFirst().createItineraryDetails(
+                List.of(
+                        ItineraryDetail.create(10000L, "해수욕장에서 사진 및 카페 사진 찍기", itineraries.getFirst(), 속초_해수욕장_Id),
+                        ItineraryDetail.create(50000L, "속초 중앙 시장에서 오징어 순대, 닭강정 먹기", itineraries.getFirst(), 속초_중앙_시장_Id),
+                        ItineraryDetail.create(null, "숙소에서 쉬기", itineraries.getFirst(), null)));
+        itineraries.getLast().createItineraryDetails(
+                List.of(
+                        ItineraryDetail.create(0L, "집가기", itineraries.getLast(), null)
+                ));
         //todo: 추후 참여자 로직 생성시, 변경 필요
         TripParticipant participant = TripParticipant.createTripParticipant(participantId, trip);
         trip.getParticipants().getValues().add(participant);
 
 
-        assertThatThrownBy(() -> trip.updateItineraries(new Itineraries(updatePeriod, itineraries), participantId
+        assertThatThrownBy(() -> trip.updateItineraries(itineraries, participantId
         )).isExactlyInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -29,11 +28,12 @@ public class ItineraryDetail extends BaseEntity {
     )
     private Itinerary itinerary;
 
-    private ItineraryDetail(Long price, String description, UUID locationId) {
+    private ItineraryDetail(Long price, String description, Itinerary itinerary, UUID locationId) {
         this.id = UUID.randomUUID();
         this.price = price;
         this.description = description;
         this.locationId = locationId;
+        this.itinerary = itinerary;
     }
 
     private static void validate(Long price, String description) {
@@ -45,9 +45,9 @@ public class ItineraryDetail extends BaseEntity {
         }
     }
 
-    public static ItineraryDetail create(Long price, String description, UUID locationId) {
+    public static ItineraryDetail create(Long price, String description, Itinerary itinerary, UUID locationId) {
         validate(price, description);
-        return new ItineraryDetail(price, description, locationId);
+        return new ItineraryDetail(price, description, itinerary, locationId);
     }
 
 

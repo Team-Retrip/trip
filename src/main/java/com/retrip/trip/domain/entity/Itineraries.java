@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -43,21 +44,22 @@ public class Itineraries {
     }
 
     private void createRegular(Trip trip, TripPeriod period) {
-        IntStream.rangeClosed(1, period.getDays())
-                .forEach(n -> this.values.add(
-                        Itinerary.create(trip, n, period.getStart().plusDays(n))
-                ));
+        IntStream.rangeClosed(1, period.getDays()).forEach(n -> this.values.add(Itinerary.create(trip, n, period.getStart().plusDays(n))));
     }
 
     public void update(Itineraries itineraries) {
-        update();
-        this.values.addAll(itineraries.values);
+        values.addAll(itineraries.values);
     }
 
-    public void update() {
+    public void clear() {
         if (this.values.isEmpty()) {
             return;
         }
+        this.values.stream().filter(Objects::nonNull).forEach(itinerary -> {
+            if (itinerary.itineraryDetails != null) {
+                itinerary.itineraryDetails.clear();
+            }
+        });
         this.values.clear();
     }
 }

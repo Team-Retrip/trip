@@ -23,14 +23,15 @@ public record ItinerariesUpdateRequest(
         @Size(min = 1)
         List<ItineraryUpdateRequest> itineraries
 ) {
-    public Itineraries toItineraries(Trip trip) {
-        return new Itineraries(trip.getPeriod(), getItinerary(trip));
+    public List<Itinerary> toItineraries(Trip trip) {
+        return itineraries.stream().map(i -> {
+            Itinerary itinerary = Itinerary.create(trip, i.date);
+            List<ItineraryDetail> itineraryDetails = i.getItineraryDetails(itinerary);
+            itinerary.createItineraryDetails(itineraryDetails);
+            return itinerary;
+        }).toList();
     }
 
-
-    private List<Itinerary> getItinerary(Trip trip) {
-        return itineraries.stream().map(i -> Itinerary.create(trip, i.date, i.getItineraryDetails())).toList();
-    }
 
     public record ItineraryUpdateRequest(
             @FutureOrPresent
@@ -38,11 +39,11 @@ public record ItinerariesUpdateRequest(
 
             List<ItineraryDetailUpdateRequest> itineraryDetails
     ) {
-        private List<ItineraryDetail> getItineraryDetails() {
-            if (itineraryDetails == null) {
+        private List<ItineraryDetail> getItineraryDetails(Itinerary itinerary) {
+            if (itineraryDetails == null || itineraryDetails.isEmpty()) {
                 return new ArrayList<>();
             }
-            return itineraryDetails.stream().map(id -> ItineraryDetail.create(id.price, id.description, id.locationId)).toList();
+            return itineraryDetails.stream().map(id -> ItineraryDetail.create(id.price, id.description, itinerary, id.locationId)).toList();
         }
 
         public record ItineraryDetailUpdateRequest(

@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,15 +108,17 @@ public class Trip extends BaseEntity {
         return trip;
     }
 
-    public void updateItineraries(Itineraries itineraries, UUID updateId) {
+    public void updateItineraries(List<Itinerary> itineraries, UUID updateId) {
         this.participants.updateByLeader(updateId);
-        this.itineraries.update(itineraries);
+        this.itineraries.clear();
+        this.itineraries.update(new Itineraries(period, itineraries));
     }
 
     public void updatePeriod(TripPeriod period, UUID updateId) {
         this.participants.updateByLeader(updateId);
         this.period = period;
-        this.itineraries.update();
+        this.itineraries.clear();
+        this.itineraries = new Itineraries(this, period);
     }
 
 }

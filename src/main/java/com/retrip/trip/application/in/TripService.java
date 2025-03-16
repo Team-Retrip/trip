@@ -39,7 +39,6 @@ public class TripService implements CreateTripUseCase, GetTripUseCase, UpdatePer
         return TripCreateResponse.of(trip);
     }
 
-
     @Transactional(readOnly = true)
     @Override
     public Page<TripResponse> getTrips(Pageable page) {
@@ -47,8 +46,8 @@ public class TripService implements CreateTripUseCase, GetTripUseCase, UpdatePer
     }
 
     @Override
-    public PeriodUpdateResponse updatePeriodUseCase(UUID tripId, PeriodUpdateRequest request) {
-        Trip trip = tripRepository.findById(tripId).orElseThrow(EntityNotFoundException::new);
+    public PeriodUpdateResponse updatePeriod(UUID tripId, PeriodUpdateRequest request) {
+        Trip trip = tripQueryRepository.findByIdWithItineraries(tripId).orElseThrow(EntityNotFoundException::new);
         trip.updatePeriod(request.toPeriod(), request.updateId());
         return PeriodUpdateResponse.of(trip.getId(), trip.getPeriod(), trip.getItineraries());
     }
