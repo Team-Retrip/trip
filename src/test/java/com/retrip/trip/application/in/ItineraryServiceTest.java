@@ -159,10 +159,10 @@ class ItineraryServiceTest {
         ));
         trip.updateItineraries(itineraries, memberId);
 
-        Page<ItineraryResponse> searchItineraryResponses = itineraryService.getItineraries(trip.getId(), PageRequest.of(0, 2));
+        Page<ItineraryResponse> searchItineraryResponses = itineraryService.getItineraries(trip.getId(), PageRequest.of(0, 14));
 
-        assertThat(searchItineraryResponses.getTotalElements()).isEqualTo(2);
+        assertThat(searchItineraryResponses.getTotalElements()).isEqualTo(14);
         assertThat(searchItineraryResponses.getPageable().getOffset()).isEqualTo(0);
-        assertThat(searchItineraryResponses.getPageable().getPageSize()).isEqualTo(2);
+        assertThat(searchItineraryResponses.getPageable().getPageSize()).isEqualTo(14);
     }
 }
