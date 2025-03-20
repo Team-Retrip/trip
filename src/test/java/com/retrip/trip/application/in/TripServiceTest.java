@@ -10,7 +10,9 @@ import com.retrip.trip.application.in.response.TripJoinResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
+import com.retrip.trip.application.out.repository.JoinRequestRepository;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
@@ -42,6 +44,10 @@ class TripServiceTest {
 
     @Autowired
     TripQueryRepository tripQueryRepository;
+
+    @Autowired
+    JoinRequestRepository joinRequestRepository;
+
     TripService tripService;
     UUID memberId = UUID.fromString("c076d246-7e6d-4191-bf5c-310aebf4c003");
     UUID locationId = UUID.fromString("13c8ab91-76bc-4f70-93e9-89f1a65dc64a");
@@ -49,7 +55,7 @@ class TripServiceTest {
 
     @BeforeEach
     void setUp() {
-        tripService = new TripService(tripRepository, tripQueryRepository);
+        tripService = new TripService(tripRepository, tripQueryRepository, joinRequestRepository);
     }
 
     @TestConfiguration
@@ -76,8 +82,8 @@ class TripServiceTest {
                 locationId,
                 "속초 여행 멤버 구함",
                 "속초 여행은 이렇게이렇게 갈겁니다~",
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15),
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(5),
                 true,
                 4,
                 TripCategory.DOMESTIC
@@ -91,8 +97,8 @@ class TripServiceTest {
     @Test
     void getTrips() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15)
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(5)
         );
         tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
         tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("강릉 여행 멤버 구함"), new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
@@ -110,15 +116,14 @@ class TripServiceTest {
     @Test
     void createItineraries() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15)
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(5)
         );
         Trip trip = tripRepository.save(Trip.createWithItineraries(memberId,UUID.randomUUID(),new TripTitle("속초 여행 멤버 구함"), new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"), period, true, 4, TripCategory.DOMESTIC));
         List<ItinerariesCreateRequest.ItineraryCreateRequest> itineraries = List.of(
-                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 10)),
-                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 12)),
-                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.of(2025, 3, 15))
-        );
+                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.now().plusDays(2)),
+                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.now().plusDays(3)),
+                new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.now().plusDays(4))        );
 
         ItinerariesCreateRequest request = new ItinerariesCreateRequest(trip.getId(), itineraries);
 
@@ -126,23 +131,83 @@ class TripServiceTest {
         assertThat(response.tripId()).isNotNull();
         assertThat(response.itineraries().size()).isEqualTo(3);
     }
-    @DisplayName("여행 참여 요청을 보낸다.")
+    @DisplayName("사용자가 참여 요청을 보낸다.")
     @Test
     void joinTrip() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15)
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(5)
         );
-        Trip trip = Trip.create(memberId, UUID.randomUUID(), new TripTitle("테스트 여행"), new TripDescription("여행 설명"), period, true, 4, TripCategory.DOMESTIC);
+        Trip trip = Trip.create(memberId, UUID.randomUUID(),
+                new TripTitle("테스트 여행"), new TripDescription("여행 설명"),
+                period, true, 4, TripCategory.DOMESTIC);
         trip = tripRepository.save(trip);
 
-
-        TripJoinRequest joinRequest = new TripJoinRequest(trip.getId(), newMemberId);
+        TripJoinRequest joinRequest = new TripJoinRequest(trip.getId(), newMemberId, "참여 요청 메시지");
         TripJoinResponse joinResponse = tripService.joinTrip(joinRequest);
-
-
         assertThat(joinResponse).isNotNull();
         assertThat(joinResponse.tripId()).isEqualTo(trip.getId());
         assertThat(joinResponse.memberId()).isEqualTo(newMemberId);
+        assertThat(joinResponse.status()).isEqualTo("대기");
+    }
+
+    @DisplayName("리더가 참여 요청을 승인하면 실제 참여자로 등록된다.")
+    @Test
+    void approveJoinRequest() {
+        TripPeriod period = new TripPeriod(
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(5)
+        );
+        Trip trip = Trip.create(memberId, UUID.randomUUID(),
+                new TripTitle("승인 테스트 여행"), new TripDescription("여행 설명"),
+                period, true, 4, TripCategory.DOMESTIC);
+        trip = tripRepository.save(trip);
+
+        TripJoinRequest joinRequest = new TripJoinRequest(trip.getId(), newMemberId, "참여 요청 메시지");
+        TripJoinResponse joinResponse = tripService.joinTrip(joinRequest);
+        assertThat(joinResponse.status()).isEqualTo("대기");
+
+        final Trip savedTrip = trip;
+        UUID joinRequestId = joinRequestRepository.findAll().stream()
+                .filter(jr -> jr.getTrip().getId().equals(savedTrip.getId())
+                        && jr.getUserId().equals(newMemberId))
+                .findFirst()
+                .orElseThrow()
+                .getId();
+
+        TripParticipant approvedParticipant = tripService.approveJoinRequest(trip.getId(), joinRequestId);
+        assertThat(approvedParticipant).isNotNull();
+        assertThat(approvedParticipant.getTrip().getId()).isEqualTo(trip.getId());
+        assertThat(approvedParticipant.getUserId()).isEqualTo(newMemberId);
+        assertThat(approvedParticipant.getStatus().getViewName()).isEqualTo("승인");
+    }
+
+    @DisplayName("리더가 참여 요청을 거절하면 요청 상태가 거절로 변경된다.")
+    @Test
+    void rejectJoinRequest() {
+        TripPeriod period = new TripPeriod(
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(5)
+        );
+        Trip trip = Trip.create(memberId, UUID.randomUUID(),
+                new TripTitle("거절 테스트 여행"), new TripDescription("여행 설명"),
+                period, true, 4, TripCategory.DOMESTIC);
+        trip = tripRepository.save(trip);
+
+        TripJoinRequest joinRequest = new TripJoinRequest(trip.getId(), newMemberId, "참여 요청 메시지");
+        TripJoinResponse joinResponse = tripService.joinTrip(joinRequest);
+        assertThat(joinResponse.status()).isEqualTo("대기");
+
+        final Trip savedTrip = trip;
+        UUID joinRequestId = joinRequestRepository.findAll().stream()
+                .filter(jr -> jr.getTrip().getId().equals(savedTrip.getId())
+                        && jr.getUserId().equals(newMemberId))
+                .findFirst()
+                .orElseThrow()
+                .getId();
+
+        TripJoinResponse rejectedResponse = tripService.rejectJoinRequest(trip.getId(), joinRequestId);
+        assertThat(rejectedResponse).isNotNull();
+        assertThat(rejectedResponse.status()).isEqualTo("거절");
     }
 }

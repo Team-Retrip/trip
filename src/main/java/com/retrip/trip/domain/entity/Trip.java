@@ -47,7 +47,7 @@ public class Trip extends BaseEntity {
     private TripCategory category;
 
     @Embedded
-    private TripParticipants tripparticipants;
+    private TripParticipants tripParticipants;
 
     @Embedded
     private TripPeriod period;
@@ -76,7 +76,7 @@ public class Trip extends BaseEntity {
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .build();
-        trip.tripparticipants = new TripParticipants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip);
         return trip;
     }
 
@@ -102,12 +102,12 @@ public class Trip extends BaseEntity {
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.tripparticipants = new TripParticipants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip);
         return trip;
     }
 
     public void addParticipant(TripParticipant participant) {
-        this.tripparticipants.addParticipant(participant);
+        this.tripParticipants.addParticipant(participant);
     }
 }
 

@@ -15,19 +15,20 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED, force = true)
-public class TripParticipant extends BaseEntity {
+public class JoinRequest extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
     private UUID userId;
 
-    @Column(name = "role", length = 50, nullable = false)
-    private ParticipantRole role;
+    @Column(name = "message")
+    private String message;
 
     @Column(name = "status", length = 50, nullable = false)
     private ParticipantStatus status;
@@ -41,24 +42,11 @@ public class TripParticipant extends BaseEntity {
     )
     private Trip trip;
 
-    public static TripParticipant createTripLeader(UUID memberId, Trip trip) {
-        return new TripParticipant(
-                UUID.randomUUID(),
-                memberId,
-                ParticipantRole.LEADER,
-                ParticipantStatus.APPROVED,
-                trip
-        );
+    public static JoinRequest create(UUID userId, Trip trip, String message) {
+        return new JoinRequest(UUID.randomUUID(), userId, message, ParticipantStatus.PENDING, trip);
     }
 
-    public static TripParticipant createTripParticipant(UUID userId, Trip trip) {
-        return new TripParticipant(
-                UUID.randomUUID(),
-                userId,
-                ParticipantRole.PARTICIPANT,
-                ParticipantStatus.APPROVED,
-                trip
-        );
+    public void setStatus(ParticipantStatus status) {
+        this.status = status;
     }
 }
-

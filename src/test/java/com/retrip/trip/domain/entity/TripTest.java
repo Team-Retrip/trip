@@ -71,7 +71,7 @@ class TripTest {
         );
 
         // when
-        List<TripParticipant> participants = trip.getParticipants().getValues();
+        List<TripParticipant> participants = trip.getTripParticipants().getValues();
 
         // then
         assertAll(
