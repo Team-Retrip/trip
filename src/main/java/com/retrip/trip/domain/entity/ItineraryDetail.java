@@ -1,12 +1,20 @@
 package com.retrip.trip.domain.entity;
 
-import jakarta.persistence.*;
+import static lombok.AccessLevel.PROTECTED;
+
+import com.retrip.trip.domain.vo.ItineraryDetailDescription;
+import com.retrip.trip.domain.vo.ItineraryDetailPrice;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
-
-import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED, force = true)
@@ -21,17 +29,16 @@ public class ItineraryDetail extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "itinerary_id",
-            nullable = false,
-            columnDefinition = "varbinary(16)",
-            foreignKey = @ForeignKey(name = "fk_itinerary_detail_to_itinerary")
-    )
+        name = "itinerary_id",
+        nullable = false,
+        columnDefinition = "varbinary(16)",
+        foreignKey = @ForeignKey(name = "fk_itinerary_detail_to_itinerary"))
     private Itinerary itinerary;
 
     private ItineraryDetail(Long price, String description, Itinerary itinerary, UUID locationId) {
         this.id = UUID.randomUUID();
-        this.price = price;
-        this.description = description;
+        this.price = new ItineraryDetailPrice(price);
+        this.description = new ItineraryDetailDescription(description);
         this.locationId = locationId;
         this.itinerary = itinerary;
     }
@@ -45,10 +52,9 @@ public class ItineraryDetail extends BaseEntity {
         }
     }
 
-    public static ItineraryDetail create(Long price, String description, Itinerary itinerary, UUID locationId) {
+    public static ItineraryDetail create(
+        Long price, String description, Itinerary itinerary, UUID locationId) {
         validate(price, description);
         return new ItineraryDetail(price, description, itinerary, locationId);
     }
-
-
 }

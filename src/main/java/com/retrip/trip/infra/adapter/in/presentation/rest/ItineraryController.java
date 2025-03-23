@@ -5,33 +5,37 @@ import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.UpdateItinerariesUseCase;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/trips/itinerary")
+@RequestMapping("/trips")
 @RestController
 public class ItineraryController {
+
     private final GetItinerariesUseCase getItinerariesUseCase;
     private final UpdateItinerariesUseCase updateItinerariesUseCase;
 
-    @GetMapping("/{tripId}")
-    public ResponseEntity<Page<ItineraryResponse>> getItineraries(@PathVariable UUID tripId, @PageableDefault(size = 10, page = 0) Pageable page) {
+    @GetMapping("/{tripId}/itineraries")
+    public ResponseEntity<Page<ItineraryResponse>> getItineraries(
+        @PathVariable UUID tripId, @PageableDefault(size = 10, page = 0) Pageable page) {
         Page<ItineraryResponse> itineraries = getItinerariesUseCase.getItineraries(tripId, page);
         return ResponseEntity.ok().body(itineraries);
     }
 
-
-    @PutMapping
+    @PutMapping("/{tripId}/itineraries")
     public ResponseEntity<ItinerariesUpdateResponse> updateItineraries(
-            @RequestBody ItinerariesUpdateRequest request
-    ) {
+        @RequestBody ItinerariesUpdateRequest request) {
         ItinerariesUpdateResponse itineraries = updateItinerariesUseCase.updateItineraries(request);
         return ResponseEntity.ok().body(itineraries);
     }

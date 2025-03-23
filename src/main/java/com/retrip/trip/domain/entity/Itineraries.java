@@ -1,31 +1,25 @@
 package com.retrip.trip.domain.entity;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
-
-import static lombok.AccessLevel.PROTECTED;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED, force = true)
 @Embeddable
 public class Itineraries {
+
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Itinerary> values = new ArrayList<>();
-
-
-    public Itineraries(Trip trip, TripPeriod period) {
-        createRegular(trip, period);
-    }
 
     public Itineraries(TripPeriod period, List<Itinerary> itineraries) {
         List<LocalDate> dates = getDates(itineraries);
@@ -43,10 +37,6 @@ public class Itineraries {
         }
     }
 
-    private void createRegular(Trip trip, TripPeriod period) {
-        IntStream.rangeClosed(1, period.getDays()).forEach(n -> this.values.add(Itinerary.create(trip, n, period.getStart().plusDays(n))));
-    }
-
     public void update(Itineraries itineraries) {
         values.addAll(itineraries.values);
     }
@@ -55,11 +45,14 @@ public class Itineraries {
         if (this.values.isEmpty()) {
             return;
         }
-        this.values.stream().filter(Objects::nonNull).forEach(itinerary -> {
-            if (itinerary.itineraryDetails != null) {
-                itinerary.itineraryDetails.clear();
-            }
-        });
+        this.values.stream()
+            .filter(Objects::nonNull)
+            .forEach(
+                itinerary -> {
+                    if (itinerary.itineraryDetails != null) {
+                        itinerary.itineraryDetails.clear();
+                    }
+                });
         this.values.clear();
     }
 }

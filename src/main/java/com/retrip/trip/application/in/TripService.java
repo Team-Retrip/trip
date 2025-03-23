@@ -12,30 +12,26 @@ import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
 import jakarta.persistence.EntityNotFoundException;
+
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class TripService implements CreateTripUseCase, GetTripUseCase, UpdatePeriodUseCase {
+
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
 
     @Override
     public TripCreateResponse createTrip(TripCreateRequest request) {
         Trip trip = tripRepository.save(request.to());
-        return TripCreateResponse.of(trip);
-    }
-
-    @Override
-    public TripCreateResponse createTripWithItineraries(TripCreateRequest request) {
-        Trip trip = tripRepository.save(request.toWithItineraries());
         return TripCreateResponse.of(trip);
     }
 
@@ -47,7 +43,10 @@ public class TripService implements CreateTripUseCase, GetTripUseCase, UpdatePer
 
     @Override
     public PeriodUpdateResponse updatePeriod(UUID tripId, PeriodUpdateRequest request) {
-        Trip trip = tripQueryRepository.findByIdWithItineraries(tripId).orElseThrow(EntityNotFoundException::new);
+        Trip trip =
+                tripQueryRepository
+                        .findByIdWithItineraries(tripId)
+                        .orElseThrow(EntityNotFoundException::new);
         trip.updatePeriod(request.toPeriod(), request.updateId());
         return PeriodUpdateResponse.of(trip.getId(), trip.getPeriod(), trip.getItineraries());
     }
