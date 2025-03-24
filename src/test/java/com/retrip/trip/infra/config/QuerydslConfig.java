@@ -22,14 +22,4 @@ public class QuerydslConfig {
         return new JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager);
     }
 
-    @Bean
-    public ItineraryQuerydslRepository itineraryQuerydslRepository(
-        JPAQueryFactory jpaQueryFactory) {
-        return new ItineraryQuerydslRepository(jpaQueryFactory);
-    }
-
-    @Bean
-    public TripQuerydslRepository tripQuerydslRepository(JPAQueryFactory jpaQueryFactory) {
-        return new TripQuerydslRepository(jpaQueryFactory);
-    }
 }

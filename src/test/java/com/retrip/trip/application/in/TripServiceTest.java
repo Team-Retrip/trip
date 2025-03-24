@@ -1,86 +1,37 @@
 package com.retrip.trip.application.in;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.request.TripCreateRequest;
+import com.retrip.trip.application.in.request.TripFixture;
 import com.retrip.trip.application.in.response.TripCreateResponse;
 import com.retrip.trip.application.in.response.TripResponse;
-import com.retrip.trip.application.out.repository.TripQueryRepository;
-import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripTitle;
-import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
-import jakarta.persistence.EntityManager;
-
-import java.time.LocalDate;
-import java.util.UUID;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class TripServiceTest {
+import java.util.UUID;
 
-    @Autowired
-    TripRepository tripRepository;
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @Autowired
-    TripQueryRepository tripQueryRepository;
-    TripService tripService;
-    UUID memberId = UUID.fromString("c076d246-7e6d-4191-bf5c-310aebf4c003");
-    UUID locationId = UUID.fromString("13c8ab91-76bc-4f70-93e9-89f1a65dc64a");
-    LocalDate start = LocalDate.now().plusDays(1);
-    LocalDate end = start.plusDays(10);
 
-    @BeforeEach
-    void setUp() {
-        tripService = new TripService(tripRepository, tripQueryRepository);
-    }
-
-    @TestConfiguration
-    static class QuerydslConfig {
-
-        @Autowired
-        EntityManager entityManager;
-
-        @Bean
-        public JPAQueryFactory jpaQueryFactory() {
-            return new JPAQueryFactory(entityManager);
-        }
-
-        @Bean
-        public TripQuerydslRepository tripQuerydslRepository(JPAQueryFactory jpaQueryFactory) {
-            return new TripQuerydslRepository(jpaQueryFactory);
-        }
-    }
-
+class TripServiceTest extends TripServiceTestFactory {
     @DisplayName("여행을 생성 한다.")
     @Test
     void createTrip() {
-        TripCreateRequest request =
-                new TripCreateRequest(
-                        memberId,
-                        locationId,
-                        "속초 여행 멤버 구함",
-                        "속초 여행은 이렇게이렇게 갈겁니다~",
-                        start,
-                        end,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC);
+        TripCreateRequest request = TripFixture.createRequest(memberId,
+                locationId,
+                "속초 여행 멤버 구함",
+                "속초 여행은 이렇게이렇게 갈겁니다~",
+                start,
+                end,
+                true,
+                4,
+                TripCategory.DOMESTIC);
         TripCreateResponse response = tripService.createTrip(request);
         assertThat(response.id()).isNotNull();
         assertThat(response.destinationId()).isEqualTo(locationId);
