@@ -12,14 +12,14 @@ public record TripJoinResponse(
     public static TripJoinResponse of(JoinRequest joinRequest) {
         return new TripJoinResponse(
                 joinRequest.getTrip().getId(),
-                joinRequest.getUserId(),
+                joinRequest.getMemberId(),
                 joinRequest.getStatus().getViewName()
         );
     }
     public static TripJoinResponse of(TripParticipant participant) {
         return new TripJoinResponse(
                 participant.getTrip().getId(),
-                participant.getUserId(),
+                participant.getMemberId(),
                 participant.getStatus().getViewName()
         );
     }

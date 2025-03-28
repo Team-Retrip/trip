@@ -2,7 +2,7 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripJoinRequest;
+import com.retrip.trip.application.in.request.TripJoinApplyRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCategoryResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
@@ -11,7 +11,7 @@ import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.JoinTripUseCase;
+import com.retrip.trip.application.in.usecase.JoinApplyUseCase;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.TripCategory;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
     private final CreateItinerariesUseCase createItinerariesUseCase;
-    private final JoinTripUseCase joinTripUseCase;
+    private final JoinApplyUseCase joinApplyUseCase;
     private final com.retrip.trip.application.in.TripService tripService;
 
     @GetMapping("/categories")
@@ -68,18 +68,15 @@ public class TripController {
         return ResponseEntity.ok().body(trips);
     }
 
-    @PostMapping("/{tripId}/joinRequest")
+    @PostMapping("/{tripId}/join-request")
     public ResponseEntity<TripJoinResponse> joinTrip(
             @PathVariable("tripId") UUID tripId,
-            @RequestBody TripJoinRequest request) {
-        if (!tripId.equals(request.tripId())) {
-            throw new IllegalArgumentException("Trip ID in path and request body must match");
-        }
-        TripJoinResponse response = joinTripUseCase.joinTrip(request);
+            @RequestBody TripJoinApplyRequest request) {
+        TripJoinResponse response = joinApplyUseCase.JoinApply(request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{tripId}/joinRequest/{joinRequestId}/approve")
+    @PostMapping("/{tripId}/join-request/{joinRequestId}/approve")
     public ResponseEntity<TripJoinResponse> approveJoinRequest(
             @PathVariable("tripId") UUID tripId,
             @PathVariable("joinRequestId") UUID joinRequestId) {
@@ -87,7 +84,7 @@ public class TripController {
         return ResponseEntity.ok(TripJoinResponse.of(approvedParticipant));
     }
 
-    @PostMapping("/{tripId}/joinRequest/{joinRequestId}/reject")
+    @PostMapping("/{tripId}/join-request/{joinRequestId}/reject")
     public ResponseEntity<TripJoinResponse> rejectJoinRequest(
             @PathVariable("tripId") UUID tripId,
             @PathVariable("joinRequestId") UUID joinRequestId) {

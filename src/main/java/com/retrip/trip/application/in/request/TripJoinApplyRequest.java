@@ -5,7 +5,7 @@ import com.retrip.trip.domain.entity.JoinRequest;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
-public record TripJoinRequest(
+public record TripJoinApplyRequest(
         @NotNull UUID tripId,
         @NotNull UUID memberId,
         String message

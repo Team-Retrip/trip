@@ -77,7 +77,7 @@ class TripTest {
         assertAll(
                 () -> assertThat(participants).hasSize(1),
                 () -> assertThat(participants.get(0).getRole()).isEqualTo(ParticipantRole.LEADER),
-                () -> assertThat(participants.get(0).getUserId()).isEqualTo(memberId)
+                () -> assertThat(participants.get(0).getMemberId()).isEqualTo(memberId)
         );
     }
 }

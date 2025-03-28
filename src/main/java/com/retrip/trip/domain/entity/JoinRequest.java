@@ -25,7 +25,7 @@ public class JoinRequest extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
-    private UUID userId;
+    private UUID memberId;
 
     @Column(name = "message")
     private String message;
@@ -48,5 +48,24 @@ public class JoinRequest extends BaseEntity {
 
     public void setStatus(ParticipantStatus status) {
         this.status = status;
+    }
+
+    public void ensurePending() {
+        if (!this.status.equals(ParticipantStatus.PENDING)) {
+            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
+        }
+    }
+
+    public TripParticipant approve() {
+        ensurePending();
+        this.status = ParticipantStatus.APPROVED;
+        TripParticipant participant = TripParticipant.createTripParticipant(memberId, trip);
+        trip.addParticipant(participant);
+        return participant;
+    }
+
+    public void reject() {
+        ensurePending(); // 상태가 대기 상태인지 검증
+        this.status = ParticipantStatus.REJECTED;
     }
 }

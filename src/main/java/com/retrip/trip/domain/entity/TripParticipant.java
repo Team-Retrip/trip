@@ -24,7 +24,7 @@ public class TripParticipant extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
-    private UUID userId;
+    private UUID memberId;
 
     @Column(name = "role", length = 50, nullable = false)
     private ParticipantRole role;
