@@ -3,7 +3,6 @@ package com.retrip.trip.domain.entity;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.retrip.trip.domain.vo.ParticipantRole;
-import com.retrip.trip.domain.vo.ParticipantStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,9 +28,6 @@ public class TripParticipant extends BaseEntity {
     @Column(name = "role", length = 50, nullable = false)
     private ParticipantRole role;
 
-    @Column(name = "status", length = 50, nullable = false)
-    private ParticipantStatus status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "trip_id",
@@ -46,17 +42,15 @@ public class TripParticipant extends BaseEntity {
                 UUID.randomUUID(),
                 memberId,
                 ParticipantRole.LEADER,
-                ParticipantStatus.APPROVED,
                 trip
         );
     }
 
-    public static TripParticipant createTripParticipant(UUID userId, Trip trip) {
+    public static TripParticipant createTripParticipant(UUID memberId, Trip trip) {
         return new TripParticipant(
                 UUID.randomUUID(),
-                userId,
+                memberId,
                 ParticipantRole.PARTICIPANT,
-                ParticipantStatus.APPROVED,
                 trip
         );
     }

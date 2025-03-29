@@ -2,8 +2,7 @@ package com.retrip.trip.domain.entity;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import com.retrip.trip.domain.vo.ParticipantRole;
-import com.retrip.trip.domain.vo.ParticipantStatus;
+import com.retrip.trip.domain.vo.TripDemandStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,13 +14,12 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED, force = true)
-public class JoinRequest extends BaseEntity {
+public class TripDemand extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
@@ -31,7 +29,7 @@ public class JoinRequest extends BaseEntity {
     private String message;
 
     @Column(name = "status", length = 50, nullable = false)
-    private ParticipantStatus status;
+    private TripDemandStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -42,30 +40,27 @@ public class JoinRequest extends BaseEntity {
     )
     private Trip trip;
 
-    public static JoinRequest create(UUID userId, Trip trip, String message) {
-        return new JoinRequest(UUID.randomUUID(), userId, message, ParticipantStatus.PENDING, trip);
+    public static TripDemand create(UUID userId, Trip trip, String message) {
+        return new TripDemand(UUID.randomUUID(), userId, message, TripDemandStatus.PENDING, trip);
     }
 
-    public void setStatus(ParticipantStatus status) {
+    public void setStatus(TripDemandStatus status) {
         this.status = status;
     }
 
-    public void ensurePending() {
-        if (!this.status.equals(ParticipantStatus.PENDING)) {
-            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
-        }
-    }
-
-    public TripParticipant approve() {
+    public void approve() {
         ensurePending();
-        this.status = ParticipantStatus.APPROVED;
-        TripParticipant participant = TripParticipant.createTripParticipant(memberId, trip);
-        trip.addParticipant(participant);
-        return participant;
+        this.status = TripDemandStatus.APPROVED;
     }
 
     public void reject() {
-        ensurePending(); // 상태가 대기 상태인지 검증
-        this.status = ParticipantStatus.REJECTED;
+        ensurePending();
+        this.status = TripDemandStatus.REJECTED;
+    }
+
+    public void ensurePending() {
+        if (!this.status.equals(TripDemandStatus.PENDING)) {
+            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
+        }
     }
 }

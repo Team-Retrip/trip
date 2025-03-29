@@ -1,26 +1,27 @@
 package com.retrip.trip.application.in;
+import com.retrip.trip.application.in.response.TripDemandApproveResponse;
+import com.retrip.trip.application.in.response.TripDemandRejectResponse;
+import com.retrip.trip.application.out.repository.TripParticipantRepository;
+import com.retrip.trip.domain.entity.TripDemand;
 import java.util.UUID;
 
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripJoinApplyRequest;
+import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripJoinResponse;
+import com.retrip.trip.application.in.response.TripDemandResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.JoinApplyUseCase;
+import com.retrip.trip.application.in.usecase.TripDemandUseCase;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
-import com.retrip.trip.application.out.repository.JoinRequestRepository;
+import com.retrip.trip.application.out.repository.TripDemandRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Itineraries;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
-import com.retrip.trip.domain.entity.JoinRequest;
-import com.retrip.trip.domain.vo.ParticipantStatus;
-import com.retrip.trip.domain.vo.TripStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,10 +32,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class TripService implements CreateTripUseCase, CreateItinerariesUseCase, GetTripUseCase, JoinApplyUseCase {
+public class TripService implements CreateTripUseCase, CreateItinerariesUseCase, GetTripUseCase, TripDemandUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
-    private final JoinRequestRepository joinRequestRepository;
+    private final TripDemandRepository tripDemandRepository;
+    private final TripParticipantRepository tripParticipantRepository;
 
     @Override
     public TripCreateResponse createTrip(TripCreateRequest request) {
@@ -63,14 +65,11 @@ public class TripService implements CreateTripUseCase, CreateItinerariesUseCase,
     }
 
     @Override
-    public TripJoinResponse JoinApply(TripJoinApplyRequest request) {
-        Trip trip = findTrip(request.tripId());
-        if (!trip.getStatus().equals(TripStatus.RECRUITING)) {
-            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
-        }
-        JoinRequest joinRequest = request.to(trip);
-        joinRequestRepository.save(joinRequest);
-        return TripJoinResponse.of(joinRequest);
+    public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
+        Trip trip = findTrip(tripId);
+        trip.validateTripRecruitingStatus();
+        TripDemand savedTripDemand = tripDemandRepository.save(request.to(trip));
+        return TripDemandResponse.of(savedTripDemand);
     }
 
     private Trip findTrip(UUID tripId) {
@@ -78,25 +77,26 @@ public class TripService implements CreateTripUseCase, CreateItinerariesUseCase,
                 .orElseThrow(() -> new EntityNotFoundException("여행을 찾을 수 없습니다."));
     }
 
-    private JoinRequest validateJoinRequest(UUID tripId, UUID joinRequestId) {
-        Trip trip = findTrip(tripId);
-        JoinRequest joinRequest = joinRequestRepository.findById(joinRequestId)
+    public TripDemandApproveResponse approve(UUID tripId, UUID joinRequestId) {
+        TripDemand tripDemand = findJoinRequestBy(tripId, joinRequestId);
+        tripDemand.approve();
+        addApprovedParticipant(tripDemand);
+        return new TripDemandApproveResponse(tripDemand.getStatus().getCode());
+    }
+
+    private void addApprovedParticipant(TripDemand tripDemand) {
+        TripParticipant participant = TripParticipant.createTripParticipant(tripDemand.getMemberId(), tripDemand.getTrip());
+        tripParticipantRepository.save(participant);
+    }
+
+    private TripDemand findJoinRequestBy(UUID tripId, UUID joinRequestId) {
+        return tripDemandRepository.findByTripIdAndId(tripId, joinRequestId)
                 .orElseThrow(() -> new EntityNotFoundException("참여 요청을 찾을 수 없습니다."));
-        if (!joinRequest.getTrip().getId().equals(trip.getId())) {
-            throw new IllegalArgumentException("해당 참여 요청은 지정된 여행에 속하지 않습니다.");
-        }
-        joinRequest.ensurePending();
-        return joinRequest;
     }
 
-    public TripParticipant approveJoinRequest(UUID tripId, UUID joinRequestId) {
-        JoinRequest joinRequest = validateJoinRequest(tripId, joinRequestId);
-        return joinRequest.approve();
-    }
-
-    public TripJoinResponse rejectJoinRequest(UUID tripId, UUID joinRequestId) {
-        JoinRequest joinRequest = validateJoinRequest(tripId, joinRequestId);
-        joinRequest.reject();
-        return TripJoinResponse.of(joinRequest);
+    public TripDemandRejectResponse reject(UUID tripId, UUID joinRequestId) {
+        TripDemand tripDemand = findJoinRequestBy(tripId, joinRequestId);
+        tripDemand.reject();
+        return new TripDemandRejectResponse(tripDemand.getStatus().getCode());
     }
 }

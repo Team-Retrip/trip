@@ -1,18 +1,20 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
+import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripJoinApplyRequest;
+import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCategoryResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripJoinResponse;
+import com.retrip.trip.application.in.response.TripDemandApproveResponse;
+import com.retrip.trip.application.in.response.TripDemandRejectResponse;
+import com.retrip.trip.application.in.response.TripDemandResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.JoinApplyUseCase;
-import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.application.in.usecase.TripDemandUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import java.util.Arrays;
 import java.util.List;
@@ -33,8 +35,8 @@ public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
     private final CreateItinerariesUseCase createItinerariesUseCase;
-    private final JoinApplyUseCase joinApplyUseCase;
-    private final com.retrip.trip.application.in.TripService tripService;
+    private final TripDemandUseCase tripDemandUseCase;
+    private final TripService tripService;
 
     @GetMapping("/categories")
     public ResponseEntity<List<TripCategoryResponse>> getTripCategories() {
@@ -68,27 +70,27 @@ public class TripController {
         return ResponseEntity.ok().body(trips);
     }
 
-    @PostMapping("/{tripId}/join-request")
-    public ResponseEntity<TripJoinResponse> joinTrip(
+    @PostMapping("/{tripId}/demand")
+    public ResponseEntity<TripDemandResponse> joinTrip(
             @PathVariable("tripId") UUID tripId,
-            @RequestBody TripJoinApplyRequest request) {
-        TripJoinResponse response = joinApplyUseCase.JoinApply(request);
+            @RequestBody TripDemandRequest request) {
+        TripDemandResponse response = tripDemandUseCase.tripDemand(tripId, request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{tripId}/join-request/{joinRequestId}/approve")
-    public ResponseEntity<TripJoinResponse> approveJoinRequest(
+    @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
+    public ResponseEntity<TripDemandApproveResponse> approveJoinRequest(
             @PathVariable("tripId") UUID tripId,
-            @PathVariable("joinRequestId") UUID joinRequestId) {
-        TripParticipant approvedParticipant = tripService.approveJoinRequest(tripId, joinRequestId);
-        return ResponseEntity.ok(TripJoinResponse.of(approvedParticipant));
+            @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandApproveResponse response = tripService.approve(tripId, tripDemandId);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{tripId}/join-request/{joinRequestId}/reject")
-    public ResponseEntity<TripJoinResponse> rejectJoinRequest(
+    @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
+    public ResponseEntity<TripDemandRejectResponse> rejectJoinRequest(
             @PathVariable("tripId") UUID tripId,
-            @PathVariable("joinRequestId") UUID joinRequestId) {
-        TripJoinResponse response = tripService.rejectJoinRequest(tripId, joinRequestId);
+            @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandRejectResponse response = tripService.reject(tripId, tripDemandId);
         return ResponseEntity.ok(response);
     }
 }

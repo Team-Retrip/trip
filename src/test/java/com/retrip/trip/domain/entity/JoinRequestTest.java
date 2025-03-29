@@ -1,6 +1,6 @@
 package com.retrip.trip.domain.entity;
 
-import com.retrip.trip.domain.vo.ParticipantStatus;
+import com.retrip.trip.domain.vo.TripDemandStatus;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
@@ -41,20 +41,20 @@ class JoinRequestTest {
         Trip dummyTrip = createDummyTrip();
         String message = "참여 요청 메시지";
 
-        JoinRequest joinRequest = JoinRequest.create(userId, dummyTrip, message);
-        assertThat(joinRequest.getStatus()).isEqualTo(ParticipantStatus.PENDING);
+        TripDemand tripDemand = TripDemand.create(userId, dummyTrip, message);
+        assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.PENDING);
     }
 
     @DisplayName("JoinRequest 상태 변경이 정상적으로 동작한다.")
     @Test
     void joinRequestStatusChangeTest() {
         Trip dummyTrip = createDummyTrip();
-        JoinRequest joinRequest = JoinRequest.create(userId, dummyTrip, "참여 요청 메시지");
+        TripDemand tripDemand = TripDemand.create(userId, dummyTrip, "참여 요청 메시지");
 
-        joinRequest.setStatus(ParticipantStatus.APPROVED);
-        assertThat(joinRequest.getStatus()).isEqualTo(ParticipantStatus.APPROVED);
+        tripDemand.setStatus(TripDemandStatus.APPROVED);
+        assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.APPROVED);
 
-        joinRequest.setStatus(ParticipantStatus.REJECTED);
-        assertThat(joinRequest.getStatus()).isEqualTo(ParticipantStatus.REJECTED);
+        tripDemand.setStatus(TripDemandStatus.REJECTED);
+        assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.REJECTED);
     }
 }

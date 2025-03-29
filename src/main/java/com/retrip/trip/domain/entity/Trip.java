@@ -109,5 +109,11 @@ public class Trip extends BaseEntity {
     public void addParticipant(TripParticipant participant) {
         this.tripParticipants.addParticipant(participant);
     }
+
+    public void validateTripRecruitingStatus() {
+        if (!this.getStatus().equals(TripStatus.RECRUITING)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
+    }
 }
 

@@ -3,23 +3,25 @@ package com.retrip.trip.application.in;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripJoinApplyRequest;
+import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripJoinResponse;
+import com.retrip.trip.application.in.response.TripDemandApproveResponse;
+import com.retrip.trip.application.in.response.TripDemandRejectResponse;
+import com.retrip.trip.application.in.response.TripDemandResponse;
 import com.retrip.trip.application.in.response.TripResponse;
+import com.retrip.trip.application.out.repository.TripParticipantRepository;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
-import com.retrip.trip.application.out.repository.JoinRequestRepository;
+import com.retrip.trip.application.out.repository.TripDemandRepository;
 import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.vo.TripDemandStatus;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripTitle;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +50,10 @@ class TripServiceTest {
     TripQueryRepository tripQueryRepository;
 
     @Autowired
-    JoinRequestRepository joinRequestRepository;
+    TripDemandRepository tripDemandRepository;
+
+    @Autowired
+    TripParticipantRepository tripParticipantRepository;
 
     TripService tripService;
     UUID memberId = UUID.fromString("c076d246-7e6d-4191-bf5c-310aebf4c003");
@@ -57,7 +62,7 @@ class TripServiceTest {
 
     @BeforeEach
     void setUp() {
-        tripService = new TripService(tripRepository, tripQueryRepository, joinRequestRepository);
+        tripService = new TripService(tripRepository, tripQueryRepository, tripDemandRepository, tripParticipantRepository);
     }
 
     @TestConfiguration
@@ -86,17 +91,6 @@ class TripServiceTest {
         TripPeriod period = createFuturePeriod();
         Trip trip = Trip.create(memberId, UUID.randomUUID(), new TripTitle(title), new TripDescription(description), period, true, 4, category);
         return tripRepository.save(trip);
-    }
-
-    // 헬퍼: 주어진 Trip과 memberId에 해당하는 JoinRequest의 ID 조회
-    private UUID findJoinRequestId(Trip trip, UUID memberId) {
-        final Trip savedTrip = trip;
-        return joinRequestRepository.findAll().stream()
-                .filter(jr -> jr.getTrip().getId().equals(savedTrip.getId())
-                        && jr.getMemberId().equals(memberId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("JoinRequest를 찾을 수 없습니다."))
-                .getId();
     }
 
     @DisplayName("여행을 생성 한다.")
@@ -160,45 +154,51 @@ class TripServiceTest {
         assertThat(response.itineraries().size()).isEqualTo(3);
     }
 
-    @DisplayName("사용자가 참여 요청을 보낸다.")
     @Test
-    void createJoinRequest() {
+    void 사용자가_참여_요청을_보낸다() {
+        //given
         Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripJoinApplyRequest joinRequest = new TripJoinApplyRequest(trip.getId(), newMemberId, "참여 요청 메시지");
-        TripJoinResponse joinResponse = tripService.JoinApply(joinRequest);
-        assertThat(joinResponse).isNotNull();
-        assertThat(joinResponse.tripId()).isEqualTo(trip.getId());
-        assertThat(joinResponse.memberId()).isEqualTo(newMemberId);
-        assertThat(joinResponse.status()).isEqualTo("대기");
+        TripDemandRequest request = new TripDemandRequest(newMemberId, "참여 요청 메시지");
+
+        //when
+        TripDemandResponse response = tripService.tripDemand(trip.getId(), request);
+
+        //then
+        assertThat(response).isNotNull();
+        assertThat(response.tripId()).isEqualTo(trip.getId());
+        assertThat(response.memberId()).isEqualTo(newMemberId);
+        assertThat(response.status()).isEqualTo("대기");
     }
 
-    @DisplayName("리더가 참여 요청을 승인하면 실제 참여자로 등록된다.")
     @Test
-    void approveJoinRequest() {
+    void 리더가_참여_요청을_승인하면_실제_참여자로_등록된다() {
+        //given
         Trip trip = createTestTrip("승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripJoinApplyRequest joinRequest = new TripJoinApplyRequest(trip.getId(), newMemberId, "참여 요청 메시지");
-        TripJoinResponse joinResponse = tripService.JoinApply(joinRequest);
-        assertThat(joinResponse.status()).isEqualTo("대기");
+        TripDemandRequest request = new TripDemandRequest(newMemberId, "참여 요청 메시지");
+        TripDemandResponse tripDemandResponse = tripService.tripDemand(trip.getId(), request);
 
-        UUID joinRequestId = findJoinRequestId(trip, newMemberId);
-        TripParticipant approvedParticipant = tripService.approveJoinRequest(trip.getId(), joinRequestId);
-        assertThat(approvedParticipant).isNotNull();
-        assertThat(approvedParticipant.getTrip().getId()).isEqualTo(trip.getId());
-        assertThat(approvedParticipant.getMemberId()).isEqualTo(newMemberId);
-        assertThat(approvedParticipant.getStatus().getViewName()).isEqualTo("승인");
+        //then
+        TripDemandApproveResponse response = tripService.approve(trip.getId(), tripDemandResponse.tripDemandId());
+
+        //when
+        assertThat(tripDemandResponse.status()).isEqualTo("대기");
+        assertThat(response).isNotNull();
+        assertThat(response.status()).isEqualTo(TripDemandStatus.APPROVED.getCode());
     }
 
-    @DisplayName("리더가 참여 요청을 거절하면 요청 상태가 거절로 변경된다.")
     @Test
-    void rejectJoinRequest() {
+    void 리더가_참여_요청을_거절하면_요청_상태가_거절로_변경된다() {
+        //given
         Trip trip = createTestTrip("거절 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripJoinApplyRequest joinRequest = new TripJoinApplyRequest(trip.getId(), newMemberId, "참여 요청 메시지");
-        TripJoinResponse joinResponse = tripService.JoinApply(joinRequest);
-        assertThat(joinResponse.status()).isEqualTo("대기");
+        TripDemandRequest request = new TripDemandRequest(newMemberId, "참여 요청 메시지");
+        TripDemandResponse tripDemandResponse = tripService.tripDemand(trip.getId(), request);
 
-        UUID joinRequestId = findJoinRequestId(trip, newMemberId);
-        TripJoinResponse rejectedResponse = tripService.rejectJoinRequest(trip.getId(), joinRequestId);
-        assertThat(rejectedResponse).isNotNull();
-        assertThat(rejectedResponse.status()).isEqualTo("거절");
+        //then
+        TripDemandRejectResponse response = tripService.reject(trip.getId(), tripDemandResponse.tripDemandId());
+
+        //when
+        assertThat(tripDemandResponse.status()).isEqualTo("대기");
+        assertThat(response).isNotNull();
+        assertThat(response.status()).isEqualTo(TripDemandStatus.REJECTED.getCode());
     }
 }
