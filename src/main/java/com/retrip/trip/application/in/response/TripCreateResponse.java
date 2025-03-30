@@ -1,22 +1,43 @@
 package com.retrip.trip.application.in.response;
 
 import com.retrip.trip.domain.entity.Trip;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "여행 생성 Response")
 public record TripCreateResponse(
+        @Schema(description = "여행 ID", example = "550e8400-e29b-41d4-a716-446655440000")
         UUID id,
+
+        @Schema(description = "여행 목적지 ID", example = "550e8400-e29b-41d4-a716-446655440001")
         UUID destinationId,
+
+        @Schema(description = "여행 제목", example = "파리 여행")
         String title,
+
+        @Schema(description = "여행 설명", example = "에펠탑과 루브르 박물관을 방문하는 여행입니다.")
         String description,
+
+        @Schema(description = "여행 시작 날짜", example = "2025-06-15")
         LocalDate start,
+
+        @Schema(description = "여행 종료 날짜", example = "2025-06-20")
         LocalDate end,
+
+        @Schema(description = "여행 공개 여부", example = "true")
         boolean open,
+
+        @Schema(description = "여행 최대 참가 인원", example = "10")
         int maxParticipants,
+
+        @Schema(description = "여행 카테고리", example = "자연 여행")
         String category,
+
+        @Schema(description = "여행 일정 리스트")
         List<ItineraryCreateResponse> itineraries
 ) {
     public static TripCreateResponse of(Trip trip) {
@@ -32,14 +53,20 @@ public record TripCreateResponse(
                 trip.getCategory().getViewName(),
                 trip.getItineraries() == null ? new ArrayList<>() :
                         trip.getItineraries().getValues().stream()
-                        .map(i -> new ItineraryCreateResponse(i.getId(), i.getName(), i.getDate()))
-                        .toList()
+                                .map(i -> new ItineraryCreateResponse(i.getId(), i.getName(), i.getDate()))
+                                .toList()
         );
     }
 
+    @Schema(description = "여행 일정 Response")
     private record ItineraryCreateResponse(
+            @Schema(description = "일정 ID", example = "550e8400-e29b-41d4-a716-446655440002")
             UUID id,
+
+            @Schema(description = "일정 이름", example = "에펠탑 방문")
             String name,
+
+            @Schema(description = "일정 날짜", example = "2025-06-16")
             LocalDate date
     ) {
     }
