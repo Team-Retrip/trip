@@ -8,15 +8,7 @@ public record ItineraryResponse(
         UUID id,
         LocalDate date,
         String name,
-        List<ItineraryDetailResponse> itineraryDetailResponse
-) {
+        List<ItineraryDetailResponse> itineraryDetailResponse) {
     public record ItineraryDetailResponse(
-            UUID id,
-            String description,
-            Long price,
-            UUID locationId
-    ) {
-
-    }
-
+            UUID id, String description, Long price, UUID locationId) {}
 }

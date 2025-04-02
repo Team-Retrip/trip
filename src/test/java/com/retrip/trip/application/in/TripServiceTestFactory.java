@@ -20,10 +20,9 @@ import org.springframework.context.annotation.Import;
 @Import(QuerydslConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class TripServiceTestFactory {
-    @Autowired
-    TripRepository tripRepository;
-    @Autowired
-    JPAQueryFactory jpaQueryFactory;
+    @Autowired TripRepository tripRepository;
+    @Autowired JPAQueryFactory jpaQueryFactory;
+
     TripQueryRepository tripQueryRepository;
 
     TripService tripService;
@@ -32,11 +31,9 @@ public abstract class TripServiceTestFactory {
     LocalDate start = LocalDate.now().plusDays(1);
     LocalDate end = start.plusDays(10);
 
-
     @BeforeEach
     void setUp() {
         tripQueryRepository = new TripQuerydslRepository(jpaQueryFactory);
         tripService = new TripService(tripRepository, tripQueryRepository);
     }
-
 }

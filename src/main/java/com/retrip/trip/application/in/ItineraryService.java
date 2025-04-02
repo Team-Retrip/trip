@@ -29,9 +29,10 @@ public class ItineraryService implements UpdateItinerariesUseCase, GetItinerarie
     @Override
     public ItinerariesUpdateResponse updateItineraries(ItinerariesUpdateRequest request) {
         Trip trip =
-            tripQueryRepository
-                .findByIdWithItineraries(request.tripId())
-                .orElseThrow(EntityNotFoundException::new);
+                tripQueryRepository
+                        .findByIdWithItineraries(request.tripId())
+                        .orElseThrow(EntityNotFoundException::new);
+
         List<Itinerary> itineraries = request.toItineraries(trip);
         trip.updateItineraries(itineraries, request.updateId());
         return ItinerariesUpdateResponse.of(trip.getId(), trip.getItineraries());
