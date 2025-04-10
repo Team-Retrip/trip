@@ -4,7 +4,7 @@ import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
 import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
-import com.retrip.trip.application.in.usecase.UpdateItinerariesUseCase;
+import com.retrip.trip.application.in.usecase.ManageItinerariesUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +22,15 @@ import java.util.UUID;
 public class ItineraryController {
 
     private final GetItinerariesUseCase getItinerariesUseCase;
-    private final UpdateItinerariesUseCase updateItinerariesUseCase;
+    private final ManageItinerariesUseCase manageItinerariesUseCase;
+
+    @PutMapping("/{tripId}/itineraries")
+    public ResponseEntity<ItinerariesUpdateResponse> updateItineraries(
+            @PathVariable UUID tripId, @RequestBody ItinerariesUpdateRequest request) {
+        ItinerariesUpdateResponse itineraries =
+                manageItinerariesUseCase.updateItineraries(tripId, request);
+        return ResponseEntity.ok().body(itineraries);
+    }
 
     @GetMapping("/{tripId}/itineraries")
     public ResponseEntity<Page<ItineraryResponse>> getItineraries(
@@ -30,11 +38,12 @@ public class ItineraryController {
         Page<ItineraryResponse> itineraries = getItinerariesUseCase.getItineraries(tripId, page);
         return ResponseEntity.ok().body(itineraries);
     }
-
+    /*
     @PutMapping("/{tripId}/itineraries")
-    public ResponseEntity<ItinerariesUpdateResponse> updateItineraries(
-            @RequestBody ItinerariesUpdateRequest request) {
-        ItinerariesUpdateResponse itineraries = updateItinerariesUseCase.updateItineraries(request);
+    public ResponseEntity<ItinerariesUpdateResponse> update2Itineraries(
+            @RequestBody ItinerariesUpdate2Request request) {
+        ItinerariesUpdateResponse itineraries = manageItinerariesUseCase.updateItineraries(request);
         return ResponseEntity.ok().body(itineraries);
     }
+     */
 }

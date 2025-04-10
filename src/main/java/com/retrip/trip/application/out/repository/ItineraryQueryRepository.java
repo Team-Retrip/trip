@@ -1,6 +1,10 @@
 package com.retrip.trip.application.out.repository;
 
 import com.retrip.trip.application.in.response.ItineraryResponse;
+import com.retrip.trip.domain.entity.Itinerary;
+import com.retrip.trip.domain.entity.Trip;
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

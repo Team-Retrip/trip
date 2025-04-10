@@ -1,5 +1,6 @@
 package com.retrip.trip.application.in;
 
+import com.retrip.trip.application.in.factory.TripServiceTestFactory;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripFixture;
 import com.retrip.trip.application.in.response.TripCreateResponse;
@@ -18,20 +19,21 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 class TripServiceTest extends TripServiceTestFactory {
     @DisplayName("여행을 생성 한다.")
     @Test
     void createTrip() {
-        TripCreateRequest request = TripFixture.createRequest(memberId,
-                locationId,
-                "속초 여행 멤버 구함",
-                "속초 여행은 이렇게이렇게 갈겁니다~",
-                start,
-                end,
-                true,
-                4,
-                TripCategory.DOMESTIC);
+        TripCreateRequest request =
+                TripFixture.createRequest(
+                        memberId,
+                        locationId,
+                        "속초 여행 멤버 구함",
+                        "속초 여행은 이렇게이렇게 갈겁니다~",
+                        start,
+                        end,
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
         TripCreateResponse response = tripService.createTrip(request);
         assertThat(response.id()).isNotNull();
         assertThat(response.destinationId()).isEqualTo(locationId);

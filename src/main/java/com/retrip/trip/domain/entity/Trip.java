@@ -13,6 +13,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,14 +35,11 @@ public class Trip extends BaseEntity {
 
     private UUID destinationId;
 
-    @Version
-    private long version;
+    @Version private long version;
 
-    @Embedded
-    private TripTitle title;
+    @Embedded private TripTitle title;
 
-    @Embedded
-    private TripDescription description;
+    @Embedded private TripDescription description;
 
     private boolean open;
 
@@ -54,14 +52,11 @@ public class Trip extends BaseEntity {
     @Column(name = "category", length = 50, nullable = false)
     private TripCategory category;
 
-    @Embedded
-    private Participants participants;
+    @Embedded private Participants participants;
 
-    @Embedded
-    private TripPeriod period;
+    @Embedded private TripPeriod period;
 
-    @Embedded
-    private Itineraries itineraries;
+    @Embedded private Itineraries itineraries;
 
     public static Trip create(
             UUID memberId,
@@ -89,16 +84,22 @@ public class Trip extends BaseEntity {
         return trip;
     }
 
+    /*
     public void updateItineraries(List<Itinerary> itineraries, UUID updateId) {
         this.participants.update(updateId);
         this.itineraries.clear();
         this.itineraries.update(new Itineraries(period, itineraries));
     }
+     */
 
     public void updatePeriod(TripPeriod period, UUID updateId) {
         this.participants.update(updateId);
         this.period = period;
         this.itineraries.clear();
         // this.itineraries = new Itineraries(this, period); // 기존 일정 남겨둘지 논의
+    }
+
+    public void updateItineraries(List<LocalDate> dates) {
+        this.itineraries.update(dates, this);
     }
 }

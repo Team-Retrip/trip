@@ -3,15 +3,18 @@ package com.retrip.trip.domain.entity;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.retrip.trip.domain.vo.TripPeriod;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED, force = true)
@@ -37,22 +40,39 @@ public class Itineraries {
         }
     }
 
-    public void update(Itineraries itineraries) {
-        values.addAll(itineraries.values);
-    }
-
     public void clear() {
         if (this.values.isEmpty()) {
             return;
         }
         this.values.stream()
-            .filter(Objects::nonNull)
-            .forEach(
-                itinerary -> {
-                    if (itinerary.itineraryDetails != null) {
-                        itinerary.itineraryDetails.clear();
-                    }
-                });
+                .filter(Objects::nonNull)
+                .forEach(
+                        itinerary -> {
+                            if (itinerary.itineraryDetails != null) {
+                                itinerary.itineraryDetails.clear();
+                            }
+                        });
         this.values.clear();
+    }
+
+    public void update(List<LocalDate> dates, Trip trip) {
+        List<LocalDate> currentDates = getDates(this.values);
+        removeDates(dates);
+        addDates(dates, trip, currentDates);
+    }
+
+    private void removeDates(List<LocalDate> dates) {
+        List<Itinerary> removeItineraries =
+                this.values.stream().filter(i -> !dates.contains(i.getDate())).toList();
+        this.values.removeAll(removeItineraries);
+    }
+
+    private void addDates(List<LocalDate> dates, Trip trip, List<LocalDate> currentDates) {
+        List<Itinerary> add =
+                dates.stream()
+                        .filter(d -> !currentDates.contains(d))
+                        .map(d -> Itinerary.create(trip, d))
+                        .toList();
+        this.values.addAll(add);
     }
 }

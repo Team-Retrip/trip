@@ -5,6 +5,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.domain.entity.Trip;
+
+import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,30 +29,45 @@ public class TripQuerydslRepository implements TripQueryRepository {
 
     @Override
     public Page<TripResponse> findTrips(Pageable page) {
-        List<TripResponse> trips = query.select(
-                        Projections.constructor(TripResponse.class,
-                                trip.id,
-                                trip.title.value,
-                                trip.destinationId,
-                                trip.period.start,
-                                trip.period.end,
-                                trip.open
-                        )
-                ).from(trip)
-                .offset(page.getOffset())
-                .limit(page.getPageSize())
-                .orderBy(trip.createdAt.desc())
-                .fetch();
+        List<TripResponse> trips =
+                query.select(
+                                Projections.constructor(
+                                        TripResponse.class,
+                                        trip.id,
+                                        trip.title.value,
+                                        trip.destinationId,
+                                        trip.period.start,
+                                        trip.period.end,
+                                        trip.open))
+                        .from(trip)
+                        .offset(page.getOffset())
+                        .limit(page.getPageSize())
+                        .orderBy(trip.createdAt.desc())
+                        .fetch();
         return new PageImpl<>(trips, page, trips.size());
     }
 
     @Override
     public Optional<Trip> findByIdWithItineraries(UUID tripId) {
-        return Optional.ofNullable(query.selectFrom(trip)
-                .leftJoin(itinerary).on(itinerary.trip.eq(trip)).fetchJoin()
-                .leftJoin(itineraryDetail).on(itineraryDetail.itinerary.eq(itinerary)).fetchJoin()
-                .where(trip.id.eq(tripId))
-                .orderBy(itinerary.date.desc())
-                .fetchOne());
+        return Optional.ofNullable(
+                query.selectFrom(trip)
+                        .leftJoin(itinerary)
+                        .on(itinerary.trip.eq(trip))
+                        .fetchJoin()
+                        .where(trip.id.eq(tripId))
+                        .orderBy(itinerary.date.desc())
+                        .fetchOne());
+    }
+
+    @Override
+    public Optional<Trip> findByTripIdAndDates(UUID tripId, List<LocalDate> dates) {
+        return Optional.ofNullable(
+                query.selectFrom(trip)
+                        .leftJoin(trip.itineraries.values, itinerary)
+                        .fetchJoin()
+                        .leftJoin(itinerary.itineraryDetails.values, itineraryDetail)
+                        .fetchJoin()
+                        .where(itinerary.trip.id.eq(tripId), itinerary.date.in(dates))
+                        .fetchOne());
     }
 }

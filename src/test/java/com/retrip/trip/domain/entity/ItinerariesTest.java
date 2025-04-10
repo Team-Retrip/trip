@@ -8,11 +8,13 @@ import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripTitle;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 class ItinerariesTest {
 
@@ -32,19 +34,19 @@ class ItinerariesTest {
         List<LocalDate> dates = List.of(end.plusDays(1), start);
 
         Trip trip =
-            Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                period,
-                true,
-                4,
-                TripCategory.DOMESTIC);
+                Trip.create(
+                        memberId,
+                        UUID.randomUUID(),
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        period,
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
         List<Itinerary> itineraries = dates.stream().map(d -> Itinerary.create(trip, d)).toList();
 
         assertThatThrownBy(() -> new Itineraries(period, itineraries))
-            .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("날짜 목록으로 일정을 생성한다.")
@@ -54,96 +56,19 @@ class ItinerariesTest {
         List<LocalDate> dates = List.of(start, start.plusDays(1), start.plusDays(2));
 
         Trip trip =
-            Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                period,
-                true,
-                4,
-                TripCategory.DOMESTIC);
+                Trip.create(
+                        memberId,
+                        UUID.randomUUID(),
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        period,
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
         List<Itinerary> itineraries = dates.stream().map(d -> Itinerary.create(trip, d)).toList();
 
         Itineraries result = new Itineraries(period, itineraries);
         assertThat(result.getValues().size()).isEqualTo(3);
         assertThat(result.getValues().getFirst().getName()).isEqualTo("day 1");
-    }
-
-    @DisplayName("리더는 여행 기간을 수정할 수 있다.")
-    @Test
-    void updateItineraryByLeader() {
-        TripPeriod updatePeriod = new TripPeriod(start.plusDays(2), end.plusDays(1));
-        Trip trip =
-            Trip.create(
-                memberId,
-                destinationId,
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                new TripPeriod(start, end),
-                true,
-                4,
-                TripCategory.DOMESTIC);
-        List<Itinerary> itineraries =
-            List.of(
-                Itinerary.create(trip, start.plusDays(2)),
-                Itinerary.create(trip, start.plusDays(3)),
-                Itinerary.create(trip, start.plusDays(5)));
-        itineraries
-            .getFirst()
-            .createItineraryDetails(
-                List.of(
-                    ItineraryDetail.create(
-                        10000L, "해수욕장에서 사진 및 카페 사진 찍기", itineraries.getFirst(), 속초_해수욕장_Id),
-                    ItineraryDetail.create(
-                        50000L, "속초 중앙 시장에서 오징어 순대, 닭강정 먹기", itineraries.getFirst(), 속초_중앙_시장_Id),
-                    ItineraryDetail.create(null, "숙소에서 쉬기", itineraries.getFirst(), null)));
-        itineraries
-            .getLast()
-            .createItineraryDetails(
-                List.of(ItineraryDetail.create(0L, "집가기", itineraries.getLast(), null)));
-
-        assertThatCode(
-            () -> trip.updateItineraries(itineraries, memberId)).doesNotThrowAnyException();
-    }
-
-    @DisplayName("사용자는 여행 일자와 여행 기간을 수정할 수 없다.")
-    @Test
-    void updateItineraryByParticipant() {
-        TripPeriod updatePeriod = new TripPeriod(start.plusDays(2), end.plusDays(1));
-        Trip trip =
-            Trip.create(
-                memberId,
-                destinationId,
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                new TripPeriod(start, end),
-                true,
-                4,
-                TripCategory.DOMESTIC);
-        List<Itinerary> itineraries =
-            List.of(
-                Itinerary.create(trip, start.plusDays(2)),
-                Itinerary.create(trip, start.plusDays(3)),
-                Itinerary.create(trip, start.plusDays(5)));
-        itineraries
-            .getFirst()
-            .createItineraryDetails(
-                List.of(
-                    ItineraryDetail.create(
-                        10000L, "해수욕장에서 사진 및 카페 사진 찍기", itineraries.getFirst(), 속초_해수욕장_Id),
-                    ItineraryDetail.create(
-                        50000L, "속초 중앙 시장에서 오징어 순대, 닭강정 먹기", itineraries.getFirst(), 속초_중앙_시장_Id),
-                    ItineraryDetail.create(null, "숙소에서 쉬기", itineraries.getFirst(), null)));
-        itineraries
-            .getLast()
-            .createItineraryDetails(
-                List.of(ItineraryDetail.create(0L, "집가기", itineraries.getLast(), null)));
-        // todo: 추후 참여자 로직 생성시, 변경 필요
-        TripParticipant participant = TripParticipant.createTripParticipant(participantId, trip);
-        trip.getParticipants().getValues().add(participant);
-
-        assertThatThrownBy(() -> trip.updateItineraries(itineraries, participantId))
-            .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 }

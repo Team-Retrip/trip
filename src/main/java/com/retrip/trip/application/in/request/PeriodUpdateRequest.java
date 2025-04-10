@@ -10,23 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 public record PeriodUpdateRequest(
-        @NotNull
-        UUID updateId,
+        @NotNull UUID updateId, @FutureOrPresent LocalDate start, @FutureOrPresent LocalDate end) {
 
-        @FutureOrPresent
-        LocalDate start,
-
-        @FutureOrPresent
-        LocalDate end
-) {
     public TripPeriod toPeriod() {
         return new TripPeriod(start, end);
-    }
-
-    public record ItineraryUpdateRequest(
-            @FutureOrPresent
-            LocalDate date
-    ) {
-
     }
 }
