@@ -1,7 +1,9 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
+import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
+import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.ManageItinerariesUseCase;
@@ -30,6 +32,16 @@ public class ItineraryController {
         ItinerariesUpdateResponse itineraries =
                 manageItinerariesUseCase.updateItineraries(tripId, request);
         return ResponseEntity.ok().body(itineraries);
+    }
+
+    @PutMapping("/{tripId}/itineraries/{itineraryId}")
+    public ResponseEntity<ItineraryDetailsUpdateResponse> updateItineraryDetails(
+            @PathVariable UUID tripId,
+            @PathVariable UUID itineraryId,
+            @RequestBody ItineraryDetailsUpdateRequest request) {
+        ItineraryDetailsUpdateResponse itineraryDetail =
+                manageItinerariesUseCase.updateItineraryDetails(tripId, itineraryId, request);
+        return ResponseEntity.ok().body(itineraryDetail);
     }
 
     @GetMapping("/{tripId}/itineraries")

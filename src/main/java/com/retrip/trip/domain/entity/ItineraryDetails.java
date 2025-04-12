@@ -21,19 +21,12 @@ public class ItineraryDetails {
     @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItineraryDetail> values = new ArrayList<>();
 
-    public ItineraryDetails(List<ItineraryDetail> itineraryDetails) {
-        values = itineraryDetails;
+    public void update(List<ItineraryDetail> itineraryDetails) {
+        this.values.clear();
+        this.values.addAll(itineraryDetails);
     }
 
     public void clear() {
-        if (this.values.isEmpty()) {
-            return;
-        }
         this.values.clear();
-    }
-
-
-    public void update(ItineraryDetails itineraryDetails) {
-        this.values = itineraryDetails.values;
     }
 }

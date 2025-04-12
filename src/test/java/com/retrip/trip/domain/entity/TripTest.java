@@ -30,16 +30,16 @@ class TripTest {
     @Test
     void create() {
         assertThatCode(
-                () ->
-                        Trip.create(
-                                memberId,
-                                destinationId,
-                                new TripTitle("속초 여행 멤버 구함"),
-                                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                                new TripPeriod(start, end),
-                                true,
-                                4,
-                                TripCategory.DOMESTIC))
+                        () ->
+                                Trip.create(
+                                        memberId,
+                                        destinationId,
+                                        new TripTitle("속초 여행 멤버 구함"),
+                                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                                        new TripPeriod(start, end),
+                                        true,
+                                        4,
+                                        TripCategory.DOMESTIC))
                 .doesNotThrowAnyException();
     }
 
@@ -47,16 +47,16 @@ class TripTest {
     @Test
     void createWithItinerary() {
         assertThatCode(
-                () ->
-                        Trip.create(
-                                memberId,
-                                destinationId,
-                                new TripTitle("속초 여행 멤버 구함"),
-                                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                                new TripPeriod(start, end),
-                                true,
-                                4,
-                                TripCategory.DOMESTIC))
+                        () ->
+                                Trip.create(
+                                        memberId,
+                                        destinationId,
+                                        new TripTitle("속초 여행 멤버 구함"),
+                                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                                        new TripPeriod(start, end),
+                                        true,
+                                        4,
+                                        TripCategory.DOMESTIC))
                 .doesNotThrowAnyException();
     }
 
@@ -74,7 +74,10 @@ class TripTest {
                         4,
                         TripCategory.DOMESTIC);
         assertThatCode(
-                () -> trip.updatePeriod(new TripPeriod(start.plusDays(3), end.plusDays(2)), memberId))
+                        () ->
+                                trip.updatePeriod(
+                                        new TripPeriod(start.plusDays(3), end.plusDays(2)),
+                                        memberId))
                 .doesNotThrowAnyException();
     }
 
@@ -98,9 +101,10 @@ class TripTest {
         trip.getParticipants().getValues().add(participant);
 
         assertThatThrownBy(
-                () ->
-                        trip.updatePeriod(
-                                new TripPeriod(start.plusDays(3), end.plusDays(2)), participantId))
+                        () ->
+                                trip.updatePeriod(
+                                        new TripPeriod(start.plusDays(3), end.plusDays(2)),
+                                        participantId))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
@@ -126,5 +130,53 @@ class TripTest {
                 () -> assertThat(participants).hasSize(1),
                 () -> assertThat(participants.get(0).getRole()).isEqualTo(ParticipantRole.LEADER),
                 () -> assertThat(participants.get(0).getUserId()).isEqualTo(memberId));
+    }
+
+    @DisplayName("여행 일정 생성")
+    @Test
+    void createItineraries() {
+        Trip trip =
+                Trip.create(
+                        memberId,
+                        destinationId,
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        new TripPeriod(start, end),
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
+        List<LocalDate> itineraries =
+                List.of(start.plusDays(2), start.plusDays(3), start.plusDays(5));
+
+        assertThatCode(() -> trip.updateItineraries(itineraries)).doesNotThrowAnyException();
+        assertThat(trip.getItineraries().getValues().size()).isEqualTo(3);
+    }
+
+    @DisplayName("여행 일정 수정")
+    @Test
+    void updateItineraries() {
+        Trip trip =
+                Trip.create(
+                        memberId,
+                        destinationId,
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        new TripPeriod(start, end),
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
+
+        List<LocalDate> createItineraries =
+                List.of(start.plusDays(2), start.plusDays(3), start.plusDays(5));
+        trip.updateItineraries(createItineraries);
+
+        List<LocalDate> updateItineraries = List.of(start.plusDays(2), start.plusDays(4));
+
+        assertThatCode(() -> trip.updateItineraries(updateItineraries)).doesNotThrowAnyException();
+        assertThat(trip.getItineraries().getValues().size()).isEqualTo(2);
+        assertThat(trip.getItineraries().getValues().getFirst().getDate())
+                .isEqualTo(start.plusDays(2));
+        assertThat(trip.getItineraries().getValues().getLast().getDate())
+                .isEqualTo(start.plusDays(4));
     }
 }

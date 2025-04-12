@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.retrip.trip.domain.entity.QItinerary.itinerary;
-import static com.retrip.trip.domain.entity.QItineraryDetail.itineraryDetail;
 import static com.retrip.trip.domain.entity.QTrip.trip;
 
 @RequiredArgsConstructor
@@ -65,9 +64,17 @@ public class TripQuerydslRepository implements TripQueryRepository {
                 query.selectFrom(trip)
                         .leftJoin(trip.itineraries.values, itinerary)
                         .fetchJoin()
-                        .leftJoin(itinerary.itineraryDetails.values, itineraryDetail)
+                        .where(trip.id.eq(tripId))
+                        .fetchOne());
+    }
+
+    @Override
+    public Optional<Trip> findByIdAndItineraryId(UUID id, UUID itineraryId) {
+        return Optional.ofNullable(
+                query.selectFrom(trip)
+                        .join(trip.itineraries.values, itinerary)
                         .fetchJoin()
-                        .where(itinerary.trip.id.eq(tripId), itinerary.date.in(dates))
+                        .where(trip.id.eq(id), itinerary.id.eq(itineraryId))
                         .fetchOne());
     }
 }

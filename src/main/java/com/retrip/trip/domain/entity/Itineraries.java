@@ -6,7 +6,10 @@ import com.retrip.trip.domain.vo.TripPeriod;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OneToMany;
+
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,19 +47,13 @@ public class Itineraries {
         if (this.values.isEmpty()) {
             return;
         }
-        this.values.stream()
-                .filter(Objects::nonNull)
-                .forEach(
-                        itinerary -> {
-                            if (itinerary.itineraryDetails != null) {
-                                itinerary.itineraryDetails.clear();
-                            }
-                        });
+        this.values.stream().filter(Objects::nonNull).forEach(Itinerary::clear);
         this.values.clear();
     }
 
     public void update(List<LocalDate> dates, Trip trip) {
         List<LocalDate> currentDates = getDates(this.values);
+        validate(trip.getPeriod(), dates);
         removeDates(dates);
         addDates(dates, trip, currentDates);
     }
@@ -74,5 +71,12 @@ public class Itineraries {
                         .map(d -> Itinerary.create(trip, d))
                         .toList();
         this.values.addAll(add);
+    }
+
+    public Itinerary getUpdateItinerary(UUID id) {
+        return this.values.stream()
+                .filter(i -> i.getId().equals(id))
+                .findFirst()
+                .orElseThrow(EntityNotFoundException::new);
     }
 }

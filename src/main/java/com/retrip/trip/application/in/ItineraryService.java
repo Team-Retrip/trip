@@ -1,15 +1,21 @@
 package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
+import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
+import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.ManageItinerariesUseCase;
 import com.retrip.trip.application.out.repository.ItineraryQueryRepository;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
+import com.retrip.trip.domain.entity.Itinerary;
+import com.retrip.trip.domain.entity.ItineraryDetail;
 import com.retrip.trip.domain.entity.Trip;
 
 import jakarta.persistence.EntityNotFoundException;
+
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +37,6 @@ public class ItineraryService implements ManageItinerariesUseCase, GetItinerarie
     @Override
     public ItinerariesUpdateResponse updateItineraries(
             UUID tripId, ItinerariesUpdateRequest request) {
-
         Trip trip =
                 tripQueryRepository
                         .findByTripIdAndDates(tripId, request.toDates())
@@ -39,6 +44,18 @@ public class ItineraryService implements ManageItinerariesUseCase, GetItinerarie
         trip.updateItineraries(request.toDates());
 
         return ItinerariesUpdateResponse.of(trip.getItineraries().getValues());
+    }
+
+    @Override
+    public ItineraryDetailsUpdateResponse updateItineraryDetails(
+            UUID tripId, UUID itineraryId, ItineraryDetailsUpdateRequest request) {
+        Trip trip =
+                tripQueryRepository
+                        .findByIdAndItineraryId(tripId, itineraryId)
+                        .orElseThrow(EntityNotFoundException::new);
+        Itinerary itinerary = trip.getUpdateItinerary(itineraryId);
+        return ItineraryDetailsUpdateResponse.of(
+                trip.updateItineraryDetails(itineraryId, request.to(itinerary)));
     }
 
     @Override

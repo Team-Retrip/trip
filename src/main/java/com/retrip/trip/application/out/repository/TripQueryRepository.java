@@ -19,4 +19,6 @@ public interface TripQueryRepository {
     Optional<Trip> findByIdWithItineraries(UUID uuid);
 
     Optional<Trip> findByTripIdAndDates(UUID tripId, List<LocalDate> dates);
+
+    Optional<Trip> findByIdAndItineraryId(UUID tripId, UUID itineraryId);
 }

@@ -53,4 +53,15 @@ public class Itinerary extends BaseEntity {
         validate(day);
         return new Itinerary("day " + day, trip, date);
     }
+
+    public void updateItineraryDetails(List<ItineraryDetail> itineraryDetails) {
+        if (this.getItineraryDetails() == null) this.itineraryDetails = new ItineraryDetails();
+        this.getItineraryDetails().update(itineraryDetails);
+    }
+
+    public void clear() {
+        if (itineraryDetails != null) {
+            itineraryDetails.clear();
+        }
+    }
 }

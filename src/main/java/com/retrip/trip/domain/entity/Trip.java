@@ -7,11 +7,7 @@ import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.domain.vo.TripTitle;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -84,14 +80,6 @@ public class Trip extends BaseEntity {
         return trip;
     }
 
-    /*
-    public void updateItineraries(List<Itinerary> itineraries, UUID updateId) {
-        this.participants.update(updateId);
-        this.itineraries.clear();
-        this.itineraries.update(new Itineraries(period, itineraries));
-    }
-     */
-
     public void updatePeriod(TripPeriod period, UUID updateId) {
         this.participants.update(updateId);
         this.period = period;
@@ -101,5 +89,16 @@ public class Trip extends BaseEntity {
 
     public void updateItineraries(List<LocalDate> dates) {
         this.itineraries.update(dates, this);
+    }
+
+    public Itinerary getUpdateItinerary(UUID id) {
+        return itineraries.getUpdateItinerary(id);
+    }
+
+    public Itinerary updateItineraryDetails(
+            UUID itineraryId, List<ItineraryDetail> itineraryDetails) {
+        Itinerary itinerary = itineraries.getUpdateItinerary(itineraryId);
+        itinerary.updateItineraryDetails(itineraryDetails);
+        return itinerary;
     }
 }
