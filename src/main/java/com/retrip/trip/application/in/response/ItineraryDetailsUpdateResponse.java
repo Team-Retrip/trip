@@ -23,6 +23,6 @@ public record ItineraryDetailsUpdateResponse(
                         .toList());
     }
 
-    private record ItineraryDetailUpdateResponse(
+    public record ItineraryDetailUpdateResponse(
             UUID id, UUID locationId, Long price, String description) {}
 }

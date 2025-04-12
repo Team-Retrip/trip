@@ -64,4 +64,15 @@ public class Itinerary extends BaseEntity {
             itineraryDetails.clear();
         }
     }
+
+    public UUID deleteByItineraryDetail(UUID itineraryDetailsId) {
+        if (this.getItineraryDetails() == null) this.itineraryDetails = new ItineraryDetails();
+        ItineraryDetail itineraryDetail =
+                itineraryDetails.getValues().stream()
+                        .filter(id -> id.getId().equals(itineraryDetailsId))
+                        .findAny()
+                        .orElseThrow(EntityNotFoundException::new);
+        this.itineraryDetails.getValues().remove(itineraryDetail);
+        return itineraryDetail.getId();
+    }
 }

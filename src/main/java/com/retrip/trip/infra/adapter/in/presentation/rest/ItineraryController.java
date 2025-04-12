@@ -3,6 +3,7 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
+import com.retrip.trip.application.in.response.ItineraryDetailDeleteResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
@@ -44,18 +45,21 @@ public class ItineraryController {
         return ResponseEntity.ok().body(itineraryDetail);
     }
 
+    @DeleteMapping("/{tripId}/itineraries/{itineraryId}/{itineraryDetailsId}")
+    public ResponseEntity<ItineraryDetailDeleteResponse> deleteItineraryDetail(
+            @PathVariable UUID tripId,
+            @PathVariable UUID itineraryId,
+            @PathVariable UUID itineraryDetailsId) {
+        ItineraryDetailDeleteResponse itineraryDetail =
+                manageItinerariesUseCase.deleteItineraryDetail(
+                        tripId, itineraryId, itineraryDetailsId);
+        return ResponseEntity.ok().body(itineraryDetail);
+    }
+
     @GetMapping("/{tripId}/itineraries")
     public ResponseEntity<Page<ItineraryResponse>> getItineraries(
             @PathVariable UUID tripId, @PageableDefault(size = 10, page = 0) Pageable page) {
         Page<ItineraryResponse> itineraries = getItinerariesUseCase.getItineraries(tripId, page);
         return ResponseEntity.ok().body(itineraries);
     }
-    /*
-    @PutMapping("/{tripId}/itineraries")
-    public ResponseEntity<ItinerariesUpdateResponse> update2Itineraries(
-            @RequestBody ItinerariesUpdate2Request request) {
-        ItinerariesUpdateResponse itineraries = manageItinerariesUseCase.updateItineraries(request);
-        return ResponseEntity.ok().body(itineraries);
-    }
-     */
 }

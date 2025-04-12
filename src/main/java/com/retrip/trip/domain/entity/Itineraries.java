@@ -73,7 +73,7 @@ public class Itineraries {
         this.values.addAll(add);
     }
 
-    public Itinerary getUpdateItinerary(UUID id) {
+    public Itinerary findId(UUID id) {
         return this.values.stream()
                 .filter(i -> i.getId().equals(id))
                 .findFirst()

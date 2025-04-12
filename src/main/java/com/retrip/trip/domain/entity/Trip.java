@@ -91,14 +91,19 @@ public class Trip extends BaseEntity {
         this.itineraries.update(dates, this);
     }
 
-    public Itinerary getUpdateItinerary(UUID id) {
-        return itineraries.getUpdateItinerary(id);
+    public Itinerary findByItinerary(UUID itineraryId) {
+        return itineraries.findId(itineraryId);
     }
 
     public Itinerary updateItineraryDetails(
             UUID itineraryId, List<ItineraryDetail> itineraryDetails) {
-        Itinerary itinerary = itineraries.getUpdateItinerary(itineraryId);
+        Itinerary itinerary = itineraries.findId(itineraryId);
         itinerary.updateItineraryDetails(itineraryDetails);
         return itinerary;
+    }
+
+    public UUID deleteItineraryDetail(UUID itineraryId, UUID itineraryDetailsId) {
+        Itinerary itinerary = itineraries.findId(itineraryId);
+        return itinerary.deleteByItineraryDetail(itineraryDetailsId);
     }
 }

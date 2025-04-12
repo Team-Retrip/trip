@@ -3,6 +3,7 @@ package com.retrip.trip.application.in;
 import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
+import com.retrip.trip.application.in.response.ItineraryDetailDeleteResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
@@ -10,12 +11,9 @@ import com.retrip.trip.application.in.usecase.ManageItinerariesUseCase;
 import com.retrip.trip.application.out.repository.ItineraryQueryRepository;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.domain.entity.Itinerary;
-import com.retrip.trip.domain.entity.ItineraryDetail;
 import com.retrip.trip.domain.entity.Trip;
 
 import jakarta.persistence.EntityNotFoundException;
-
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,12 +51,24 @@ public class ItineraryService implements ManageItinerariesUseCase, GetItinerarie
                 tripQueryRepository
                         .findByIdAndItineraryId(tripId, itineraryId)
                         .orElseThrow(EntityNotFoundException::new);
-        Itinerary itinerary = trip.getUpdateItinerary(itineraryId);
+        Itinerary itinerary = trip.findByItinerary(itineraryId);
         return ItineraryDetailsUpdateResponse.of(
                 trip.updateItineraryDetails(itineraryId, request.to(itinerary)));
     }
 
     @Override
+    public ItineraryDetailDeleteResponse deleteItineraryDetail(
+            UUID tripId, UUID itineraryId, UUID itineraryDetailsId) {
+        Trip trip =
+                tripQueryRepository
+                        .findByIdAndItineraryId(tripId, itineraryId)
+                        .orElseThrow(EntityNotFoundException::new);
+        return ItineraryDetailDeleteResponse.of(
+                trip.deleteItineraryDetail(itineraryId, itineraryDetailsId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<ItineraryResponse> getItineraries(UUID tripId, Pageable page) {
         return itineraryQueryRepository.findItineraries(tripId, page);
     }

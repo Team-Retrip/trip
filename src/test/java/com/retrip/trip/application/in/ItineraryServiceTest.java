@@ -7,6 +7,7 @@ import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryFixture;
 import com.retrip.trip.application.in.response.ItinerariesUpdateResponse;
+import com.retrip.trip.application.in.response.ItineraryDetailDeleteResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.domain.entity.Trip;
@@ -181,6 +182,51 @@ class ItineraryServiceTest extends ItineraryServiceTestFactory {
         assertThat(response.itineraryDetails().size()).isEqualTo(2);
     }
 
+    @Test
+    @DisplayName("여행의 상세 일정을 삭제한다.")
+    void deleteItineraryDetail() {
+        TripPeriod period = new TripPeriod(start, end);
+        Trip trip =
+                tripRepository.save(
+                        Trip.create(
+                                memberId,
+                                UUID.randomUUID(),
+                                new TripTitle("속초 여행 멤버 구함"),
+                                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                                period,
+                                true,
+                                4,
+                                TripCategory.DOMESTIC));
+
+        ItinerariesUpdateRequest createItineraries =
+                ItineraryFixture.updateItineraryRequest(
+                        List.of(start.plusDays(2), start.plusDays(3), end.minusDays(1)));
+
+        ItinerariesUpdateResponse itineraries =
+                itineraryService.updateItineraries(trip.getId(), createItineraries);
+
+        ItineraryDetailsUpdateRequest itineraryDetailsUpdateRequest =
+                ItineraryFixture.updateItineraryDetailsRequest(
+                        List.of(
+                                new ItineraryDetailsUpdateRequest.ItineraryDetailUpdateRequest(
+                                        속초_해수욕장_Id, 10_000L, "속초 해수욕장"),
+                                new ItineraryDetailsUpdateRequest.ItineraryDetailUpdateRequest(
+                                        속초_중앙_시장_Id, 50_000L, "속초 중앙시장 투어"),
+                                new ItineraryDetailsUpdateRequest.ItineraryDetailUpdateRequest(
+                                        숙소_Id, null, "숙소 복귀")));
+        UUID itineraryId = itineraries.itineraries().getFirst().id();
+        ItineraryDetailsUpdateResponse itineraryDetailsUpdateResponse =
+                itineraryService.updateItineraryDetails(
+                        trip.getId(), itineraryId, itineraryDetailsUpdateRequest);
+        UUID itineraryDetailId = itineraryDetailsUpdateResponse.itineraryDetails().getFirst().id();
+
+        ItineraryDetailDeleteResponse response =
+                itineraryService.deleteItineraryDetail(
+                        trip.getId(), itineraryId, itineraryDetailId);
+
+        assertThat(response.id()).isEqualTo(itineraryDetailId);
+    }
+
     @DisplayName("여행 일정을 조회한다.")
     @Test
     void getItineraries() {
@@ -197,33 +243,32 @@ class ItineraryServiceTest extends ItineraryServiceTestFactory {
                                 4,
                                 TripCategory.DOMESTIC));
         trip.updateItineraries(List.of(start, start.plusDays(1), end.minusDays(1)));
-        /*
-        itineraries
-                        .getFirst()
-                        .createItineraryDetails(
-                                List.of(
-                                        ItineraryDetail.create(
-                                                10000L,
-                                                "해수욕장에서 사진 및 카페 사진 찍기",
-                                                itineraries.getFirst(),
-                                                속초_해수욕장_Id),
-                                        ItineraryDetail.create(
-                                                50000L,
-                                                "속초 중앙 시장에서 오징어 순대, 닭강정 먹기",
-                                                itineraries.getFirst(),
-                                                속초_중앙_시장_Id)));
-                itineraries
-                        .getLast()
-                        .createItineraryDetails(
-                                List.of(ItineraryDetail.create(0L, "집가기", itineraries.getLast(), null)));
 
-                trip.updateItineraries(itineraries, memberId);
-        */
+        ItinerariesUpdateRequest createItineraries =
+                ItineraryFixture.updateItineraryRequest(
+                        List.of(start.plusDays(2), start.plusDays(3), end.minusDays(1)));
+
+        ItinerariesUpdateResponse itineraries =
+                itineraryService.updateItineraries(trip.getId(), createItineraries);
+
+        ItineraryDetailsUpdateRequest itineraryDetailsUpdateRequest =
+                ItineraryFixture.updateItineraryDetailsRequest(
+                        List.of(
+                                new ItineraryDetailsUpdateRequest.ItineraryDetailUpdateRequest(
+                                        속초_해수욕장_Id, 10_000L, "속초 해수욕장"),
+                                new ItineraryDetailsUpdateRequest.ItineraryDetailUpdateRequest(
+                                        속초_중앙_시장_Id, 50_000L, "속초 중앙시장 투어"),
+                                new ItineraryDetailsUpdateRequest.ItineraryDetailUpdateRequest(
+                                        숙소_Id, null, "숙소 복귀")));
+
+        UUID itineraryId = itineraries.itineraries().getFirst().id();
+        itineraryService.updateItineraryDetails(
+                trip.getId(), itineraryId, itineraryDetailsUpdateRequest);
         Page<ItineraryResponse> searchItineraryResponses =
-                itineraryService.getItineraries(trip.getId(), PageRequest.of(0, 14));
+                itineraryService.getItineraries(trip.getId(), PageRequest.of(0, 3));
 
         assertThat(searchItineraryResponses.getTotalElements()).isEqualTo(3L);
         assertThat(searchItineraryResponses.getPageable().getOffset()).isEqualTo(0);
-        assertThat(searchItineraryResponses.getPageable().getPageSize()).isEqualTo(14);
+        assertThat(searchItineraryResponses.getPageable().getPageSize()).isEqualTo(3);
     }
 }
