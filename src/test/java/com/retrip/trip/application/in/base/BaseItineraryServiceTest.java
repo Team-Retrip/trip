@@ -1,4 +1,4 @@
-package com.retrip.trip.application.in.factory;
+package com.retrip.trip.application.in.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.ItineraryService;
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Import;
 @DataJpaTest
 @Import(QuerydslConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public abstract class ItineraryServiceTestFactory {
+public abstract class BaseItineraryServiceTest {
     @Autowired protected TripRepository tripRepository;
 
     @Autowired protected JPAQueryFactory jpaQueryFactory;

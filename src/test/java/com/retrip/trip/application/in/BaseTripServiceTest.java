@@ -1,6 +1,5 @@
 package com.retrip.trip.application.in;
 
-import com.retrip.trip.application.in.factory.TripServiceTestFactory;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripFixture;
 import com.retrip.trip.application.in.response.TripCreateResponse;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TripServiceTest extends TripServiceTestFactory {
+class BaseTripServiceTest extends com.retrip.trip.application.in.base.BaseTripServiceTest {
     @DisplayName("여행을 생성 한다.")
     @Test
     void createTrip() {

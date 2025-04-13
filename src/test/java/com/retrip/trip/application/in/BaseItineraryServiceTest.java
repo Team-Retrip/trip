@@ -2,7 +2,6 @@ package com.retrip.trip.application.in;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.retrip.trip.application.in.factory.ItineraryServiceTestFactory;
 import com.retrip.trip.application.in.request.ItinerariesUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryFixture;
@@ -24,7 +23,8 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 import java.util.UUID;
 
-class ItineraryServiceTest extends ItineraryServiceTestFactory {
+class BaseItineraryServiceTest
+        extends com.retrip.trip.application.in.base.BaseItineraryServiceTest {
 
     @Test
     @DisplayName("여행의 일정 목록을 생성한다.")

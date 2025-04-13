@@ -1,4 +1,4 @@
-package com.retrip.trip.application.in.factory;
+package com.retrip.trip.application.in.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.TripService;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @DataJpaTest
 @Import(QuerydslConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public abstract class TripServiceTestFactory {
+public abstract class BaseTripServiceTest {
     @Autowired protected TripRepository tripRepository;
     @Autowired protected JPAQueryFactory jpaQueryFactory;
 
