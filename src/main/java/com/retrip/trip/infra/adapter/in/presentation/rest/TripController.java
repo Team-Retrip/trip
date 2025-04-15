@@ -1,17 +1,24 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
+import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
+import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.TripCategoryResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
+import com.retrip.trip.application.in.response.TripDemandApproveResponse;
+import com.retrip.trip.application.in.response.TripDemandRejectResponse;
+import com.retrip.trip.application.in.response.TripDemandResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
+import com.retrip.trip.application.in.usecase.TripDemandUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +35,8 @@ public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
     private final CreateItinerariesUseCase createItinerariesUseCase;
+    private final TripDemandUseCase tripDemandUseCase;
+    private final TripService tripService;
 
     @GetMapping("/categories")
     public ResponseEntity<List<TripCategoryResponse>> getTripCategories() {
@@ -59,5 +68,29 @@ public class TripController {
     public ResponseEntity<Page<TripResponse>> getTrips(@PageableDefault(size = 10, page = 0) Pageable page) {
         Page<TripResponse> trips = getTripUseCase.getTrips(page);
         return ResponseEntity.ok().body(trips);
+    }
+
+    @PostMapping("/{tripId}/demand")
+    public ResponseEntity<TripDemandResponse> joinTrip(
+            @PathVariable("tripId") UUID tripId,
+            @RequestBody TripDemandRequest request) {
+        TripDemandResponse response = tripDemandUseCase.tripDemand(tripId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
+    public ResponseEntity<TripDemandApproveResponse> approveJoinRequest(
+            @PathVariable("tripId") UUID tripId,
+            @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandApproveResponse response = tripService.approve(tripId, tripDemandId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
+    public ResponseEntity<TripDemandRejectResponse> rejectJoinRequest(
+            @PathVariable("tripId") UUID tripId,
+            @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandRejectResponse response = tripService.reject(tripId, tripDemandId);
+        return ResponseEntity.ok(response);
     }
 }

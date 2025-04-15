@@ -47,7 +47,10 @@ public class Trip extends BaseEntity {
     private TripCategory category;
 
     @Embedded
-    private Participants participants;
+    private TripParticipants tripParticipants;
+
+    @Embedded
+    private TripDemands tripDemands;
 
     @Embedded
     private TripPeriod period;
@@ -76,7 +79,7 @@ public class Trip extends BaseEntity {
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .build();
-        trip.participants = new Participants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip);
         return trip;
     }
 
@@ -102,8 +105,18 @@ public class Trip extends BaseEntity {
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.participants = new Participants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip);
         return trip;
+    }
+
+    public void addParticipant(TripParticipant participant) {
+        this.tripParticipants.addParticipant(participant);
+    }
+
+    public void validateTripRecruitingStatus() {
+        if (!this.getStatus().equals(TripStatus.RECRUITING)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
     }
 }
 

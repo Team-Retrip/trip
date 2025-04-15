@@ -71,13 +71,13 @@ class TripTest {
         );
 
         // when
-        List<TripParticipant> participants = trip.getParticipants().getValues();
+        List<TripParticipant> participants = trip.getTripParticipants().getValues();
 
         // then
         assertAll(
                 () -> assertThat(participants).hasSize(1),
                 () -> assertThat(participants.get(0).getRole()).isEqualTo(ParticipantRole.LEADER),
-                () -> assertThat(participants.get(0).getUserId()).isEqualTo(memberId)
+                () -> assertThat(participants.get(0).getMemberId()).isEqualTo(memberId)
         );
     }
 }
