@@ -36,16 +36,22 @@ public class TripDemand extends BaseEntity {
             name = "trip_id",
             nullable = false,
             columnDefinition = "varbinary(16)",
-            foreignKey = @ForeignKey(name = "fk_trip_participant_to_trip")
+            foreignKey = @ForeignKey(name = "fk_trip_demand_to_trip")
     )
     private Trip trip;
 
-    public static TripDemand create(UUID userId, Trip trip, String message) {
-        return new TripDemand(UUID.randomUUID(), userId, message, TripDemandStatus.PENDING, trip);
+    public static TripDemand create(UUID memberId, Trip trip, String message) {
+        return new TripDemand(UUID.randomUUID(), memberId, message, TripDemandStatus.PENDING, trip);
     }
 
     public void setStatus(TripDemandStatus status) {
         this.status = status;
+    }
+
+    public void ensurePending() {
+        if (!this.status.equals(TripDemandStatus.PENDING)) {
+            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
+        }
     }
 
     public void approve() {
@@ -56,11 +62,5 @@ public class TripDemand extends BaseEntity {
     public void reject() {
         ensurePending();
         this.status = TripDemandStatus.REJECTED;
-    }
-
-    public void ensurePending() {
-        if (!this.status.equals(TripDemandStatus.PENDING)) {
-            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
-        }
     }
 }

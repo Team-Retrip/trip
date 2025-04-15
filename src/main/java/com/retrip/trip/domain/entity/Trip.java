@@ -50,6 +50,9 @@ public class Trip extends BaseEntity {
     private TripParticipants tripParticipants;
 
     @Embedded
+    private TripDemands tripDemands;
+
+    @Embedded
     private TripPeriod period;
 
     @Embedded

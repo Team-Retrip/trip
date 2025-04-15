@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JoinRequestTest {
+class TripDemandTest {
 
     // 테스트용 사용자, 여행 ID 생성
     UUID userId = UUID.fromString("11111111-2222-3333-4444-555555555555");
@@ -35,9 +35,9 @@ class JoinRequestTest {
                 .build();
     }
 
-    @DisplayName("JoinRequest 생성 시 초기 상태는 '대기'여야 한다.")
+    @DisplayName("TripDemand 생성 시 초기 상태는 '대기'여야 한다.")
     @Test
-    void joinRequestCreationTest() {
+    void tripDemandCreationTest() {
         Trip dummyTrip = createDummyTrip();
         String message = "참여 요청 메시지";
 
@@ -45,9 +45,9 @@ class JoinRequestTest {
         assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.PENDING);
     }
 
-    @DisplayName("JoinRequest 상태 변경이 정상적으로 동작한다.")
+    @DisplayName("TripDemand 상태 변경이 정상적으로 동작한다.")
     @Test
-    void joinRequestStatusChangeTest() {
+    void tripDemandStatusChangeTest() {
         Trip dummyTrip = createDummyTrip();
         TripDemand tripDemand = TripDemand.create(userId, dummyTrip, "참여 요청 메시지");
 
