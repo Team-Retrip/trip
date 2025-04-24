@@ -4,29 +4,22 @@ import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
-import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
-import com.retrip.trip.application.in.response.TripCategoryResponse;
-import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripDemandApproveResponse;
-import com.retrip.trip.application.in.response.TripDemandRejectResponse;
-import com.retrip.trip.application.in.response.TripDemandResponse;
-import com.retrip.trip.application.in.response.TripResponse;
+import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.CreateItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
 import com.retrip.trip.application.in.usecase.TripDemandUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RequestMapping("/trips")
@@ -39,58 +32,58 @@ public class TripController {
     private final TripService tripService;
 
     @GetMapping("/categories")
-    public ResponseEntity<List<TripCategoryResponse>> getTripCategories() {
+    public ApiResponse<List<TripCategoryResponse>> getTripCategories() {
         List<TripCategoryResponse> response = Arrays.stream(TripCategory.values())
                 .map(TripCategoryResponse::of)
                 .toList();
-        return ResponseEntity.ok().body(response);
+        return ApiResponse.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripCreateRequest request) {
+    public ApiResponse<TripCreateResponse> createTrip(@RequestBody TripCreateRequest request) {
         TripCreateResponse trip = createTripUseCase.createTrip(request);
-        return ResponseEntity.created(URI.create("/trips/" + trip.id())).body(trip);
+        return ApiResponse.created(trip);
     }
 
     @PostMapping("/regular")
-    public ResponseEntity<TripCreateResponse> createTripWithItineraries(@RequestBody TripCreateRequest request) {
+    public ApiResponse<TripCreateResponse> createTripWithItineraries(@RequestBody TripCreateRequest request) {
         TripCreateResponse trip = createTripUseCase.createTripWithItineraries(request);
-        return ResponseEntity.created(URI.create("/trips/" + trip.id())).body(trip);
+        return ApiResponse.created(trip);
     }
 
     @PostMapping("/itineraries")
-    public ResponseEntity<ItinerariesCreateResponse> createItineraries(@RequestBody ItinerariesCreateRequest request) {
+    public ApiResponse<ItinerariesCreateResponse> createItineraries(@RequestBody ItinerariesCreateRequest request) {
         ItinerariesCreateResponse itineraries = createItinerariesUseCase.createItineraries(request);
-        return ResponseEntity.created(URI.create("/trips/" + itineraries.tripId() + "/itineraries")).body(itineraries);
+        return ApiResponse.created(itineraries);
     }
 
     @GetMapping
-    public ResponseEntity<Page<TripResponse>> getTrips(@PageableDefault(size = 10, page = 0) Pageable page) {
+    public ApiResponse<Page<TripResponse>> getTrips(@PageableDefault(size = 10, page = 0) Pageable page) {
         Page<TripResponse> trips = getTripUseCase.getTrips(page);
-        return ResponseEntity.ok().body(trips);
+        return ApiResponse.ok(trips);
     }
 
     @PostMapping("/{tripId}/demand")
-    public ResponseEntity<TripDemandResponse> joinTrip(
+    public ApiResponse<TripDemandResponse> joinTrip(
             @PathVariable("tripId") UUID tripId,
             @RequestBody TripDemandRequest request) {
         TripDemandResponse response = tripDemandUseCase.tripDemand(tripId, request);
-        return ResponseEntity.ok(response);
+        return ApiResponse.ok(response);
     }
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
-    public ResponseEntity<TripDemandApproveResponse> approveJoinRequest(
+    public ApiResponse<TripDemandApproveResponse> approveJoinRequest(
             @PathVariable("tripId") UUID tripId,
             @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandApproveResponse response = tripService.approve(tripId, tripDemandId);
-        return ResponseEntity.ok(response);
+        return ApiResponse.ok(response);
     }
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
-    public ResponseEntity<TripDemandRejectResponse> rejectJoinRequest(
+    public ApiResponse<TripDemandRejectResponse> rejectJoinRequest(
             @PathVariable("tripId") UUID tripId,
             @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandRejectResponse response = tripService.reject(tripId, tripDemandId);
-        return ResponseEntity.ok(response);
+        return ApiResponse.ok(response);
     }
 }

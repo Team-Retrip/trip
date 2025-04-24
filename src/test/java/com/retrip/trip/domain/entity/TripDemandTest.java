@@ -16,11 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TripDemandTest {
 
-    // 테스트용 사용자, 여행 ID 생성
     UUID userId = UUID.fromString("11111111-2222-3333-4444-555555555555");
     UUID tripId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-    // 테스트에 사용할 더미 Trip 엔티티 생성 (최소한의 값만 설정)
     private Trip createDummyTrip() {
         return Trip.builder()
                 .id(tripId)
