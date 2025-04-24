@@ -81,12 +81,10 @@ class TripServiceTest {
         }
     }
 
-    // 헬퍼: 미래의 여행 기간 생성 (시작일: 현재 +1일, 종료일: 현재 +5일)
     private TripPeriod createFuturePeriod() {
         return new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
     }
 
-    // 헬퍼: 테스트용 Trip 생성
     private Trip createTestTrip(String title, String description, TripCategory category) {
         TripPeriod period = createFuturePeriod();
         Trip trip = Trip.create(memberId, UUID.randomUUID(), new TripTitle(title), new TripDescription(description), period, true, 4, category);
