@@ -65,8 +65,10 @@ public class TripService implements CreateTripUseCase, CreateItinerariesUseCase,
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
         trip.validateTripRecruitingStatus();
-        TripDemand savedTripDemand = tripDemandRepository.save(request.to(trip));
-        return TripDemandResponse.of(savedTripDemand);
+        TripDemand demand = TripDemand.create(request.memberId(), trip, request.message());
+        trip.addDemand(demand);
+        tripRepository.save(trip);
+        return TripDemandResponse.of(demand);
     }
 
     private Trip findTrip(UUID tripId) {
