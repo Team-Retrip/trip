@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "deploy-test1" ]
   pull_request:
-    branches: [ "deploy-test" ]
+    branches: [ "deploy-test1" ]
 
 permissions:
   contents: read
