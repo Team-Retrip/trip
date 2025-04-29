@@ -1,0 +1,84 @@
+spring:
+  profiles:
+    active: local
+    group:
+      local: local,common,secret
+      blue: blue,common,secret
+      green: green,common,secret
+
+
+
+server:
+  env: blue
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+server:
+  port: 8080
+  address: localhost
+
+serverName: local_server
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: blue
+
+server:
+  port: 8080
+  address: 3.37.85.255
+
+
+serverName: blue_server
+
+---
+spring:
+  config:
+    activate:
+      on-profile: green
+
+server:
+  port: 8081
+  address: 3.37.85.255
+
+
+serverName: green_server
+
+---
+spring:
+  application:
+    name: trip
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
+    username: sa
+    password: ''
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+
+
+logging:
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql: trace
+      springframework:
+        web:
+          client:
+            RestTemplate: DEBUG

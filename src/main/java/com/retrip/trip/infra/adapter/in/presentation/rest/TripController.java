@@ -15,11 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/trips")
@@ -30,6 +29,9 @@ public class TripController {
     private final CreateItinerariesUseCase createItinerariesUseCase;
     private final TripDemandUseCase tripDemandUseCase;
     private final TripService tripService;
+
+
+
 
     @GetMapping("/categories")
     public ApiResponse<List<TripCategoryResponse>> getTripCategories() {
