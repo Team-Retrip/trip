@@ -2,9 +2,9 @@ name: CICD
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "deploy-test1" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "deploy-test" ]
 
 permissions:
   contents: read
@@ -43,10 +43,10 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.RETRIP-SERVER_IP }}/env")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.RETRIP_SERVER_IP }}/env")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.RETRIP-SERVER_IP }}/env")
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.RETRIP_SERVER_IP }}/env")
           else
             CURRENT_UPSTREAM=green
           fi
