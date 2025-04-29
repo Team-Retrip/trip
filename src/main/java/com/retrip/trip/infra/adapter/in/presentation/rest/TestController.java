@@ -32,7 +32,7 @@ public class TestController {
         responseData.put("env",env);
         responseData.put("serverName",serverName);
         responseData.put("port",port);
-        responseData.put("adress",address);
+        responseData.put("adress:",address);
 
         return ResponseEntity.ok(responseData);
 
