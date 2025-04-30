@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -34,6 +33,7 @@ public class TestController {
         responseData.put("port",port);
         responseData.put("adress:",address);
         responseData.put("name","이혁진");
+        responseData.put("test","test");
 
         return ResponseEntity.ok(responseData);
 
