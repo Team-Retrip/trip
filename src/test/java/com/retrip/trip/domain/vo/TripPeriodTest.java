@@ -12,8 +12,8 @@ class TripPeriodTest {
     @Test
     void create() {
         assertThatCode(() -> new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15)))
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(6)))
                 .doesNotThrowAnyException();
     }
 
@@ -23,7 +23,7 @@ class TripPeriodTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         assertThatThrownBy(() -> new TripPeriod(
                 yesterday,
-                LocalDate.of(2025, 3, 15)))
+                LocalDate.now().plusDays(1)))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
@@ -31,17 +31,31 @@ class TripPeriodTest {
     @Test
     void end_date_less_than_start_date() {
         assertThatThrownBy(() -> new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 9)))
+                LocalDate.now().plusDays(1),
+                LocalDate.now().minusDays(1)))
+                .isExactlyInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("여행 기간은 30일을 초과할 수 없다.")
+    @Test
+    void period_within_limit_30_days() {
+        assertThatThrownBy(() -> new TripPeriod(
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusMonths(2)))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("여행 기간으로 총 여행일을 가져온다.")
     @Test
     void getDays() {
+
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15));
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(6));
+
+        //TripPeriod period = new TripPeriod(LocalDate.of(2025, 5, 31),LocalDate.of(2025, 7, 2));
         assertThat(period.getDays()).isEqualTo(6);
+
+
     }
 }
