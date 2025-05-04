@@ -10,7 +10,9 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
 import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,6 +55,10 @@ public class TripParticipant extends BaseEntity {
                 ParticipantRole.PARTICIPANT,
                 trip
         );
+    }
+
+    public boolean isLeader() {
+        return ParticipantRole.isLeaderRole(this.role);
     }
 }
 

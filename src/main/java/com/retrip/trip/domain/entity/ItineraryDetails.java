@@ -17,6 +17,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PROTECTED, force = true)
 @Embeddable
 public class ItineraryDetails {
-  @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ItineraryDetail> values = new ArrayList<>();
+    @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItineraryDetail> values = new ArrayList<>();
+
+    public void removeAll() {
+        values.clear();
+    }
 }

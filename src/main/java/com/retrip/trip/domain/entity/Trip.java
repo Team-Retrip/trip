@@ -1,11 +1,18 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.domain.vo.TripTitle;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -116,6 +123,20 @@ public class Trip extends BaseEntity {
     public void validateTripRecruitingStatus() {
         if (!this.getStatus().equals(TripStatus.RECRUITING)) {
             throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
+    }
+
+    public void updatePeriod(
+            TripPeriod period,
+            @NotNull UUID memberId) {
+        if (!tripParticipants.updatableByLeader(memberId)) {
+            throw new PeriodUpdateFailedException();
+        }
+        this.period = period;
+        if (Objects.isNull(this.itineraries)) {
+            this.itineraries = new Itineraries(this, period);
+        } else {
+            this.itineraries.updateByPeriod(period, this);
         }
     }
 }
