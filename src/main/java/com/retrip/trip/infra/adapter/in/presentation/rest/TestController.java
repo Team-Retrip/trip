@@ -35,6 +35,7 @@ public class TestController {
         responseData.put("name","이혁진");
         responseData.put("age","28");
         responseData.put("test","test");
+        responseData.put("test1","test");
 
         return ResponseEntity.ok(responseData);
 
