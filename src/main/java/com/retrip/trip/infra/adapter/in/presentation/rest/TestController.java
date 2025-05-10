@@ -33,7 +33,6 @@ public class TestController {
         responseData.put("port",port);
         responseData.put("adress:",address);
         responseData.put("name","이혁진");
-        responseData.put("age","30");
         responseData.put("test","test");
 
         return ResponseEntity.ok(responseData);
