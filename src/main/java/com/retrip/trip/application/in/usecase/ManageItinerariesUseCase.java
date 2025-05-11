@@ -6,5 +6,5 @@ import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import java.util.UUID;
 
 public interface ManageItinerariesUseCase {
-  ItinerariesCreateResponse createItineraries(UUID tripId, ItinerariesCreateRequest request);
+    ItinerariesCreateResponse createItineraries(UUID tripId, ItinerariesCreateRequest request);
 }

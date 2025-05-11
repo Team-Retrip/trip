@@ -2,25 +2,63 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
+import com.retrip.trip.application.in.request.ItineraryDetailsCreateRequest;
+import com.retrip.trip.application.in.response.ItineraryDetailsCreateResponse;
 import com.retrip.trip.application.in.usecase.ManageItinerariesUseCase;
+import com.retrip.trip.application.in.usecase.ManageItineraryDetailsUseCase;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
-@RequestMapping("/trips/itineraries")
+@RequestMapping("/trips")
 @RestController
 public class ItineraryController {
-  private final ManageItinerariesUseCase manageItinerariesUseCase;
+    private final ManageItinerariesUseCase manageItinerariesUseCase;
+    private final ManageItineraryDetailsUseCase manageItineraryDetailsUseCase;
 
-  @PostMapping("/{tripId}")
-  public ApiResponse<ItinerariesCreateResponse> createItineraries(
-      @PathVariable UUID tripId, @RequestBody ItinerariesCreateRequest request) {
-    ItinerariesCreateResponse itineraries =
-        manageItinerariesUseCase.createItineraries(tripId, request);
-    return ApiResponse.created(itineraries);
-  }
+    // 해당 엔드포인트 있을지 말지 고민 필요
+    // 필요하다면, 날짜를 입력받는게 아닌 여행 기간으로 자동 생성
+    @PostMapping("/{tripId}/itineraries")
+    public ApiResponse<ItinerariesCreateResponse> createItineraries(
+            @PathVariable UUID tripId, @RequestBody ItinerariesCreateRequest request) {
+        ItinerariesCreateResponse itineraries =
+                manageItinerariesUseCase.createItineraries(tripId, request);
+        return ApiResponse.created(itineraries);
+    }
+
+    @PostMapping("/{tripId}/itineraries/{itineraryId}/itineraryDetails")
+    public ResponseEntity<ItineraryDetailsCreateResponse> createItineraryDetails(
+            @PathVariable UUID tripId,
+            @PathVariable UUID itineraryId,
+            @RequestBody ItineraryDetailsCreateRequest request) {
+        ItineraryDetailsCreateResponse itineraryDetail =
+                manageItineraryDetailsUseCase.createItineraryDetails(tripId, itineraryId, request);
+        return ResponseEntity.ok().body(itineraryDetail);
+    }
+/*
+
+    @PutMapping("/{tripId}/itineraries/{itineraryId}/itineraryDetails/{itineraryDetailId}")
+    public ResponseEntity<ItineraryDetailsUpdateResponse> updateItineraryDetails(
+            @PathVariable UUID tripId,
+            @PathVariable UUID itineraryId,
+            @PathVariable UUID itineraryDetailId,
+            @RequestBody ItineraryDetailsUpdateRequest request) {
+        ItineraryDetailsUpdateResponse itineraryDetail =
+                manageItineraryDetailsUseCase.updateItineraryDetails(tripId, itineraryId, request);
+        return ResponseEntity.ok().body(itineraryDetail);
+    }*/
+
+    @DeleteMapping("/{tripId}/itineraries/{itineraryId}/itineraryDetails/{itineraryDetailsId}")
+    public ResponseEntity<Void> deleteItineraryDetail(
+            @PathVariable UUID tripId,
+            @PathVariable UUID itineraryId,
+            @PathVariable UUID itineraryDetailsId) {
+        manageItineraryDetailsUseCase.deleteItineraryDetail(tripId, itineraryId, itineraryDetailsId);
+        return ResponseEntity.noContent().build();
+    }
 }

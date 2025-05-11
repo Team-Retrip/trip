@@ -33,8 +33,8 @@ class TripTest {
                 new TripTitle("속초 여행 멤버 구함"),
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
-                        LocalDate.of(2025, 3, 10),
-                        LocalDate.of(2025, 3, 15)),
+                        LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(5)),
                 true,
                 4,
                 TripCategory.DOMESTIC
@@ -50,8 +50,8 @@ class TripTest {
                 new TripTitle("속초 여행 멤버 구함"),
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
-                        LocalDate.of(2025, 3, 10),
-                        LocalDate.of(2025, 3, 15)),
+                        LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(5)),
                 true,
                 4,
                 TripCategory.DOMESTIC
@@ -67,8 +67,8 @@ class TripTest {
                 new TripTitle("속초 여행 멤버 구함"),
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
-                        LocalDate.of(2025, 3, 10),
-                        LocalDate.of(2025, 3, 15)),
+                        LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(5)),
                 true,
                 4,
                 TripCategory.DOMESTIC

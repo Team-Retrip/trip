@@ -1,13 +1,11 @@
 package com.retrip.trip.domain.entity;
 
 import jakarta.persistence.*;
-
-import java.util.Objects;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -57,9 +55,22 @@ public class Itinerary extends BaseEntity {
         this.name = "day " + n;
     }
 
-    public void remove() {
+    public void removeAllItineraries() {
         if (!Objects.isNull(this.itineraryDetails)) {
             this.itineraryDetails.removeAll();
         }
+    }
+
+    public void removeItineraryDetail(UUID itineraryDetailsId) {
+        if (!Objects.isNull(this.itineraryDetails)) {
+            this.itineraryDetails.remove(itineraryDetailsId);
+        }
+    }
+
+    public void addItineraryDetail(ItineraryDetail itineraryDetail) {
+        if (Objects.isNull(this.itineraryDetails)) {
+            this.itineraryDetails = new ItineraryDetails();
+        }
+        this.getItineraryDetails().addItineraryDetail(itineraryDetail, this.date);
     }
 }

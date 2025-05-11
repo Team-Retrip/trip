@@ -22,8 +22,8 @@ class ItinerariesTest {
     @Test
     void ofPeriod() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15));
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(6));
         Trip trip = Trip.createWithItineraries(
                 memberId,
                 UUID.randomUUID(),
@@ -42,11 +42,12 @@ class ItinerariesTest {
     @Test
     void out_of_period() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15));
+                LocalDate.now().plusDays(0),
+                LocalDate.now().plusDays(5)
+        );
         List<LocalDate> dates = List.of(
-                LocalDate.of(2025, 3, 9),
-                LocalDate.of(2025, 3, 10));
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(0));
 
         Trip trip = Trip.createWithItineraries(
                 memberId,
@@ -67,12 +68,12 @@ class ItinerariesTest {
     @Test
     void irregular() {
         TripPeriod period = new TripPeriod(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 15));
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(6));
         List<LocalDate> dates = List.of(
-                LocalDate.of(2025, 3, 10),
-                LocalDate.of(2025, 3, 12),
-                LocalDate.of(2025, 3, 15));
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(3),
+                LocalDate.now().plusDays(6));
 
         Trip trip = Trip.createWithItineraries(
                 memberId,
@@ -143,18 +144,7 @@ class ItinerariesTest {
         //when
         TripPeriod updatePeriod = new TripPeriod(LocalDate.now().plusDays(3), LocalDate.now().plusDays(8));
         itineraries.updateByPeriod(updatePeriod, trip);
-
-
-        //then
-        assertThat(itineraries.getValues()).hasSize(6);
-        assertThat(itineraries.getValues().stream().map(Itinerary::getName).toList())
-                .containsExactly("day 1", "day 2", "day 3", "day 4", "day 5", "day 6");
-        assertThat(itineraries.getValues().stream().map(Itinerary::getDate).toList())
-                .containsExactly(
-                        LocalDate.now().plusDays(1),
-                        LocalDate.now().plusDays(2),
-                        LocalDate.now().plusDays(3)
-                );
+        
 
         //then
         assertThat(itineraries.getValues()).hasSize(6);
@@ -308,5 +298,29 @@ class ItinerariesTest {
                         LocalDate.now().plusDays(13),
                         LocalDate.now().plusDays(14)
                 );
+    }
+
+    @Test
+    @DisplayName("여행 상세 일정을 제거할 수 있다.")
+    void deleteItineraryDetail() {
+        //given
+        TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
+        Trip trip = Trip.createWithItineraries(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("속초 여행 멤버 구함"),
+                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                period,
+                true,
+                4,
+                TripCategory.DOMESTIC
+        );
+
+        //when
+        trip.getItineraries().getValues().getFirst().removeItineraryDetail(UUID.randomUUID());
+
+
+        //then
+
     }
 }

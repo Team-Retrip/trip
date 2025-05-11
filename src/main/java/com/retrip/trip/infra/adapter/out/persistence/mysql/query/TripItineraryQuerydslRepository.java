@@ -1,19 +1,20 @@
 package com.retrip.trip.infra.adapter.out.persistence.mysql.query;
 
-import static com.querydsl.jpa.JPAExpressions.selectFrom;
-import static com.retrip.trip.domain.entity.QItinerary.itinerary;
-import static com.retrip.trip.domain.entity.QItineraryDetail.itineraryDetail;
-
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
 import com.retrip.trip.domain.entity.Itinerary;
-
-import java.util.List;
-import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.retrip.trip.domain.entity.QItinerary.itinerary;
+import static com.retrip.trip.domain.entity.QItineraryDetail.itineraryDetail;
+import static com.retrip.trip.domain.entity.QTrip.trip;
 
 @RequiredArgsConstructor
 @Repository
@@ -31,4 +32,43 @@ public class TripItineraryQuerydslRepository implements TripItineraryQueryReposi
                 .where(itinerary.id.in(ids))
                 .fetch();
     }
+
+    @Override
+    public Optional<Itinerary> findByIdWithItineraryDetail(
+            UUID itineraryId,
+            UUID itineraryDetailsId) {
+        return Optional.ofNullable(query
+                .selectFrom(itinerary)
+                .leftJoin(itineraryDetail)
+                .on(itineraryDetail.itinerary.eq(itinerary))
+                .fetchJoin()
+                .where(itineraryEq(itineraryId), itineraryDetailEq(itineraryDetailsId))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<Itinerary> findByIdWithItineraryDetails(
+            UUID itineraryId) {
+        return Optional.ofNullable(query
+                .selectFrom(itinerary)
+                .leftJoin(itineraryDetail)
+                .on(itineraryDetail.itinerary.eq(itinerary))
+                .fetchJoin()
+                .where(itineraryEq(itineraryId))
+                .fetchOne());
+    }
+
+
+    private static BooleanExpression tripEq(UUID tripId) {
+        return trip.id.eq(tripId);
+    }
+
+    private static BooleanExpression itineraryEq(UUID itineraryId) {
+        return itinerary.id.eq(itineraryId);
+    }
+
+    private static BooleanExpression itineraryDetailEq(UUID itineraryDetailsId) {
+        return itineraryDetail.id.eq(itineraryDetailsId);
+    }
+
 }

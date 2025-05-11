@@ -4,8 +4,10 @@ import static lombok.AccessLevel.PROTECTED;
 
 import com.retrip.trip.domain.vo.ItineraryDetailDescription;
 import com.retrip.trip.domain.vo.ItineraryDetailPrice;
+import com.retrip.trip.domain.vo.ItineraryDetailTime;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.Getter;
@@ -15,42 +17,37 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PROTECTED, force = true)
 @Entity
 public class ItineraryDetail extends BaseEntity {
-  @Id
-  @Column(columnDefinition = "varbinary(16)")
-  private UUID id;
+    @Id
+    @Column(columnDefinition = "varbinary(16)")
+    private UUID id;
 
-  @Embedded private ItineraryDetailPrice price;
-  @Embedded private ItineraryDetailDescription description;
-  private UUID locationId;
+    @Embedded
+    private ItineraryDetailPrice price;
+    @Embedded
+    private ItineraryDetailDescription description;
+    @Embedded
+    private ItineraryDetailTime time;
+    private UUID locationId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(
-      name = "itinerary_id",
-      nullable = false,
-      columnDefinition = "varbinary(16)",
-      foreignKey = @ForeignKey(name = "fk_itinerary_detail_to_itinerary"))
-  private Itinerary itinerary;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "itinerary_id",
+            nullable = false,
+            columnDefinition = "varbinary(16)",
+            foreignKey = @ForeignKey(name = "fk_itinerary_detail_to_itinerary"))
+    private Itinerary itinerary;
 
-  private ItineraryDetail(Long price, String description, Itinerary itinerary, UUID locationId) {
-    this.id = UUID.randomUUID();
-    this.price = new ItineraryDetailPrice(price);
-    this.description = new ItineraryDetailDescription(description);
-    this.locationId = locationId;
-    this.itinerary = itinerary;
-  }
-
-  private static void validate(Long price, String description) {
-    if (price != null && price < 0) {
-      throw new IllegalArgumentException("금액은 0보다 작을 수 없습니다.");
+    private ItineraryDetail(Long price, String description, LocalDateTime time, Itinerary itinerary, UUID locationId) {
+        this.id = UUID.randomUUID();
+        this.price = new ItineraryDetailPrice(price);
+        this.description = new ItineraryDetailDescription(description);
+        this.time = new ItineraryDetailTime(time);
+        this.locationId = locationId;
+        this.itinerary = itinerary;
     }
-    if (description != null && description.length() > 50) {
-      throw new IllegalArgumentException("여행 일정 상세 내용은 50자 이내여야 합니다.");
-    }
-  }
 
-  public static ItineraryDetail create(
-      Long price, String description, Itinerary itinerary, UUID locationId) {
-    validate(price, description);
-    return new ItineraryDetail(price, description, itinerary, locationId);
-  }
+    public static ItineraryDetail create(
+            Long price, String description, LocalDateTime time, Itinerary itinerary, UUID locationId) {
+        return new ItineraryDetail(price, description, time, itinerary, locationId);
+    }
 }

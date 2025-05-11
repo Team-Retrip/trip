@@ -47,7 +47,7 @@ public class Itineraries {
     private void createRegular(Trip trip, TripPeriod period) {
         IntStream.rangeClosed(1, period.getDays())
                 .forEach(n -> this.values.add(
-                        Itinerary.create(trip, n, period.getStart().plusDays(n))
+                        Itinerary.create(trip, n, period.getStart().plusDays(n - 1))
                 ));
     }
 
@@ -64,9 +64,8 @@ public class Itineraries {
 
     public void updateByPeriod(TripPeriod period, Trip trip) {
         List<Itinerary> containItineraries = getContainItineraries(period);
-        List<Itinerary> updateItineraries = updateRegular(trip, period, containItineraries);
         this.values.clear();
-        this.values.addAll(updateItineraries);
+        this.values.addAll(updateRegular(trip, period, containItineraries));
     }
 
     private List<Itinerary> getContainItineraries(TripPeriod period) {
@@ -75,7 +74,7 @@ public class Itineraries {
             if (!period.isNotInclude(itinerary.getDate())) {
                 result.add(itinerary);
             } else {
-                itinerary.remove();
+                itinerary.removeAllItineraries();
             }
         });
         result.sort(Comparator.comparing(Itinerary::getDate));
@@ -83,21 +82,19 @@ public class Itineraries {
     }
 
     private List<Itinerary> updateRegular(Trip trip, TripPeriod period, List<Itinerary> itineraries) {
-        List<Itinerary> updatedItineraries = new ArrayList<>();
         List<LocalDate> dates = itineraries.stream().map(Itinerary::getDate).sorted().toList();
         AtomicInteger idx = new AtomicInteger();
-        IntStream.rangeClosed(1, period.getDays())
-                .forEach(n -> {
+        return IntStream.rangeClosed(1, period.getDays())
+                .mapToObj(n -> {
                     LocalDate date = period.getStart().plusDays(n - 1);
                     if (dates.contains(date)) {
                         Itinerary itinerary = itineraries.get(idx.getAndIncrement());
                         itinerary.updateDate(n);
-                        updatedItineraries.add(itinerary);
+                        return itinerary;
                     } else {
-                        updatedItineraries.add(Itinerary.create(trip, n, date));
+                        return Itinerary.create(trip, n, date);
                     }
-                });
-        return updatedItineraries;
+                }).toList();
     }
 
 }

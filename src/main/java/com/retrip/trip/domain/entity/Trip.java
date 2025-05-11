@@ -9,6 +9,7 @@ import com.retrip.trip.domain.vo.TripTitle;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import java.util.Objects;
@@ -138,6 +139,17 @@ public class Trip extends BaseEntity {
         } else {
             this.itineraries.updateByPeriod(period, this);
         }
+    }
+
+    public void addItineraries(List<LocalDate> dates) {
+        itineraries = new Itineraries(this, this.getPeriod(), dates);
+    }
+
+    public List<UUID> getItinerariesIds() {
+        if (Objects.isNull(getItineraries())) {
+            return List.of();
+        }
+        return getItineraries().ids();
     }
 }
 

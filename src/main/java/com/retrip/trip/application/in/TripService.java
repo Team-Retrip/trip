@@ -15,6 +15,7 @@ import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -92,9 +93,8 @@ public class TripService
     @Override
     public PeriodUpdateResponse updatePeriod(UUID tripId, PeriodUpdateRequest request) {
         TripPeriod period = request.toPeriod();
-        Trip trip =
-                tripQueryRepository.findByIdWithItineraries(tripId).orElseThrow(TripNotFoundException::new);
-        List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItineraries().ids());
+        Trip trip = tripQueryRepository.findByIdWithItineraries(tripId).orElseThrow(TripNotFoundException::new);
+        List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItinerariesIds());
         trip.updatePeriod(period, request.memberId());
         return PeriodUpdateResponse.of(trip);
     }
