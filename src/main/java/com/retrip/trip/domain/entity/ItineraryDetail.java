@@ -50,4 +50,12 @@ public class ItineraryDetail extends BaseEntity {
             Long price, String description, LocalDateTime time, Itinerary itinerary, UUID locationId) {
         return new ItineraryDetail(price, description, time, itinerary, locationId);
     }
+
+    public void update(ItineraryDetail itineraryDetail) {
+        this.price = itineraryDetail.getPrice();
+        this.description = itineraryDetail.getDescription();
+        this.time = itineraryDetail.getTime();
+        this.itinerary = itineraryDetail.getItinerary();
+        this.locationId = itineraryDetail.getLocationId();
+    }
 }

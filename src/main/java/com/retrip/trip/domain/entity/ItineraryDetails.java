@@ -3,7 +3,9 @@ package com.retrip.trip.domain.entity;
 import com.retrip.trip.domain.vo.ItineraryDetailTime;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OneToMany;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,6 +36,19 @@ public class ItineraryDetails {
         values.add(itineraryDetail);
     }
 
+    public void updateItineraryDetail(ItineraryDetail itineraryDetail, LocalDate baseDay, UUID updateId) {
+        ItineraryDetail updatedItineraryDetail = findByItineraryDetail(updateId);
+        updatedItineraryDetail.update(itineraryDetail);
+        this.values.remove(updatedItineraryDetail);
+
+        validate(itineraryDetail.getTime(), baseDay);
+        values.add(updatedItineraryDetail);
+    }
+
+    private ItineraryDetail findByItineraryDetail(UUID updateId) {
+        return this.values.stream().filter(id -> id.getId().equals(updateId)).findFirst().orElseThrow(EntityNotFoundException::new);
+    }
+
     private void validate(ItineraryDetailTime time, LocalDate baseDay) {
         if (!baseDay.equals(time.getValue().toLocalDate())) {
             throw new IllegalArgumentException("일정과 상세 일정 일자가 다릅니다.");
@@ -42,4 +57,5 @@ public class ItineraryDetails {
             throw new IllegalArgumentException("해당 시간에는 이미 상세 일정이 있습니다.");
         }
     }
+
 }

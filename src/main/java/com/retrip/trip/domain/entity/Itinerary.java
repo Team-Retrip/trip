@@ -73,4 +73,8 @@ public class Itinerary extends BaseEntity {
         }
         this.getItineraryDetails().addItineraryDetail(itineraryDetail, this.date);
     }
+
+    public void updateItineraryDetail(ItineraryDetail itineraryDetail, UUID updateId) {
+        this.getItineraryDetails().updateItineraryDetail(itineraryDetail, this.date, updateId);
+    }
 }
