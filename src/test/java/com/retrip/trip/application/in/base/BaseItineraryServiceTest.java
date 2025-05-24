@@ -50,6 +50,6 @@ public abstract class BaseItineraryServiceTest {
     @BeforeEach
     void setUp() {
         tripItineraryQueryRepository = new TripItineraryQuerydslRepository(jpaQueryFactory);
-        itineraryService = new ItineraryService(tripRepository, tripItineraryQueryRepository);
+        itineraryService = new ItineraryService(tripItineraryQueryRepository);
     }
 }

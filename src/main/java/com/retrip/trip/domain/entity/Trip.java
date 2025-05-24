@@ -141,9 +141,6 @@ public class Trip extends BaseEntity {
         }
     }
 
-    public void addItineraries(List<LocalDate> dates) {
-        itineraries = new Itineraries(this, this.getPeriod(), dates);
-    }
 
     public List<UUID> getItinerariesIds() {
         if (Objects.isNull(getItineraries())) {
