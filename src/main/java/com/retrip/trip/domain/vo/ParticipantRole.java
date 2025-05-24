@@ -1,6 +1,7 @@
 package com.retrip.trip.domain.vo;
 
 import java.util.Arrays;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,5 +20,9 @@ public enum ParticipantRole {
                 .filter(participantRole -> participantRole.getCode().equals(code))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코드입니다."));
+    }
+
+    public static boolean isLeaderRole(ParticipantRole role) {
+        return LEADER == role;
     }
 }
