@@ -4,10 +4,8 @@ import com.retrip.trip.application.in.base.BaseTripServiceTest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
-import com.retrip.trip.application.in.request.TripFixture;
+import com.retrip.trip.application.in.request.TripRequestFixture;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.domain.entity.Itineraries;
-import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.vo.*;
 import org.junit.jupiter.api.DisplayName;
@@ -168,7 +166,7 @@ class TripServiceTest extends BaseTripServiceTest {
         // then
         LocalDate start = LocalDate.now().plusDays(1);
         LocalDate end = LocalDate.now().plusDays(3);
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 start,
                 end
@@ -200,7 +198,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
 
         // when
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(3)
@@ -241,7 +239,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
 
         // when
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(3),
                 LocalDate.now().plusDays(8)
@@ -285,7 +283,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
 
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(3),
                 LocalDate.now().plusDays(8)
@@ -328,7 +326,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
 
         // when
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(7),
                 LocalDate.now().plusDays(9)
@@ -368,7 +366,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
 
         // when
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(7),
                 LocalDate.now().plusDays(12)
@@ -412,7 +410,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
 
         // when
-        PeriodUpdateRequest request = TripFixture.createPeriod(
+        PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(11),
                 LocalDate.now().plusDays(14)

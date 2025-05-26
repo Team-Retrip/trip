@@ -30,7 +30,7 @@ public class Itinerary extends BaseEntity {
     private Trip trip;
 
     @Embedded
-    ItineraryDetails itineraryDetails;
+    private ItineraryDetails itineraryDetails;
 
     private Itinerary(String name, Trip trip, LocalDate date) {
         this.id = UUID.randomUUID();
