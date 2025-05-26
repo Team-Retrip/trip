@@ -1,16 +1,12 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
-import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
-import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.request.ItineraryDetailsCreateRequest;
 import com.retrip.trip.application.in.response.ItineraryDetailsCreateResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
-import com.retrip.trip.application.in.usecase.ManageItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.ManageItineraryDetailsUseCase;
-import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 
 import java.util.UUID;
 
@@ -25,19 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/trips")
 @RestController
 public class ItineraryController {
-    private final ManageItinerariesUseCase manageItinerariesUseCase;
     private final ManageItineraryDetailsUseCase manageItineraryDetailsUseCase;
     private final GetItinerariesUseCase getItinerariesUseCase;
-
-    // 해당 엔드포인트 있을지 말지 고민 필요
-    // 필요하다면, 날짜를 입력받는게 아닌 여행 기간으로 자동 생성
-    @PostMapping("/{tripId}/itineraries")
-    public ApiResponse<ItinerariesCreateResponse> createItineraries(
-            @PathVariable UUID tripId, @RequestBody ItinerariesCreateRequest request) {
-        ItinerariesCreateResponse itineraries =
-                manageItinerariesUseCase.createItineraries(tripId, request);
-        return ApiResponse.created(itineraries);
-    }
 
     @PostMapping("/{tripId}/itineraries/{itineraryId}/itineraryDetails")
     public ResponseEntity<ItineraryDetailsCreateResponse> createItineraryDetails(

@@ -85,16 +85,17 @@ public class Itineraries {
         List<LocalDate> dates = itineraries.stream().map(Itinerary::getDate).sorted().toList();
         AtomicInteger idx = new AtomicInteger();
         return IntStream.rangeClosed(1, period.getDays())
-                .mapToObj(n -> {
-                    LocalDate date = period.getStart().plusDays(n - 1);
-                    if (dates.contains(date)) {
-                        Itinerary itinerary = itineraries.get(idx.getAndIncrement());
-                        itinerary.updateDate(n);
-                        return itinerary;
-                    } else {
-                        return Itinerary.create(trip, n, date);
-                    }
-                }).toList();
+                .mapToObj(n -> getItinerary(trip, period, itineraries, n, dates, idx)).toList();
+    }
+
+    private static Itinerary getItinerary(Trip trip, TripPeriod period, List<Itinerary> itineraries, int n, List<LocalDate> dates, AtomicInteger idx) {
+        LocalDate date = period.getStart().plusDays(n - 1);
+        if (dates.contains(date)) {
+            Itinerary itinerary = itineraries.get(idx.getAndIncrement());
+            itinerary.updateDate(n);
+            return itinerary;
+        }
+        return Itinerary.create(trip, n, date);
     }
 
 }

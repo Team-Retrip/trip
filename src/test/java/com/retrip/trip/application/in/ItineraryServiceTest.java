@@ -1,58 +1,28 @@
 package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.base.BaseItineraryServiceTest;
-import com.retrip.trip.application.in.request.ItinerariesCreateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsCreateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
 import com.retrip.trip.application.in.request.ItineraryFixture;
-import com.retrip.trip.application.in.response.ItinerariesCreateResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsCreateResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.vo.TripCategory;
-import com.retrip.trip.domain.vo.TripDescription;
-import com.retrip.trip.domain.vo.TripPeriod;
-
-import com.retrip.trip.domain.vo.TripTitle;
-
-import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class ItineraryServiceTest extends BaseItineraryServiceTest {
-
-    @Test
-    @DisplayName("여행의 일정 목록을 생성 한다.")
-    void createItineraries() {
-        Trip saveTrip = tripRepository.save(trip);
-
-        List<ItinerariesCreateRequest.ItineraryCreateRequest> itineraries =
-                List.of(
-                        new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.now().plusDays(2)),
-                        new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.now().plusDays(3)),
-                        new ItinerariesCreateRequest.ItineraryCreateRequest(LocalDate.now().plusDays(4)));
-        ItinerariesCreateRequest request = new ItinerariesCreateRequest(itineraries);
-        ItinerariesCreateResponse response =
-                itineraryService.createItineraries(saveTrip.getId(), request);
-        assertThat(response.tripId()).isNotNull();
-        assertThat(response.itineraries().size()).isEqualTo(3);
-    }
 
     @Test
     @DisplayName("여행의 상세 일정을 생성 한다.")

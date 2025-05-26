@@ -66,9 +66,9 @@ public class TripItineraryQuerydslRepository implements TripItineraryQueryReposi
     @Override
     public Page<ItineraryResponse> findItineraries(UUID tripId, Pageable page) {
         List<Itinerary> result =
-                query.selectFrom(itinerary)
+                query.selectDistinct(itinerary)
+                        .from(itinerary)
                         .leftJoin(itinerary.itineraryDetails.values, itineraryDetail)
-                        .fetchJoin()
                         .where(itinerary.trip.id.eq(tripId))
                         .offset(page.getOffset())
                         .limit(page.getPageSize())
