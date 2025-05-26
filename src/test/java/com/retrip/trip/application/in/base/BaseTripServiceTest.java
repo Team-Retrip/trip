@@ -22,7 +22,7 @@ public abstract class BaseTripServiceTest {
     protected TripRepository tripRepository;
 
     @Autowired
-    protected TripDemandRepository tripDemandRepository;
+    protected TripDemandReadRepository tripDemandReadRepository;
 
     @Autowired
     protected TripParticipantRepository tripParticipantRepository;
@@ -45,6 +45,6 @@ public abstract class BaseTripServiceTest {
 
         tripService =
                 new TripService(
-                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandRepository, tripParticipantRepository);
+                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripParticipantRepository);
     }
 }

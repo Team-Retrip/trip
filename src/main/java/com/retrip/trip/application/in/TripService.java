@@ -4,7 +4,10 @@ import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.application.in.usecase.*;
+import com.retrip.trip.application.in.usecase.CreateTripUseCase;
+import com.retrip.trip.application.in.usecase.GetTripUseCase;
+import com.retrip.trip.application.in.usecase.TripDemandUseCase;
+import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
@@ -22,6 +25,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -30,7 +36,7 @@ public class TripService
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
-    private final TripDemandRepository tripDemandRepository;
+    private final TripDemandReadRepository tripDemandReadRepository;
     private final TripParticipantRepository tripParticipantRepository;
 
     @Override
@@ -78,7 +84,7 @@ public class TripService
     }
 
     private TripDemand findTripDemandByTripIdAndTripDemandId(UUID tripId, UUID tripDemandId) {
-        return tripDemandRepository
+        return tripDemandReadRepository
                 .findByTripIdAndId(tripId, tripDemandId)
                 .orElseThrow(() -> new EntityNotFoundException("참여 요청을 찾을 수 없습니다."));
     }
