@@ -1,23 +1,16 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
-import com.retrip.trip.domain.vo.TripCategory;
-import com.retrip.trip.domain.vo.TripDescription;
-import com.retrip.trip.domain.vo.TripPeriod;
-import com.retrip.trip.domain.vo.TripStatus;
-import com.retrip.trip.domain.vo.TripTitle;
+import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
-import java.util.List;
-
-import java.util.Objects;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -65,6 +58,9 @@ public class Trip extends BaseEntity {
     @Embedded
     private Itineraries itineraries;
 
+    @Embedded
+    private TripInvitations invitations;
+
     public static Trip create(
             UUID memberId,
             UUID destinationId,
@@ -92,7 +88,7 @@ public class Trip extends BaseEntity {
     }
 
     public static Trip createWithItineraries(
-            UUID memberId,
+            UUID leaderId,
             UUID destinationId,
             TripTitle title,
             TripDescription description,
@@ -113,7 +109,8 @@ public class Trip extends BaseEntity {
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.tripParticipants = new TripParticipants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(leaderId, trip);
+        trip.invitations = new TripInvitations();
         return trip;
     }
 
@@ -144,6 +141,10 @@ public class Trip extends BaseEntity {
             return List.of();
         }
         return getItineraries().ids();
+    }
+
+    public void createInvitations(UUID leaderId, List<UUID> memberIds) {
+        invitations.add(this, leaderId, memberIds);
     }
 }
 

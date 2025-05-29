@@ -1,9 +1,11 @@
 package com.retrip.trip.domain.fixture;
 
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripTitle;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -19,16 +21,16 @@ public class TripFixture {
     public static final UUID 혁진_ID = UUID.fromString("42880aaf-4b97-4b0c-8a8a-72df4bb592f6");
 
     public static Trip createTrip(UUID tripId) {
-        return Trip.builder()
-                .id(tripId)
-                .destinationId(UUID.randomUUID())
-                .title(new TripTitle("속초 여행"))
-                .description(new TripDescription("속초 맛집 투어"))
-                .period(new TripPeriod(
-                        LocalDate.now(),
-                        LocalDate.now().plusDays(10)))
-                .open(true)
-                .maxParticipants(10)
-                .build();
+        Trip trip = Trip.createWithItineraries(
+                LEADER_ID,
+                UUID.randomUUID(),
+                new TripTitle("속초 여행 멤버 구함"),
+                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)),
+                true,
+                4,
+                TripCategory.DOMESTIC);
+        ReflectionTestUtils.setField(trip, "id", tripId);
+        return trip;
     }
 }
