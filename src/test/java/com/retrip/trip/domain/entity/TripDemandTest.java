@@ -20,17 +20,16 @@ class TripDemandTest {
     UUID tripId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
     private Trip createDummyTrip() {
-        return Trip.builder()
-                .id(tripId)
-                .destinationId(UUID.randomUUID())
-                .title(new TripTitle("테스트 여행"))
-                .description(new TripDescription("테스트 설명"))
-                .period(new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)))
-                .open(true)
-                .maxParticipants(4)
-                .status(TripStatus.RECRUITING)
-                .category(TripCategory.DOMESTIC)
-                .build();
+        return Trip.create(
+                userId,
+                tripId,
+                new TripTitle("테스트 여행"),
+                new TripDescription("테스트 설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                4,
+                TripCategory.DOMESTIC
+        );
     }
 
     @DisplayName("TripDemand 생성 시 초기 상태는 '대기'여야 한다.")
