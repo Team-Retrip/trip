@@ -57,6 +57,7 @@ public class TripService
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
         trip.validateTripRecruitingStatus();
+        trip.validateCanJoin();
         TripDemand demand = TripDemand.create(request.memberId(), trip, request.message());
         trip.addDemand(demand);
         tripRepository.save(trip);
@@ -69,7 +70,10 @@ public class TripService
 
     public TripDemandApproveResponse approve(UUID tripId, UUID joinRequestId) {
         TripDemand tripDemand = findJoinRequestBy(tripId, joinRequestId);
+        Trip trip = tripDemand.getTrip();
+        trip.validateCanJoin();
         tripDemand.approve();
+
         addApprovedParticipant(tripDemand);
         return new TripDemandApproveResponse(tripDemand.getStatus().getCode());
     }
