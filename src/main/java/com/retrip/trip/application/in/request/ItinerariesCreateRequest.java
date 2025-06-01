@@ -21,7 +21,7 @@ public record ItinerariesCreateRequest(
 
     @Schema(description = "일정 생성 Request")
     public record ItineraryCreateRequest(
-            @Schema(description = "일정 날짜", example = "2025-06-15")
+            @Schema(description = "일정 날짜")
             @FutureOrPresent
             LocalDate date
     ) {}

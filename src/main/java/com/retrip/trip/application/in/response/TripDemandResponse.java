@@ -7,16 +7,16 @@ import java.util.UUID;
 
 @Schema(description = "여행 참가 신청 Response")
 public record TripDemandResponse(
-        @Schema(description = "여행 신청 ID", example = "550e8400-e29b-41d4-a716-446655440000")
+        @Schema(description = "여행 신청 ID")
         UUID tripDemandId,
 
-        @Schema(description = "여행 ID", example = "550e8400-e29b-41d4-a716-446655440001")
+        @Schema(description = "여행 ID")
         UUID tripId,
 
-        @Schema(description = "신청자 멤버 ID", example = "550e8400-e29b-41d4-a716-446655440002")
+        @Schema(description = "신청자 멤버 ID")
         UUID memberId,
 
-        @Schema(description = "신청 상태", example = "PENDING")
+        @Schema(description = "신청 상태")
         String status
 ) {
     public static TripDemandResponse of(TripDemand tripDemand) {

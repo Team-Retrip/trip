@@ -9,13 +9,13 @@ import java.util.UUID;
 
 @Schema(description = "여행 일정 Response")
 public record ItineraryResponse(
-        @Schema(description = "일정 ID", example = "550e8400-e29b-41d4-a716-446655440000")
+        @Schema(description = "일정 ID")
         UUID id,
 
-        @Schema(description = "일정 날짜", example = "2025-06-15")
+        @Schema(description = "일정 날짜")
         LocalDate date,
 
-        @Schema(description = "일정 이름", example = "파리 시내 관광")
+        @Schema(description = "일정 이름")
         String name,
 
         @Schema(description = "일정 세부사항 목록")
@@ -23,19 +23,19 @@ public record ItineraryResponse(
 ) {
     @Schema(description = "일정 세부사항 Response")
     public record ItineraryDetailResponse(
-            @Schema(description = "세부사항 ID", example = "550e8400-e29b-41d4-a716-446655440001")
+            @Schema(description = "세부사항 ID")
             UUID id,
 
-            @Schema(description = "세부사항 설명", example = "에펠탑 관광")
+            @Schema(description = "세부사항 설명")
             String description,
 
-            @Schema(description = "일정 시간", example = "2025-06-15T09:00:00")
+            @Schema(description = "일정 시간")
             LocalDateTime time,
 
-            @Schema(description = "예상 비용", example = "50000")
+            @Schema(description = "예상 비용")
             Long price,
 
-            @Schema(description = "위치 ID", example = "550e8400-e29b-41d4-a716-446655440002")
+            @Schema(description = "위치 ID")
             UUID locationId
     ) {}
 }

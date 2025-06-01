@@ -38,13 +38,13 @@ public record TripCreateRequest(
         @FutureOrPresent
         LocalDate end,
 
-        @Schema(description = "여행 공개 여부", example = "true")
+        @Schema(description = "여행 공개 여부")
         boolean open,
 
-        @Schema(description = "여행 최대 참가 인원", example = "8")
+        @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
 
-        @Schema(description = "여행 카테고리", example = "도시 탐방")
+        @Schema(description = "여행 카테고리")
         TripCategory category
 
 ) {

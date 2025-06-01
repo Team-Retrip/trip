@@ -10,13 +10,13 @@ import java.util.UUID;
 
 @Schema(description = "여행 기간 수정 Response")
 public record PeriodUpdateResponse(
-        @Schema(description = "여행 ID", example = "550e8400-e29b-41d4-a716-446655440000")
+        @Schema(description = "여행 ID")
         UUID tripId,
 
-        @Schema(description = "여행 시작 날짜", example = "2025-06-15")
+        @Schema(description = "여행 시작 날짜")
         LocalDate start,
 
-        @Schema(description = "여행 종료 날짜", example = "2025-06-25")
+        @Schema(description = "여행 종료 날짜")
         LocalDate end,
 
         @Schema(description = "수정된 일정 목록")
@@ -37,13 +37,13 @@ public record PeriodUpdateResponse(
 
     @Schema(description = "일정 수정 Response")
     public record ItineraryUpdateResponse(
-            @Schema(description = "일정 ID", example = "550e8400-e29b-41d4-a716-446655440001")
+            @Schema(description = "일정 ID")
             UUID id,
 
-            @Schema(description = "일정 이름", example = "파리 시내 관광")
+            @Schema(description = "일정 이름")
             String name,
 
-            @Schema(description = "일정 날짜", example = "2025-06-16")
+            @Schema(description = "일정 날짜")
             LocalDate date
     ) {}
 }

@@ -19,22 +19,22 @@ public record TripCreateResponse(
         @Schema(description = "여행 제목", example = "파리 여행")
         String title,
 
-        @Schema(description = "여행 설명", example = "에펠탑과 루브르 박물관을 방문하는 여행입니다.")
+        @Schema(description = "여행 설명")
         String description,
 
-        @Schema(description = "여행 시작 날짜", example = "2025-06-15")
+        @Schema(description = "여행 시작 날짜")
         LocalDate start,
 
-        @Schema(description = "여행 종료 날짜", example = "2025-06-20")
+        @Schema(description = "여행 종료 날짜")
         LocalDate end,
 
-        @Schema(description = "여행 공개 여부", example = "true")
+        @Schema(description = "여행 공개 여부")
         boolean open,
 
-        @Schema(description = "여행 최대 참가 인원", example = "10")
+        @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
 
-        @Schema(description = "여행 카테고리", example = "자연 여행")
+        @Schema(description = "여행 카테고리")
         String category,
 
         @Schema(description = "여행 일정 리스트")
@@ -60,13 +60,13 @@ public record TripCreateResponse(
 
     @Schema(description = "여행 일정 Response")
     private record ItineraryCreateResponse(
-            @Schema(description = "일정 ID", example = "550e8400-e29b-41d4-a716-446655440002")
+            @Schema(description = "일정 ID")
             UUID id,
 
-            @Schema(description = "일정 이름", example = "에펠탑 방문")
+            @Schema(description = "일정 이름")
             String name,
 
-            @Schema(description = "일정 날짜", example = "2025-06-16")
+            @Schema(description = "일정 날짜")
             LocalDate date
     ) {
     }

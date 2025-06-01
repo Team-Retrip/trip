@@ -5,13 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "여행 카테고리 Response")
 public record TripCategoryResponse(
-        @Schema(description = "카테고리 코드", example = "CITY")
+        @Schema(description = "카테고리 코드")
         String code,
 
-        @Schema(description = "카테고리 영문명", example = "city")
+        @Schema(description = "카테고리 영문명")
         String engName,
 
-        @Schema(description = "카테고리 한글명", example = "도시 탐방")
+        @Schema(description = "카테고리 한글명")
         String korName
 ) {
     public static TripCategoryResponse of(TripCategory categoryType) {
