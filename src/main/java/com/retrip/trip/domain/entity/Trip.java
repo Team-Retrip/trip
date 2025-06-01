@@ -44,8 +44,7 @@ public class Trip extends BaseEntity {
 
     private boolean open;
 
-    @Column(name = "max_participants", nullable = false)
-    private int maxParticipants;
+
 
     @Column(name = "status", length = 50, nullable = false)
     private TripStatus status;
@@ -82,11 +81,10 @@ public class Trip extends BaseEntity {
                 .description(description)
                 .period(period)
                 .open(open)
-                .maxParticipants(maxParticipants)
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .build();
-        trip.tripParticipants = new TripParticipants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
         return trip;
     }
 
@@ -107,12 +105,11 @@ public class Trip extends BaseEntity {
                 .description(description)
                 .period(period)
                 .open(open)
-                .maxParticipants(maxParticipants)
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.tripParticipants = new TripParticipants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
         return trip;
     }
 
@@ -129,6 +126,11 @@ public class Trip extends BaseEntity {
             throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
         }
     }
+    public void validateCanJoin() {
+        validateTripRecruitingStatus();
+        tripParticipants.validateCanJoin();
+    }
+
 
     public void updatePeriod(
             TripPeriod period,
@@ -143,6 +145,14 @@ public class Trip extends BaseEntity {
             this.itineraries.updateByPeriod(period, this);
         }
     }
+    public void updateMaxParticipants(int newMaxParticipants, UUID memberId) {
+        if (!tripParticipants.updatableByLeader(memberId)) {
+            throw new IllegalStateException("여행 리더만 최대 참여 인원을 변경할 수 있습니다.");
+        }
+        validateTripRecruitingStatus();
+        tripParticipants.updateMaxParticipants(newMaxParticipants);
+    }
+
 
     public List<UUID> getItinerariesIds() {
         if (Objects.isNull(getItineraries())) {
@@ -150,5 +160,9 @@ public class Trip extends BaseEntity {
         }
         return getItineraries().ids();
     }
+
+
+
+
 }
 
