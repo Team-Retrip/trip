@@ -3,7 +3,6 @@ package com.retrip.trip.domain.entity;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.retrip.trip.domain.vo.ParticipantRole;
-import com.retrip.trip.domain.vo.ParticipantStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +10,9 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
 import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,13 +25,10 @@ public class TripParticipant extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
-    private UUID userId;
+    private UUID memberId;
 
     @Column(name = "role", length = 50, nullable = false)
     private ParticipantRole role;
-
-    @Column(name = "status", length = 50, nullable = false)
-    private ParticipantStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -46,9 +44,21 @@ public class TripParticipant extends BaseEntity {
                 UUID.randomUUID(),
                 memberId,
                 ParticipantRole.LEADER,
-                ParticipantStatus.APPROVED,
                 trip
         );
+    }
+
+    public static TripParticipant createTripParticipant(UUID memberId, Trip trip) {
+        return new TripParticipant(
+                UUID.randomUUID(),
+                memberId,
+                ParticipantRole.PARTICIPANT,
+                trip
+        );
+    }
+
+    public boolean isLeader() {
+        return ParticipantRole.isLeaderRole(this.role);
     }
 }
 

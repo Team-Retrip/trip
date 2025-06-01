@@ -1,11 +1,18 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.domain.vo.TripTitle;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,7 +54,10 @@ public class Trip extends BaseEntity {
     private TripCategory category;
 
     @Embedded
-    private Participants participants;
+    private TripParticipants tripParticipants;
+
+    @Embedded
+    private TripDemands tripDemands;
 
     @Embedded
     private TripPeriod period;
@@ -76,7 +86,7 @@ public class Trip extends BaseEntity {
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .build();
-        trip.participants = new Participants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip);
         return trip;
     }
 
@@ -102,8 +112,43 @@ public class Trip extends BaseEntity {
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.participants = new Participants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip);
         return trip;
+    }
+
+    public void addParticipant(TripParticipant participant) {
+        this.tripParticipants.addParticipant(participant);
+    }
+
+    public void addDemand(TripDemand demand) {
+        this.tripDemands.addDemand(demand);
+    }
+
+    public void validateTripRecruitingStatus() {
+        if (!this.getStatus().equals(TripStatus.RECRUITING)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
+    }
+
+    public void updatePeriod(
+            TripPeriod period,
+            @NotNull UUID memberId) {
+        if (!tripParticipants.updatableByLeader(memberId)) {
+            throw new PeriodUpdateFailedException();
+        }
+        this.period = period;
+        if (Objects.isNull(this.itineraries)) {
+            this.itineraries = new Itineraries(this, period);
+        } else {
+            this.itineraries.updateByPeriod(period, this);
+        }
+    }
+
+    public List<UUID> getItinerariesIds() {
+        if (Objects.isNull(getItineraries())) {
+            return List.of();
+        }
+        return getItineraries().ids();
     }
 }
 

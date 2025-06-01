@@ -1,0 +1,58 @@
+package com.retrip.trip.domain.entity;
+
+import com.retrip.trip.domain.vo.TripDemandStatus;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripDescription;
+import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
+import com.retrip.trip.domain.vo.TripTitle;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TripDemandTest {
+
+    UUID userId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+    UUID tripId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+    private Trip createDummyTrip() {
+        return Trip.builder()
+                .id(tripId)
+                .destinationId(UUID.randomUUID())
+                .title(new TripTitle("테스트 여행"))
+                .description(new TripDescription("테스트 설명"))
+                .period(new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)))
+                .open(true)
+                .maxParticipants(4)
+                .status(TripStatus.RECRUITING)
+                .category(TripCategory.DOMESTIC)
+                .build();
+    }
+
+    @DisplayName("TripDemand 생성 시 초기 상태는 '대기'여야 한다.")
+    @Test
+    void tripDemandCreationTest() {
+        Trip dummyTrip = createDummyTrip();
+        String message = "참여 요청 메시지";
+
+        TripDemand tripDemand = TripDemand.create(userId, dummyTrip, message);
+        assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.PENDING);
+    }
+
+    @DisplayName("TripDemand 상태 변경이 정상적으로 동작한다.")
+    @Test
+    void tripDemandStatusChangeTest() {
+        Trip dummyTrip = createDummyTrip();
+        TripDemand tripDemand = TripDemand.create(userId, dummyTrip, "참여 요청 메시지");
+
+        tripDemand.setStatus(TripDemandStatus.APPROVED);
+        assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.APPROVED);
+
+        tripDemand.setStatus(TripDemandStatus.REJECTED);
+        assertThat(tripDemand.getStatus()).isEqualTo(TripDemandStatus.REJECTED);
+    }
+}
