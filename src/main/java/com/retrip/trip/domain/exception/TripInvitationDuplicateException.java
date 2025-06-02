@@ -9,4 +9,8 @@ public class TripInvitationDuplicateException extends IllegalStateException {
     public TripInvitationDuplicateException() {
         super(errorCode);
     }
+
+    public TripInvitationDuplicateException(String message) {
+        super(errorCode, message);
+    }
 }

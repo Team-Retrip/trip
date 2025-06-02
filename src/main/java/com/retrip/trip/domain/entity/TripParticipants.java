@@ -40,5 +40,10 @@ public class TripParticipants {
                 .orElseThrow(() -> new InvalidValueException("여행 회원이 아닙니다."))
                 .isLeader();
     }
+
+    public boolean anyDuplicate(List<UUID> memberIds) {
+        return values.stream()
+                .anyMatch(p -> memberIds.contains(p.getMemberId()));
+    }
 }
 
