@@ -32,7 +32,6 @@ public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
     private final TripDemandUseCase tripDemandUseCase;
-    private final TripService tripService;
     private final TripPeriodUseCase tripPeriodUseCase;
 
     @GetMapping("/categories")
@@ -84,17 +83,19 @@ public class TripController {
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
     @Schema(description = "여행 참가 신청 승인")
-    public ApiResponse<TripDemandApproveResponse> approveJoinRequest(
-            @PathVariable("tripId") UUID tripId, @PathVariable("tripDemandId") UUID tripDemandId) {
-        TripDemandApproveResponse response = tripService.approve(tripId, tripDemandId);
+    public ApiResponse<TripDemandApproveResponse> approveRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+                                                                 @PathVariable("tripId") UUID tripId,
+                                                                 @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandApproveResponse response = tripDemandUseCase.approve(memberId, tripId, tripDemandId);
         return ApiResponse.ok(response);
     }
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
     @Schema(description = "여행 참가 신청 거절")
-    public ApiResponse<TripDemandRejectResponse> rejectJoinRequest(
-            @PathVariable("tripId") UUID tripId, @PathVariable("tripDemandId") UUID tripDemandId) {
-        TripDemandRejectResponse response = tripService.reject(tripId, tripDemandId);
+    public ApiResponse<TripDemandRejectResponse> rejectRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+                                                               @PathVariable("tripId") UUID tripId,
+                                                               @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandRejectResponse response = tripDemandUseCase.reject(memberId, tripId, tripDemandId);
         return ApiResponse.ok(response);
     }
 }
