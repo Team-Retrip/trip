@@ -144,7 +144,7 @@ public class Trip extends BaseEntity {
     }
 
     public void createInvitations(UUID leaderId, List<UUID> memberIds) {
-        invitations.add(this, leaderId, memberIds);
+        invitations.add(this, leaderId, memberIds, tripParticipants);
     }
 }
 

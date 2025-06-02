@@ -21,20 +21,19 @@ public class TripInvitations {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<TripInvitation> values = new ArrayList<>();
 
-    public void add(Trip trip, UUID leaderId, List<UUID> memberIds) {
-        validate(trip, leaderId, memberIds);
-        memberIds.stream()
-                .map(id -> new TripInvitation(trip, id))
-                .forEach(values::add);
+    public void add(Trip trip, UUID leaderId, List<UUID> memberIds, TripParticipants participants) {
+        validate(trip, leaderId, memberIds, participants);
+        inviteAgain(memberIds);
+        addNewInvitation(trip, memberIds);
     }
 
-    private void validate(Trip trip, UUID leaderId, List<UUID> memberIds) {
+    private void validate(Trip trip, UUID leaderId, List<UUID> memberIds, TripParticipants participants) {
         if (isNotLeader(trip.getTripParticipants(), leaderId)) {
             throw new MemberIsNotLeaderException();
         }
 
-        if (anyDuplicate(memberIds)) {
-            throw new TripInvitationDuplicateException();
+        if (participants.anyDuplicate(memberIds)) {
+            throw new TripInvitationDuplicateException("여행 멤버로 등록된 사용자는 초대할 수 없습니다.");
         }
     }
 
@@ -42,9 +41,31 @@ public class TripInvitations {
         return !tripParticipants.isLeader(leaderId);
     }
 
-    private boolean anyDuplicate(List<UUID> memberIds) {
+    private List<TripInvitation> findDuplicates(List<UUID> memberIds) {
         return values.stream()
+                .filter(i -> memberIds.contains(i.getMemberId()))
+                .toList();
+    }
+
+    private void addNewInvitation(Trip trip, List<UUID> memberIds) {
+        List<UUID> invitationMemberIds = values.stream()
                 .map(TripInvitation::getMemberId)
-                .anyMatch(memberIds::contains);
+                .toList();
+
+        memberIds.stream()
+                .filter(id -> !invitationMemberIds.contains(id))
+                .map(id -> new TripInvitation(trip, id))
+                .forEach(values::add);
+    }
+
+    private void inviteAgain(List<UUID> memberIds) {
+        if (anyCannotInviteAgain(memberIds)) {
+            throw new TripInvitationDuplicateException();
+        }
+    }
+
+    private boolean anyCannotInviteAgain(List<UUID> memberIds) {
+        return findDuplicates(memberIds).stream()
+                .anyMatch(TripInvitation::cannotInviteAgain);
     }
 }

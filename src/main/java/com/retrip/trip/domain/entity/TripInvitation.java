@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-import static com.retrip.trip.domain.vo.TripInvitationStatus.INVITED;
+import static com.retrip.trip.domain.vo.TripInvitationStatus.*;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -33,5 +33,10 @@ public class TripInvitation {
         this.trip = trip;
         this.memberId = memberId;
         this.status = INVITED;
+    }
+
+    public boolean cannotInviteAgain() {
+        return this.status == INVITED
+                || this.status == ACCEPTED;
     }
 }
