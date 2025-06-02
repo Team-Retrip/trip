@@ -2,6 +2,7 @@ package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
 import com.retrip.trip.domain.exception.TripInvitationDuplicateException;
+import com.retrip.trip.domain.exception.common.IllegalStateException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
@@ -28,6 +29,10 @@ public class TripInvitations {
     }
 
     private void validate(Trip trip, UUID leaderId, List<UUID> memberIds, TripParticipants participants) {
+        if (trip.getStatus().cannotCreateInvitations()) {
+            throw new IllegalStateException("여행 초대를 생성할 수 없는 상태입니다. " + trip.getStatus().name());
+        }
+
         if (isNotLeader(trip.getTripParticipants(), leaderId)) {
             throw new MemberIsNotLeaderException();
         }
@@ -62,6 +67,8 @@ public class TripInvitations {
         if (anyCannotInviteAgain(memberIds)) {
             throw new TripInvitationDuplicateException();
         }
+        findDuplicates(memberIds)
+                .forEach(TripInvitation::inviteAgain);
     }
 
     private boolean anyCannotInviteAgain(List<UUID> memberIds) {

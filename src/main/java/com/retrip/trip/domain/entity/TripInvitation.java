@@ -39,4 +39,8 @@ public class TripInvitation {
         return this.status == INVITED
                 || this.status == ACCEPTED;
     }
+
+    public void inviteAgain() {
+        this.status = INVITED;
+    }
 }
