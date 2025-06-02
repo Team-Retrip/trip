@@ -1,8 +1,9 @@
 package com.retrip.trip.domain.vo;
 
-import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
@@ -23,5 +24,10 @@ public enum TripStatus {
                 .filter(tripStatus -> tripStatus.getCode().equals(code))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코드입니다."));
+    }
+
+    public boolean cannotCreateInvitations() {
+        return this != RECRUITING
+                && this != RECRUITMENT_CLOSED;
     }
 }
