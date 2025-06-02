@@ -6,9 +6,10 @@ import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.request.TripFixture;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.domain.entity.Itineraries;
-import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripDemand;
+import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TripServiceTest extends BaseTripServiceTest {
     private TripPeriod createFuturePeriod() {
@@ -40,9 +42,8 @@ class TripServiceTest extends BaseTripServiceTest {
         return tripRepository.save(trip);
     }
 
-    @DisplayName("여행을 생성 한다.")
     @Test
-    void createTrip() {
+    void 여행을_생성_한다() {
         TripCreateRequest request =
                 new TripCreateRequest(
                         memberId,
@@ -59,9 +60,8 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(response.destinationId()).isEqualTo(locationId);
     }
 
-    @DisplayName("여행 목록을 조회한다.")
     @Test
-    void getTrips() {
+    void 여행_목록을_조회한다() {
         TripPeriod period = createFuturePeriod();
         tripRepository.save(
                 Trip.createWithItineraries(
@@ -129,35 +129,66 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 리더가_참여_요청을_승인하면_실제_참여자로_등록된다() {
         // given
-        Trip trip = createTestTrip("승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemandRequest request = new TripDemandRequest(newMemberId, "참여 요청 메시지");
-        TripDemandResponse tripDemandResponse = tripService.tripDemand(trip.getId(), request);
+        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
+        newTrip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(newTrip);
 
         // then
-        TripDemandApproveResponse response =
-                tripService.approve(trip.getId(), tripDemandResponse.tripDemandId());
+        TripDemandApproveResponse response = tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
+        Trip trip = tripRepository.findById(newTrip.getId()).orElseThrow();
+        UUID newParticipantMemberId = trip.getTripParticipants().getValues().stream()
+                .map(TripParticipant::getMemberId)
+                .filter(id -> id.equals(newMemberId))
+                .findFirst()
+                .orElseThrow();
 
         // when
-        assertThat(tripDemandResponse.status()).isEqualTo("대기");
         assertThat(response).isNotNull();
-        assertThat(response.status()).isEqualTo(TripDemandStatus.APPROVED.getCode());
+        assertThat(newParticipantMemberId).isEqualTo(newMemberId);
+        assertThat(response.statusCode()).isEqualTo(TripDemandStatus.APPROVED.getCode());
+    }
+
+    @Test
+    void 리더가_아니면_참여_요청을_승인할_수_없다() {
+        // given
+        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
+        newTrip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(newTrip);
+        tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
+
+        // then && when
+        assertThrows(BusinessException.class, () -> tripService.approve(newMemberId, newTrip.getId(), tripDemand.getId()));
     }
 
     @Test
     void 리더가_참여_요청을_거절하면_요청_상태가_거절로_변경된다() {
         // given
-        Trip trip = createTestTrip("거절 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemandRequest request = new TripDemandRequest(newMemberId, "참여 요청 메시지");
-        TripDemandResponse tripDemandResponse = tripService.tripDemand(trip.getId(), request);
+        Trip newTrip = TripFixture.createTestTrip(memberId, "거절 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
+        newTrip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(newTrip);
 
         // then
-        TripDemandRejectResponse response =
-                tripService.reject(trip.getId(), tripDemandResponse.tripDemandId());
+        TripDemandRejectResponse response = tripService.reject(memberId, newTrip.getId(), tripDemand.getId());
 
         // when
-        assertThat(tripDemandResponse.status()).isEqualTo("대기");
         assertThat(response).isNotNull();
-        assertThat(response.status()).isEqualTo(TripDemandStatus.REJECTED.getCode());
+        assertThat(response.statusCode()).isEqualTo(TripDemandStatus.REJECTED.getCode());
+    }
+
+    @Test
+    void 리더가_아니면_참여_요청을_거절할_수_없다() {
+        // given
+        Trip newTrip = TripFixture.createTestTrip(memberId, "거절 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
+        newTrip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(newTrip);
+        tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
+
+        // then && when
+        assertThrows(BusinessException.class, () -> tripService.reject(newMemberId, newTrip.getId(), tripDemand.getId()));
     }
 
     @Test
