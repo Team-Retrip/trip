@@ -8,9 +8,6 @@ import java.util.UUID;
 
 public record TripInvitationsCreateRequest(
         @NotNull
-        UUID tripId,
-
-        @NotNull
         UUID leaderId,
 
         @Size(min = 1)

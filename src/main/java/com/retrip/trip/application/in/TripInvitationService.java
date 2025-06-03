@@ -19,8 +19,8 @@ public class TripInvitationService implements TripInvitationManageUseCase {
     private final TripRepository tripRepository;
 
     @Override
-    public TripInvitationsCreateResponse createInvitations(TripInvitationsCreateRequest request) {
-        Trip trip = findTripWithInvitations(request.tripId());
+    public TripInvitationsCreateResponse createInvitations(UUID tripId, TripInvitationsCreateRequest request) {
+        Trip trip = findTripWithInvitations(tripId);
         trip.createInvitations(request.leaderId(), request.memberIds());
         return TripInvitationsCreateResponse.of(trip);
     }

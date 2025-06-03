@@ -5,20 +5,21 @@ import com.retrip.trip.application.in.response.TripInvitationsCreateResponse;
 import com.retrip.trip.application.in.usecase.TripInvitationManageUseCase;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
-@RequestMapping("/trips/invitations")
+@RequestMapping("/trips/{tripId}/invitations")
 @RestController
 public class TripInvitationController {
     private final TripInvitationManageUseCase invitationManageUseCase;
 
     @PostMapping
-    public ApiResponse<TripInvitationsCreateResponse> createInvitation(@RequestBody TripInvitationsCreateRequest request) {
-        TripInvitationsCreateResponse invitation = invitationManageUseCase.createInvitations(request);
+    public ApiResponse<TripInvitationsCreateResponse> createInvitation(
+            @PathVariable UUID tripId,
+            @RequestBody TripInvitationsCreateRequest request) {
+        TripInvitationsCreateResponse invitation = invitationManageUseCase.createInvitations(tripId, request);
         return ApiResponse.created(invitation);
     }
 }

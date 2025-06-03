@@ -18,8 +18,8 @@ class TripInvitationServiceTest extends BaseTripInvitationServiceTest {
         tripRepository.save(trip);
 
         TripInvitationsCreateRequest request = new TripInvitationsCreateRequest(
-                TRIP_ID, LEADER_ID, List.of(정수_ID, 홍석_ID, 준호_ID));
-        TripInvitationsCreateResponse response = tripInvitationService.createInvitations(request);
+                LEADER_ID, List.of(정수_ID, 홍석_ID, 준호_ID));
+        TripInvitationsCreateResponse response = tripInvitationService.createInvitations(TRIP_ID, request);
         assertThat(response.tripId()).isEqualTo(TRIP_ID);
         assertThat(response.invitations().size()).isEqualTo(3);
     }
