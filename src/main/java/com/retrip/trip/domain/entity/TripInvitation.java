@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-import static com.retrip.trip.domain.vo.TripInvitationStatus.*;
+import static com.retrip.trip.domain.vo.TripInvitationStatus.ACCEPTED;
+import static com.retrip.trip.domain.vo.TripInvitationStatus.INVITED;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED, force = true)
 @Entity
-public class TripInvitation {
+public class TripInvitation extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
