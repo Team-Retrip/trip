@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface TripInvitationReadRepository extends ReadRepository<TripInvitation, UUID> {
     Page<TripInvitation> findByTripIdAndStatus(UUID tripId, TripInvitationStatus status, Pageable page);
+
+    Page<TripInvitation> findByMemberIdAndStatus(UUID memberId, TripInvitationStatus status, Pageable pageable);
 }

@@ -2,6 +2,7 @@ package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.request.TripInvitationOrder;
 import com.retrip.trip.application.in.request.TripInvitationsCreateRequest;
+import com.retrip.trip.application.in.response.MemberTripInvitationsResponse;
 import com.retrip.trip.application.in.response.TripInvitationsCreateResponse;
 import com.retrip.trip.application.in.response.TripInvitationsResponse;
 import com.retrip.trip.application.in.usecase.TripInvitationManageUseCase;
@@ -37,19 +38,29 @@ public class TripInvitationService implements TripInvitationManageUseCase {
         return TripInvitationsCreateResponse.of(trip);
     }
 
-    private Trip findTripWithInvitations(UUID tripId) {
-        return tripRepository.findWithTripInvitations(tripId)
-                .orElseThrow(TripNotFoundException::new);
-    }
-
     @Transactional(readOnly = true)
     @Override
     public Page<TripInvitationsResponse> getTripInvitations(
             UUID tripId, UUID leaderId, String status, Pageable page, TripInvitationOrder order, String sort) {
         validateLeader(findTrip(tripId), leaderId, new MemberIsNotLeaderException());
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
-        Page<TripInvitation> tripInvitations = tripInvitationReadRepository.findByTripIdAndStatus(tripId, TripInvitationStatus.valueOf(status), pageable);
+        Page<TripInvitation> tripInvitations =
+                tripInvitationReadRepository.findByTripIdAndStatus(tripId, TripInvitationStatus.valueOf(status), pageable);
         return tripInvitations.map(TripInvitationsResponse::of);
+    }
+
+    @Override
+    public Page<MemberTripInvitationsResponse> getMemberTripInvitations(
+            UUID memberId, String status, Pageable page, TripInvitationOrder order, String sort) {
+        Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
+        Page<TripInvitation> tripInvitations =
+                tripInvitationReadRepository.findByMemberIdAndStatus(memberId, TripInvitationStatus.valueOf(status), pageable);
+        return tripInvitations.map(MemberTripInvitationsResponse::of);
+    }
+
+    private Trip findTripWithInvitations(UUID tripId) {
+        return tripRepository.findWithTripInvitations(tripId)
+                .orElseThrow(TripNotFoundException::new);
     }
 
     private Trip findTrip(UUID tripId) {
