@@ -11,11 +11,8 @@ import com.retrip.trip.application.in.usecase.TripDemandUseCase;
 import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +20,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @RequestMapping("/trips")
 @RestController
+@Tag(name = "Trip", description = "여행 관련 API")
 public class TripController {
     private final CreateTripUseCase createTripUseCase;
     private final GetTripUseCase getTripUseCase;
@@ -34,6 +36,7 @@ public class TripController {
     private final TripPeriodUseCase tripPeriodUseCase;
 
     @GetMapping("/categories")
+    @Schema(description = "여행 카테고리 목록 조회")
     public ApiResponse<List<TripCategoryResponse>> getTripCategories() {
         List<TripCategoryResponse> response =
                 Arrays.stream(TripCategory.values()).map(TripCategoryResponse::of).toList();
@@ -41,12 +44,14 @@ public class TripController {
     }
 
     @PostMapping
+    @Schema(description = "여행 생성")
     public ApiResponse<TripCreateResponse> createTrip(@RequestBody TripCreateRequest request) {
         TripCreateResponse trip = createTripUseCase.createTrip(request);
         return ApiResponse.created(trip);
     }
 
     @PostMapping("/regular")
+    @Schema(description = "일정이 포함된 여행 생성")
     public ApiResponse<TripCreateResponse> createTripWithItineraries(
             @RequestBody TripCreateRequest request) {
         TripCreateResponse trip = createTripUseCase.createTripWithItineraries(request);
@@ -54,6 +59,7 @@ public class TripController {
     }
 
     @GetMapping
+    @Schema(description = "여행 목록 조회")
     public ApiResponse<Page<TripResponse>> getTrips(
             @PageableDefault(size = 10, page = 0) Pageable page) {
         Page<TripResponse> trips = getTripUseCase.getTrips(page);
@@ -61,6 +67,7 @@ public class TripController {
     }
 
     @PostMapping("/{tripId}/demand")
+    @Schema(description = "여행 참가 신청")
     public ApiResponse<TripDemandResponse> joinTrip(
             @PathVariable("tripId") UUID tripId, @RequestBody TripDemandRequest request) {
         TripDemandResponse response = tripDemandUseCase.tripDemand(tripId, request);
@@ -68,6 +75,7 @@ public class TripController {
     }
 
     @PutMapping("/{tripId}/period")
+    @Schema(description = "여행 기간 수정")
     public ResponseEntity<PeriodUpdateResponse> updatePeriod(
             @PathVariable UUID tripId, @RequestBody PeriodUpdateRequest request) {
         PeriodUpdateResponse period = tripPeriodUseCase.updatePeriod(tripId, request);
@@ -75,6 +83,7 @@ public class TripController {
     }
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
+    @Schema(description = "여행 참가 신청 승인")
     public ApiResponse<TripDemandApproveResponse> approveJoinRequest(
             @PathVariable("tripId") UUID tripId, @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandApproveResponse response = tripService.approve(tripId, tripDemandId);
@@ -82,6 +91,7 @@ public class TripController {
     }
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
+    @Schema(description = "여행 참가 신청 거절")
     public ApiResponse<TripDemandRejectResponse> rejectJoinRequest(
             @PathVariable("tripId") UUID tripId, @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandRejectResponse response = tripService.reject(tripId, tripDemandId);
