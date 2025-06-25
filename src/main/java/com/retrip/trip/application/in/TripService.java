@@ -9,13 +9,11 @@ import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
-import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -56,10 +54,8 @@ public class TripService
     @Override
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
-        trip.validateTripRecruitingStatus();
         TripDemand demand = TripDemand.create(request.memberId(), trip, request.message());
         trip.addDemand(demand);
-        tripRepository.save(trip);
         return TripDemandResponse.of(demand);
     }
 
@@ -67,29 +63,24 @@ public class TripService
         return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
     }
 
-    public TripDemandApproveResponse approve(UUID tripId, UUID joinRequestId) {
-        TripDemand tripDemand = findJoinRequestBy(tripId, joinRequestId);
-        tripDemand.approve();
-        addApprovedParticipant(tripDemand);
-        return new TripDemandApproveResponse(tripDemand.getStatus().getCode());
+    @Override
+    public TripDemandApproveResponse approve(UUID memberId, UUID tripId, UUID tripDemandId) {
+        TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, tripDemandId);
+        tripDemand.approve(memberId);
+        return TripDemandApproveResponse.of(tripDemand);
     }
 
-    private void addApprovedParticipant(TripDemand tripDemand) {
-        TripParticipant participant =
-                TripParticipant.createTripParticipant(tripDemand.getMemberId(), tripDemand.getTrip());
-        tripParticipantRepository.save(participant);
+    @Override
+    public TripDemandRejectResponse reject(UUID memberId, UUID tripId, UUID joinRequestId) {
+        TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, joinRequestId);
+        tripDemand.reject(memberId);
+        return TripDemandRejectResponse.of(tripDemand);
     }
 
-    private TripDemand findJoinRequestBy(UUID tripId, UUID joinRequestId) {
+    private TripDemand findTripDemandByTripIdAndTripDemandId(UUID tripId, UUID tripDemandId) {
         return tripDemandRepository
-                .findByTripIdAndId(tripId, joinRequestId)
+                .findByTripIdAndId(tripId, tripDemandId)
                 .orElseThrow(() -> new EntityNotFoundException("참여 요청을 찾을 수 없습니다."));
-    }
-
-    public TripDemandRejectResponse reject(UUID tripId, UUID joinRequestId) {
-        TripDemand tripDemand = findJoinRequestBy(tripId, joinRequestId);
-        tripDemand.reject();
-        return new TripDemandRejectResponse(tripDemand.getStatus().getCode());
     }
 
     @Override

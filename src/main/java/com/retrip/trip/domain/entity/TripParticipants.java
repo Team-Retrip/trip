@@ -35,7 +35,7 @@ public class TripParticipants {
         return isLeader(memberId);
     }
 
-    private boolean isLeader(UUID memberId) {
+    public boolean isLeader(UUID memberId) {
         return this.values.stream()
                 .filter(m -> memberId.equals(m.getMemberId()))
                 .findFirst()

@@ -1,7 +1,9 @@
 package com.retrip.trip.domain.entity;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_LEADER;
 import static lombok.AccessLevel.PROTECTED;
 
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.TripDemandStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,19 +50,28 @@ public class TripDemand extends BaseEntity {
         this.status = status;
     }
 
-    public void ensurePending() {
-        if (!this.status.equals(TripDemandStatus.PENDING)) {
-            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
+    public void approve(UUID memberId) {
+        validateTripLeader(memberId);
+        ensurePending();
+        this.status = TripDemandStatus.APPROVED;
+        trip.addParticipant(TripParticipant.createTripParticipant(this.getMemberId(), this.getTrip()));
+    }
+
+    public void reject(UUID memberId) {
+        validateTripLeader(memberId);
+        ensurePending();
+        this.status = TripDemandStatus.REJECTED;
+    }
+
+    private void validateTripLeader(UUID memberId) {
+        if(!this.trip.getTripParticipants().isLeader(memberId)) {
+            throw new BusinessException(NOT_TRIP_LEADER);
         }
     }
 
-    public void approve() {
-        ensurePending();
-        this.status = TripDemandStatus.APPROVED;
-    }
-
-    public void reject() {
-        ensurePending();
-        this.status = TripDemandStatus.REJECTED;
+    public void ensurePending() {
+        if (!TripDemandStatus.PENDING.equals(this.status)) {
+            throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");
+        }
     }
 }
