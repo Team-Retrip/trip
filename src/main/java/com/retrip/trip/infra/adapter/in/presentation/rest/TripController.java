@@ -1,9 +1,9 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
-import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
+import com.retrip.trip.application.in.request.TripMemberBanRequest;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
@@ -97,5 +97,14 @@ public class TripController {
                                                                @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandRejectResponse response = tripDemandUseCase.reject(memberId, tripId, tripDemandId);
         return ApiResponse.ok(response);
+    }
+
+    @DeleteMapping("/{tripId}/members/ban")
+    @Schema(description = "여행 참가 신청 거절")
+    public ApiResponse<TripDemandRejectResponse> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+                                                           @PathVariable("tripId") UUID tripId,
+                                                           @RequestBody TripMemberBanRequest request) {
+        tripDemandUseCase.banMembers(memberId, tripId, request.memberIdList());
+        return ApiResponse.noContent();
     }
 }

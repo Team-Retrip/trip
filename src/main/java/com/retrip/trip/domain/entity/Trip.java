@@ -1,6 +1,12 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
+import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripDescription;
+import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
+import com.retrip.trip.domain.vo.TripTitle;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -13,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -119,7 +126,14 @@ public class Trip extends BaseEntity {
     }
 
     public void addDemand(TripDemand demand) {
+        validateTripBan(demand);
         this.tripDemands.addDemand(demand);
+    }
+
+    private void validateTripBan(TripDemand demand) {
+        if(this.tripParticipants.isBan(demand.getMemberId())){
+            throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
+        }
     }
 
     public void updatePeriod(
@@ -141,6 +155,10 @@ public class Trip extends BaseEntity {
             return List.of();
         }
         return getItineraries().ids();
+    }
+
+    public void banMembers(UUID loginMemberId, List<UUID> memberIdList) {
+        this.tripParticipants.banMembers(loginMemberId, memberIdList, this);
     }
 
     public void createInvitations(UUID leaderId, List<UUID> memberIds) {
