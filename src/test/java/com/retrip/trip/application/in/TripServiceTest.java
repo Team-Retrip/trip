@@ -10,6 +10,7 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
