@@ -5,6 +5,7 @@ import com.retrip.trip.domain.vo.InvitationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +25,9 @@ public class Invitation extends BaseEntity {
     private UUID tripId;
     private UUID memberId;
     private InvitationStatus status;
+
+    @Version
+    private long version;
 
     public Invitation(UUID tripId, UUID memberId) {
         this.id = UUID.randomUUID();
