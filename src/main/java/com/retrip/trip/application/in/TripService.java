@@ -1,13 +1,11 @@
 package com.retrip.trip.application.in;
 
+import com.retrip.trip.application.in.request.DelegateLeaderRequest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.application.in.usecase.CreateTripUseCase;
-import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.TripDemandUseCase;
-import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
+import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
@@ -25,14 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class TripService
-        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase {
+        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
@@ -96,5 +91,24 @@ public class TripService
         List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItinerariesIds());
         trip.updatePeriod(period, request.memberId());
         return PeriodUpdateResponse.of(trip);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<TripResponse> getMyTrips(UUID memberId, Pageable page) {
+        return tripQueryRepository.findMyTrips(memberId, page);
+    }
+
+    @Override
+    public void leaveTrip(UUID tripId, UUID memberId) {
+        Trip trip = findTrip(tripId);
+        trip.leave(memberId);
+    }
+
+    @Override
+    public DelegateLeaderResponse delegateLeader(UUID tripId, DelegateLeaderRequest request) {
+        Trip trip = findTrip(tripId);
+        trip.delegateLeader(request.currentLeaderId(), request.newLeaderId());
+        return DelegateLeaderResponse.of(trip, request.newLeaderId());
     }
 }
