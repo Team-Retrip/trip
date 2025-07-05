@@ -27,6 +27,12 @@ public class InvitationPolicy {
         }
     }
 
+    public void canViewInvitations(Trip trip, UUID leaderId) {
+        if (isNotLeader(trip.getTripParticipants(), leaderId)) {
+            throw new MemberIsNotLeaderException();
+        }
+    }
+
     public boolean isNotLeader(TripParticipants tripParticipants, UUID leaderId) {
         return !tripParticipants.isLeader(leaderId);
     }

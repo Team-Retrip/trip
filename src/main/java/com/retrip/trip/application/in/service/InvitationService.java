@@ -13,7 +13,6 @@ import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.entity.invitation.Invitations;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.InvitationPolicy;
-import com.retrip.trip.domain.service.TripPolicy;
 import com.retrip.trip.domain.vo.InvitationStatus;
 import com.retrip.trip.infra.adapter.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ import java.util.UUID;
 public class InvitationService implements InvitationManageUseCase {
     private final TripRepository tripRepository;
     private final InvitationRepository invitationRepository;
-    private final TripPolicy tripPolicy;
     private final InvitationPolicy invitationPolicy;
 
     @Override
@@ -48,7 +46,7 @@ public class InvitationService implements InvitationManageUseCase {
     @Override
     public Page<InvitationsResponse> getTripInvitations(
             UUID tripId, UUID leaderId, String status, Pageable page, TripInvitationOrder order, String sort) {
-        tripPolicy.validateLeader(findTripWithParticipants(tripId), leaderId);
+        invitationPolicy.canViewInvitations(findTripWithParticipants(tripId), leaderId);
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
         Page<Invitation> tripInvitations =
                 invitationRepository.findByTripIdAndStatus(tripId, InvitationStatus.valueOf(status), pageable);
