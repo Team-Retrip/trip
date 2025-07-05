@@ -1,27 +1,31 @@
 package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.base.BaseTripServiceTest;
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripDemandRequest;
-import com.retrip.trip.application.in.request.TripRequestFixture;
+import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
+import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
+import com.retrip.trip.domain.exception.NotParticipantException;
+import com.retrip.trip.domain.exception.TripNotReadyException;
 import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TripServiceTest extends BaseTripServiceTest {
     private TripPeriod createFuturePeriod() {
@@ -40,6 +44,20 @@ class TripServiceTest extends BaseTripServiceTest {
                         true,
                         4,
                         category);
+        return tripRepository.save(trip);
+    }
+
+    private Trip createReadyTrip(UUID leaderId) {
+        Trip trip = Trip.create(
+                leaderId,
+                locationId,
+                new TripTitle("준비된 여행"),
+                new TripDescription("설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                4,
+                TripCategory.DOMESTIC);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
         return tripRepository.save(trip);
     }
 
@@ -464,6 +482,125 @@ class TripServiceTest extends BaseTripServiceTest {
                         LocalDate.now().plusDays(13),
                         LocalDate.now().plusDays(14)
                 );
+    }
+
+    @Test
+    @DisplayName("멤버가 성공적으로 여행을 나간다")
+    void leaveTrip_success_forMember() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+
+        // when
+        tripService.leaveTrip(trip.getId(), newMemberId);
+
+        // then
+        Trip updatedTrip = tripRepository.findById(trip.getId()).get();
+        boolean isParticipantPresent = updatedTrip.getTripParticipants().findParticipantById(newMemberId).isPresent();
+        assertThat(isParticipantPresent).isFalse();
+    }
+
+    @Test
+    @DisplayName("리더는 위임 없이 여행을 나갈 수 없다")
+    void leaveTrip_fail_forLeader() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+
+        // when & then
+        assertThrows(LeaderCannotLeaveException.class, () -> {
+            tripService.leaveTrip(trip.getId(), memberId);
+        });
+    }
+
+    @Test
+    @DisplayName("여행이 '여행 전' 상태가 아니면 나갈 수 없다")
+    void leaveTrip_fail_whenTripNotReady() {
+        // given
+        Trip trip = createTestTrip("여행", "설명", TripCategory.DOMESTIC);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(TripNotReadyException.class, () -> {
+            tripService.leaveTrip(trip.getId(), newMemberId);
+        });
+    }
+
+    @Test
+    @DisplayName("리더가 성공적으로 다른 멤버에게 리더를 위임한다")
+    void delegateLeader_success() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, newMemberId);
+
+        // when
+        tripService.delegateLeader(trip.getId(), request);
+
+        // then
+        Trip updatedTrip = tripRepository.findById(trip.getId()).get();
+        assertTrue(updatedTrip.getTripParticipants().findParticipantById(newMemberId).get().isLeader());
+        assertThat(updatedTrip.getTripParticipants().findParticipantById(memberId).get().isLeader()).isFalse();
+    }
+
+    @Test
+    @DisplayName("리더가 아닌 멤버는 리더를 위임할 수 없다")
+    void delegateLeader_fail_notLeader() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(newMemberId, memberId);
+
+        // when & then
+        assertThrows(MemberIsNotLeaderException.class, () -> {
+            tripService.delegateLeader(trip.getId(), request);
+        });
+    }
+
+    @Test
+    @DisplayName("리더는 자기 자신에게 리더를 위임할 수 없다")
+    void delegateLeader_fail_toSelf() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, memberId);
+
+        // when & then
+        assertThrows(InvalidValueException.class, () -> {
+            tripService.delegateLeader(trip.getId(), request);
+        });
+    }
+
+    @Test
+    @DisplayName("참여자가 아닌 사람에게 리더를 위임할 수 없다")
+    void delegateLeader_fail_toNonParticipant() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+        UUID nonParticipantId = UUID.randomUUID();
+        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, nonParticipantId);
+
+        // when & then
+        assertThrows(NotParticipantException.class, () -> {
+            tripService.delegateLeader(trip.getId(), request);
+        });
+    }
+
+    @Test
+    @DisplayName("여행을 나간 후 '나의 여행 목록'에 보이지 않는다")
+    void getMyTrips_afterLeaving() {
+        // given
+        Trip trip = createReadyTrip(memberId);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+
+        // when
+        tripService.leaveTrip(trip.getId(), newMemberId);
+
+        // then
+        Page<TripResponse> myTrips = tripService.getMyTrips(newMemberId, PageRequest.of(0, 10));
+        assertThat(myTrips.getTotalElements()).isZero();
     }
 
 }
