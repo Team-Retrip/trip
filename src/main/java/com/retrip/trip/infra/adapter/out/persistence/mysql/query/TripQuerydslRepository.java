@@ -19,6 +19,7 @@ import java.util.List;
 
 import static com.retrip.trip.domain.entity.QItinerary.itinerary;
 import static com.retrip.trip.domain.entity.QTrip.trip;
+import static com.retrip.trip.domain.entity.QTripParticipant.tripParticipant;
 
 @RequiredArgsConstructor
 @Repository
@@ -28,34 +29,65 @@ public class TripQuerydslRepository implements TripQueryRepository {
   @Override
   public Page<TripResponse> findTrips(Pageable page) {
     List<TripResponse> trips =
-        query
-            .select(
-                Projections.constructor(
-                    TripResponse.class,
-                    trip.id,
-                    trip.title.value,
-                    trip.destinationId,
-                    trip.period.start,
-                    trip.period.end,
-                    trip.open))
-            .from(trip)
-            .offset(page.getOffset())
-            .limit(page.getPageSize())
-            .orderBy(trip.createdAt.desc())
-            .fetch();
+            query
+                    .select(
+                            Projections.constructor(
+                                    TripResponse.class,
+                                    trip.id,
+                                    trip.title.value,
+                                    trip.destinationId,
+                                    trip.period.start,
+                                    trip.period.end,
+                                    trip.open))
+                    .from(trip)
+                    .offset(page.getOffset())
+                    .limit(page.getPageSize())
+                    .orderBy(trip.createdAt.desc())
+                    .fetch();
     return new PageImpl<>(trips, page, trips.size());
   }
 
   @Override
   public Optional<Trip> findByIdWithItineraries(UUID tripId) {
     return Optional.ofNullable(
-        query
-            .selectFrom(trip)
-            .leftJoin(itinerary)
-            .on(itinerary.trip.eq(trip))
-            .fetchJoin()
-            .where(trip.id.eq(tripId))
-            .orderBy(itinerary.date.desc())
-            .fetchOne());
+            query
+                    .selectFrom(trip)
+                    .leftJoin(itinerary)
+                    .on(itinerary.trip.eq(trip))
+                    .fetchJoin()
+                    .where(trip.id.eq(tripId))
+                    .orderBy(itinerary.date.desc())
+                    .fetchOne());
+  }
+
+  @Override
+  public Page<TripResponse> findMyTrips(UUID memberId, Pageable page) {
+    List<TripResponse> trips =
+            query
+                    .select(
+                            Projections.constructor(
+                                    TripResponse.class,
+                                    trip.id,
+                                    trip.title.value,
+                                    trip.destinationId,
+                                    trip.period.start,
+                                    trip.period.end,
+                                    trip.open))
+                    .from(trip)
+                    .join(trip.tripParticipants.values, tripParticipant)
+                    .where(tripParticipant.memberId.eq(memberId))
+                    .offset(page.getOffset())
+                    .limit(page.getPageSize())
+                    .orderBy(trip.createdAt.desc())
+                    .fetch();
+
+    Long total = query
+            .select(trip.count())
+            .from(trip)
+            .join(trip.tripParticipants.values, tripParticipant)
+            .where(tripParticipant.memberId.eq(memberId))
+            .fetchOne();
+
+    return new PageImpl<>(trips, page, total == null ? 0 : total);
   }
 }

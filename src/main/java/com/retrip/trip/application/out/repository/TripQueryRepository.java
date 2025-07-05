@@ -13,5 +13,7 @@ import org.springframework.data.domain.Pageable;
 public interface TripQueryRepository {
   Page<TripResponse> findTrips(Pageable page);
 
+  Page<TripResponse> findMyTrips(UUID memberId, Pageable page);
+
   Optional<Trip> findByIdWithItineraries(UUID tripId);
 }
