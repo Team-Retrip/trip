@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -45,5 +46,14 @@ public class TripParticipants {
         return values.stream()
                 .anyMatch(p -> memberIds.contains(p.getMemberId()));
     }
-}
 
+    public void removeParticipant(UUID memberId) {
+        this.values.removeIf(p -> p.getMemberId().equals(memberId));
+    }
+
+    public Optional<TripParticipant> findParticipantById(UUID memberId) {
+        return this.values.stream()
+                .filter(p -> p.getMemberId().equals(memberId))
+                .findFirst();
+    }
+}
