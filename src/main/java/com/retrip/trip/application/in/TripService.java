@@ -1,5 +1,7 @@
 package com.retrip.trip.application.in;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
+
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
@@ -12,7 +14,10 @@ import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
+import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.entity.TripParticipants;
 import com.retrip.trip.domain.exception.TripNotFoundException;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -96,5 +101,11 @@ public class TripService
         List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItinerariesIds());
         trip.updatePeriod(period, request.memberId());
         return PeriodUpdateResponse.of(trip);
+    }
+
+    @Override
+    public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIds) {
+        Trip trip = findTrip(tripId);
+        trip.banMembers(loginMemberId, memberIds);
     }
 }

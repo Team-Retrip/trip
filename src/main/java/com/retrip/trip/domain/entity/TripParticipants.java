@@ -1,6 +1,13 @@
 package com.retrip.trip.domain.entity;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_LEADER;
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
+import static lombok.AccessLevel.PROTECTED;
+
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
+import com.retrip.trip.domain.vo.ParticipantStatus;
+import com.retrip.trip.domain.vo.TripStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
@@ -10,8 +17,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Embeddable
@@ -39,6 +44,45 @@ public class TripParticipants {
                 .findFirst()
                 .orElseThrow(() -> new InvalidValueException("여행 회원이 아닙니다."))
                 .isLeader();
+    }
+
+    public void banMembers(UUID loginMemberId, List<UUID> memberIds, Trip trip) {
+        validateTripRecruitingStatus(trip.getStatus());
+        validateTripLeader(loginMemberId);
+        validateExistParticipantMember(memberIds);
+
+        List<TripParticipant> participantsToBan = values.stream()
+                .filter(m -> memberIds.contains(m.getMemberId()))
+                .toList();
+
+        participantsToBan.forEach(TripParticipant::ban);
+    }
+
+    private void validateExistParticipantMember(List<UUID> memberIds) {
+        boolean isAllExist = values.stream()
+                .anyMatch(m -> memberIds.contains(m.getMemberId()));
+
+        if(!isAllExist) {
+            throw new BusinessException(TRIP_MEMBER_NOT_IN_TRIP);
+        }
+    }
+
+    private void validateTripLeader(UUID loginMemberId) {
+        if(!isLeader(loginMemberId)) {
+            throw new BusinessException(NOT_TRIP_LEADER);
+        }
+    }
+
+    public void validateTripRecruitingStatus(TripStatus status) {
+        if (!TripStatus.RECRUITING.equals(status)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
+    }
+
+    public boolean isBan(UUID memberId) {
+        return values.stream()
+                .anyMatch(tripParticipant -> memberId.equals(tripParticipant.getMemberId()) &&
+                                                          tripParticipant.getStatus() == ParticipantStatus.EXPELLED);
     }
 
     public boolean anyDuplicate(List<UUID> memberIds) {
