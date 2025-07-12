@@ -25,7 +25,7 @@ public class TripDemands {
         values.add(demand);
     }
 
-    public void validateTripRecruitingStatus(TripStatus status) {
+    private void validateTripRecruitingStatus(TripStatus status) {
         if (!TripStatus.RECRUITING.equals(status)) {
             throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
         }

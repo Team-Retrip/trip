@@ -100,11 +100,11 @@ public class TripController {
     }
 
     @DeleteMapping("/{tripId}/members/ban")
-    @Schema(description = "여행 참가 신청 거절")
+    @Schema(description = "여행 멤버 리스트 강퇴")
     public ApiResponse<TripDemandRejectResponse> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
                                                            @PathVariable("tripId") UUID tripId,
                                                            @RequestBody TripMemberBanRequest request) {
-        tripDemandUseCase.banMembers(memberId, tripId, request.memberIdList());
+        tripDemandUseCase.banMembers(memberId, tripId, request.memberIds());
         return ApiResponse.noContent();
     }
 }

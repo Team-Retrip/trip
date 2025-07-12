@@ -46,21 +46,21 @@ public class TripParticipants {
                 .isLeader();
     }
 
-    public void banMembers(UUID loginMemberId, List<UUID> memberIdList, Trip trip) {
+    public void banMembers(UUID loginMemberId, List<UUID> memberIds, Trip trip) {
         validateTripRecruitingStatus(trip.getStatus());
         validateTripLeader(loginMemberId);
-        validateExistParticipantMember(memberIdList);
+        validateExistParticipantMember(memberIds);
 
         List<TripParticipant> participantsToBan = values.stream()
-                .filter(m -> memberIdList.contains(m.getMemberId()))
+                .filter(m -> memberIds.contains(m.getMemberId()))
                 .toList();
 
         participantsToBan.forEach(TripParticipant::ban);
     }
 
-    private void validateExistParticipantMember(List<UUID> memberIdList) {
+    private void validateExistParticipantMember(List<UUID> memberIds) {
         boolean isAllExist = values.stream()
-                .anyMatch(m -> memberIdList.contains(m.getMemberId()));
+                .anyMatch(m -> memberIds.contains(m.getMemberId()));
 
         if(!isAllExist) {
             throw new BusinessException(TRIP_MEMBER_NOT_IN_TRIP);

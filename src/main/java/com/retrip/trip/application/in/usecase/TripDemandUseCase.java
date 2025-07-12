@@ -14,5 +14,5 @@ public interface TripDemandUseCase {
 
     TripDemandRejectResponse reject(UUID memberId, UUID tripId, UUID tripDemandId);
 
-    void banMembers(UUID memberId, UUID tripId, List<UUID> uuids);
+    void banMembers(UUID memberId, UUID tripId, List<UUID> memberIds);
 }

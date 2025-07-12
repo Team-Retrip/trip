@@ -104,8 +104,8 @@ public class TripService
     }
 
     @Override
-    public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIdList) {
+    public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIds) {
         Trip trip = findTrip(tripId);
-        trip.banMembers(loginMemberId, memberIdList);
+        trip.banMembers(loginMemberId, memberIds);
     }
 }

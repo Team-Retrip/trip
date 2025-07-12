@@ -126,11 +126,11 @@ public class Trip extends BaseEntity {
     }
 
     public void addDemand(TripDemand demand) {
-        validateTripBan(demand);
+        validateAddDemand(demand);
         this.tripDemands.addDemand(demand);
     }
 
-    private void validateTripBan(TripDemand demand) {
+    private void validateAddDemand(TripDemand demand) {
         if(this.tripParticipants.isBan(demand.getMemberId())){
             throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
         }
@@ -157,8 +157,8 @@ public class Trip extends BaseEntity {
         return getItineraries().ids();
     }
 
-    public void banMembers(UUID loginMemberId, List<UUID> memberIdList) {
-        this.tripParticipants.banMembers(loginMemberId, memberIdList, this);
+    public void banMembers(UUID loginMemberId, List<UUID> memberIds) {
+        this.tripParticipants.banMembers(loginMemberId, memberIds, this);
     }
 
     public void createInvitations(UUID leaderId, List<UUID> memberIds) {
