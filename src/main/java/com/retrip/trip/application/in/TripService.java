@@ -1,7 +1,5 @@
 package com.retrip.trip.application.in;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
-
 import com.retrip.trip.application.in.request.DelegateLeaderRequest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
@@ -12,16 +10,9 @@ import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
-import com.retrip.trip.domain.entity.TripParticipant;
-import com.retrip.trip.domain.entity.TripParticipants;
 import com.retrip.trip.domain.exception.TripNotFoundException;
-import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
-
-import java.util.List;
-import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -118,6 +109,7 @@ public class TripService
     public void leaveTrip(UUID tripId, UUID memberId) {
         Trip trip = findTrip(tripId);
         trip.leave(memberId);
+        tripRepository.save(trip);
     }
 
     @Override

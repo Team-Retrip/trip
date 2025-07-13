@@ -1,10 +1,6 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
-import com.retrip.trip.application.in.request.DelegateLeaderRequest;
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripDemandRequest;
-import com.retrip.trip.application.in.request.TripMemberBanRequest;
+import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.domain.vo.TripCategory;
@@ -31,6 +27,8 @@ public class TripController {
     private final GetTripUseCase getTripUseCase;
     private final TripDemandUseCase tripDemandUseCase;
     private final TripPeriodUseCase tripPeriodUseCase;
+    private final LeaveTripUseCase leaveTripUseCase;
+    private final DelegateLeaderUseCase delegateLeaderUseCase;
 
     @GetMapping("/categories")
     @Schema(description = "여행 카테고리 목록 조회")

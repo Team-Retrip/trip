@@ -5,10 +5,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.domain.entity.Trip;
-
-import java.util.Optional;
-import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,10 +12,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.retrip.trip.domain.entity.QItinerary.itinerary;
 import static com.retrip.trip.domain.entity.QTrip.trip;
 import static com.retrip.trip.domain.entity.QTripParticipant.tripParticipant;
+import static com.retrip.trip.domain.vo.ParticipantStatus.ACTIVE;
 
 @RequiredArgsConstructor
 @Repository
@@ -75,7 +74,10 @@ public class TripQuerydslRepository implements TripQueryRepository {
                                     trip.open))
                     .from(trip)
                     .join(trip.tripParticipants.values, tripParticipant)
-                    .where(tripParticipant.memberId.eq(memberId))
+                    .where(
+                            tripParticipant.memberId.eq(memberId),
+                            tripParticipant.status.eq(ACTIVE) // 수정된 부분
+                    )
                     .offset(page.getOffset())
                     .limit(page.getPageSize())
                     .orderBy(trip.createdAt.desc())
@@ -85,7 +87,10 @@ public class TripQuerydslRepository implements TripQueryRepository {
             .select(trip.count())
             .from(trip)
             .join(trip.tripParticipants.values, tripParticipant)
-            .where(tripParticipant.memberId.eq(memberId))
+            .where(
+                    tripParticipant.memberId.eq(memberId),
+                    tripParticipant.status.eq(ACTIVE) // 수정된 부분
+            )
             .fetchOne();
 
     return new PageImpl<>(trips, page, total == null ? 0 : total);

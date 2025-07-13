@@ -5,6 +5,7 @@ import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripItineraryQuerydslRepository;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,6 +14,9 @@ import java.util.UUID;
 public abstract class BaseTripServiceTest extends BaseServiceTest {
     @Autowired
     protected TripRepository tripRepository;
+
+    @Autowired
+    protected EntityManager em;
 
     @Autowired
     protected TripDemandReadRepository tripDemandReadRepository;

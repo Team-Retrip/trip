@@ -1,14 +1,10 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
-import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
-import com.retrip.trip.domain.exception.NotParticipantException;
-import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
 import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
 import com.retrip.trip.domain.exception.TripNotReadyException;
-import com.retrip.trip.domain.exception.common.InvalidValueException;
-import com.retrip.trip.domain.exception.TripNotReadyException;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -177,7 +173,7 @@ public class Trip extends BaseEntity {
 
     public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
         if (this.status != TripStatus.BEFORE_TRIP) {
-            throw new TripNotReadyException("여행이 시작된 후에는 리더를 위임할 수 없습니다.");
+            throw new TripNotReadyException();
         }
         tripParticipants.delegateLeader(currentLeaderId, newLeaderId);
     }

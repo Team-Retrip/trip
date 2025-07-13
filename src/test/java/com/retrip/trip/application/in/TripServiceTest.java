@@ -14,7 +14,6 @@ import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.*;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +59,20 @@ class TripServiceTest extends BaseTripServiceTest {
                 4,
                 TripCategory.DOMESTIC);
         ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
+        return tripRepository.save(trip);
+    }
+
+    private Trip createProgressTrip(UUID leaderId) {
+        Trip trip = Trip.create(
+                leaderId,
+                locationId,
+                new TripTitle("진행중 여행"),
+                new TripDescription("설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                4,
+                TripCategory.DOMESTIC);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
         return tripRepository.save(trip);
     }
 
@@ -518,7 +532,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @DisplayName("여행이 '여행 전' 상태가 아니면 나갈 수 없다")
     void leaveTrip_fail_whenTripNotReady() {
         // given
-        Trip trip = createTestTrip("여행", "설명", TripCategory.DOMESTIC);
+        Trip trip = createProgressTrip(memberId);
         trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
         tripRepository.save(trip);
 
@@ -598,6 +612,8 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         tripService.leaveTrip(trip.getId(), newMemberId);
+        em.flush();
+        em.clear();
 
         // then
         Page<TripResponse> myTrips = tripService.getMyTrips(newMemberId, PageRequest.of(0, 10));
