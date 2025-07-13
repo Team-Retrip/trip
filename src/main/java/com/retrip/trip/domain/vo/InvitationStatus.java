@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
-public enum TripInvitationStatus {
+public enum InvitationStatus {
     INVITED("INVITED", "초대"),
     ACCEPTED("ACCEPTED", "수락"),
     REJECTED("REJECTED", "거절"),
@@ -16,8 +16,8 @@ public enum TripInvitationStatus {
     private final String code;
     private final String viewName;
 
-    public static TripInvitationStatus codeOf(String code) {
-        return Arrays.stream(TripInvitationStatus.values())
+    public static InvitationStatus codeOf(String code) {
+        return Arrays.stream(InvitationStatus.values())
                 .filter(status -> status.getCode().equals(code))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코드입니다."));

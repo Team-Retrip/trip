@@ -65,9 +65,6 @@ public class Trip extends BaseEntity {
     @Embedded
     private Itineraries itineraries;
 
-    @Embedded
-    private TripInvitations invitations;
-
     public static Trip create(
             UUID memberId,
             UUID destinationId,
@@ -117,7 +114,6 @@ public class Trip extends BaseEntity {
                 .build();
         trip.itineraries = new Itineraries(trip, period);
         trip.tripParticipants = new TripParticipants(leaderId, trip);
-        trip.invitations = new TripInvitations();
         return trip;
     }
 
