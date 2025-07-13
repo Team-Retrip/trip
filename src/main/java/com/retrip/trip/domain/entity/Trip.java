@@ -1,6 +1,9 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
+import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
+import com.retrip.trip.domain.exception.TripNotReadyException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
@@ -151,5 +154,27 @@ public class Trip extends BaseEntity {
     public void banMembers(UUID loginMemberId, List<UUID> memberIds) {
         this.tripParticipants.banMembers(loginMemberId, memberIds, this);
     }
-}
 
+    public void leave(UUID memberId) {
+        if (!this.status.canLeave()) {
+            throw new TripNotReadyException();
+        }
+
+        TripParticipant participant = tripParticipants.findParticipantById(memberId)
+                .orElseThrow(() -> new NotParticipantException("현재 여행에 참여하고 있지 않습니다."));
+
+        if (participant.isLeader()) {
+            throw new LeaderCannotLeaveException();
+        }
+
+        tripParticipants.removeParticipant(memberId);
+    }
+
+
+    public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
+        if (this.status != TripStatus.BEFORE_TRIP) {
+            throw new TripNotReadyException();
+        }
+        tripParticipants.delegateLeader(currentLeaderId, newLeaderId);
+    }
+}

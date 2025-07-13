@@ -64,11 +64,15 @@ public class TripParticipant extends BaseEntity {
     }
 
     public boolean isLeader() {
-        return ParticipantRole.isLeaderRole(this.role);
+        return this.role.isLeader();
     }
 
     public void ban() {
         this.status = ParticipantStatus.EXPELLED;
     }
-}
 
+
+    public void changeRole(ParticipantRole newRole) {
+        this.role = newRole;
+    }
+}

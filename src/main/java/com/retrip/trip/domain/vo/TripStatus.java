@@ -30,4 +30,8 @@ public enum TripStatus {
         return this != RECRUITING
                 && this != RECRUITMENT_CLOSED;
     }
+
+    public boolean canLeave() {
+        return this == RECRUITING || this == RECRUITMENT_CLOSED || this == BEFORE_TRIP;
+    }
 }

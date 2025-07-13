@@ -21,7 +21,7 @@ public enum ParticipantRole {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코드입니다."));
     }
 
-    public static boolean isLeaderRole(ParticipantRole role) {
-        return LEADER == role;
+    public boolean isLeader() {
+        return this == LEADER;
     }
 }

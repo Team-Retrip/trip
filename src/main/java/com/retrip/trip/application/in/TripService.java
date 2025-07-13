@@ -1,29 +1,18 @@
 package com.retrip.trip.application.in;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
-
+import com.retrip.trip.application.in.request.DelegateLeaderRequest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.application.in.usecase.CreateTripUseCase;
-import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.TripDemandUseCase;
-import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
+import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
-import com.retrip.trip.domain.entity.TripParticipant;
-import com.retrip.trip.domain.entity.TripParticipants;
 import com.retrip.trip.domain.exception.TripNotFoundException;
-import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
-
-import java.util.List;
-import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +26,7 @@ import java.util.UUID;
 @Transactional
 @Service
 public class TripService
-        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase {
+        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
@@ -103,9 +92,30 @@ public class TripService
         return PeriodUpdateResponse.of(trip);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<TripResponse> getMyTrips(UUID memberId, Pageable page) {
+        return tripQueryRepository.findMyTrips(memberId, page);
+    }
+
     @Override
     public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIds) {
         Trip trip = findTrip(tripId);
         trip.banMembers(loginMemberId, memberIds);
+    }
+
+
+    @Override
+    public void leaveTrip(UUID tripId, UUID memberId) {
+        Trip trip = findTrip(tripId);
+        trip.leave(memberId);
+        tripRepository.save(trip);
+    }
+
+    @Override
+    public DelegateLeaderResponse delegateLeader(UUID tripId, DelegateLeaderRequest request) {
+        Trip trip = findTrip(tripId);
+        trip.delegateLeader(request.currentLeaderId(), request.newLeaderId());
+        return DelegateLeaderResponse.of(trip, request.newLeaderId());
     }
 }

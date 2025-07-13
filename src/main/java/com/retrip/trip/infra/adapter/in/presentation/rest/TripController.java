@@ -1,14 +1,8 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripDemandRequest;
-import com.retrip.trip.application.in.request.TripMemberBanRequest;
+import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.application.in.usecase.CreateTripUseCase;
-import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.TripDemandUseCase;
-import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
+import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,6 +27,8 @@ public class TripController {
     private final GetTripUseCase getTripUseCase;
     private final TripDemandUseCase tripDemandUseCase;
     private final TripPeriodUseCase tripPeriodUseCase;
+    private final LeaveTripUseCase leaveTripUseCase;
+    private final DelegateLeaderUseCase delegateLeaderUseCase;
 
     @GetMapping("/categories")
     @Schema(description = "여행 카테고리 목록 조회")
@@ -96,6 +92,33 @@ public class TripController {
                                                                @PathVariable("tripId") UUID tripId,
                                                                @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandRejectResponse response = tripDemandUseCase.reject(memberId, tripId, tripDemandId);
+        return ApiResponse.ok(response);
+    }
+
+    @GetMapping("/my")
+    @Schema(description = "나의 여행 목록 조회")
+    public ApiResponse<Page<TripResponse>> getMyTrips(
+            @RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @PageableDefault(size = 10, page = 0) Pageable page) {
+        Page<TripResponse> trips = getTripUseCase.getMyTrips(memberId, page);
+        return ApiResponse.ok(trips);
+    }
+
+    @DeleteMapping("/{tripId}/participants/{memberId}")
+    @Schema(description = "여행 나가기")
+    public ApiResponse<Void> leaveTrip(
+            @PathVariable UUID tripId,
+            @PathVariable UUID memberId) { //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+        leaveTripUseCase.leaveTrip(tripId, memberId);
+        return ApiResponse.noContent();
+    }
+
+    @PutMapping("/{tripId}/delegate-leader")
+    @Schema(description = "여행 리더 위임")
+    public ApiResponse<DelegateLeaderResponse> delegateLeader(
+            @PathVariable UUID tripId,
+            @RequestBody DelegateLeaderRequest request) {
+        DelegateLeaderResponse response = delegateLeaderUseCase.delegateLeader(tripId, request);
         return ApiResponse.ok(response);
     }
 
