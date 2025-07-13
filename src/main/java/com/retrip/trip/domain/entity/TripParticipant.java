@@ -58,7 +58,7 @@ public class TripParticipant extends BaseEntity {
     }
 
     public boolean isLeader() {
-        return ParticipantRole.isLeaderRole(this.role);
+        return this.role.isLeader();
     }
 
     public void changeRole(ParticipantRole newRole) {

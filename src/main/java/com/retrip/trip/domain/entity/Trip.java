@@ -153,7 +153,7 @@ public class Trip extends BaseEntity {
     }
 
     public void leave(UUID memberId) {
-        if (this.status != TripStatus.BEFORE_TRIP) {
+        if (!this.status.canLeave()) {
             throw new TripNotReadyException();
         }
 
@@ -167,23 +167,11 @@ public class Trip extends BaseEntity {
         tripParticipants.removeParticipant(memberId);
     }
 
+
     public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
         if (this.status != TripStatus.BEFORE_TRIP) {
-            throw new TripNotReadyException();
+            throw new TripNotReadyException("여행이 시작된 후에는 리더를 위임할 수 없습니다.");
         }
-        if (currentLeaderId.equals(newLeaderId)) {
-            throw new InvalidValueException("자기 자신에게 리더를 위임할 수 없습니다.");
-        }
-        if (!tripParticipants.isLeader(currentLeaderId)) {
-            throw new MemberIsNotLeaderException();
-        }
-
-        TripParticipant newLeader = tripParticipants.findParticipantById(newLeaderId)
-                .orElseThrow(() -> new NotParticipantException("새로운 리더가 될 멤버가 여행에 참여하고 있지 않습니다."));
-
-        TripParticipant oldLeader = tripParticipants.findParticipantById(currentLeaderId).get();
-
-        oldLeader.changeRole(ParticipantRole.PARTICIPANT);
-        newLeader.changeRole(ParticipantRole.LEADER);
+        tripParticipants.delegateLeader(currentLeaderId, newLeaderId);
     }
 }

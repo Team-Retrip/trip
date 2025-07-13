@@ -1,6 +1,9 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
+import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
+import com.retrip.trip.domain.vo.ParticipantRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
@@ -55,5 +58,30 @@ public class TripParticipants {
         return this.values.stream()
                 .filter(p -> p.getMemberId().equals(memberId))
                 .findFirst();
+    }
+
+    public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
+        validateLeaderDelegation(currentLeaderId, newLeaderId);
+
+        TripParticipant oldLeader = findParticipantById(currentLeaderId)
+                .orElseThrow(() -> new NotParticipantException("현재 리더를 찾을 수 없습니다."));
+        TripParticipant newLeader = findParticipantById(newLeaderId)
+                .orElseThrow(() -> new NotParticipantException("새로운 리더가 될 멤버가 여행에 참여하고 있지 않습니다."));
+
+        changeLeader(oldLeader, newLeader);
+    }
+
+    private void validateLeaderDelegation(UUID currentLeaderId, UUID newLeaderId) {
+        if (currentLeaderId.equals(newLeaderId)) {
+            throw new InvalidValueException("자기 자신에게 리더를 위임할 수 없습니다.");
+        }
+        if (!isLeader(currentLeaderId)) {
+            throw new MemberIsNotLeaderException();
+        }
+    }
+
+    private void changeLeader(TripParticipant oldLeader, TripParticipant newLeader) {
+        oldLeader.changeRole(ParticipantRole.PARTICIPANT);
+        newLeader.changeRole(ParticipantRole.LEADER);
     }
 }
