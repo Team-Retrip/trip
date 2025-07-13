@@ -5,24 +5,21 @@ import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripItineraryQuerydslRepository;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
-import com.retrip.trip.infra.config.QuerydslConfig;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.UUID;
 
-@DataJpaTest
-@Import(QuerydslConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public abstract class BaseTripServiceTest {
+public abstract class BaseTripServiceTest extends BaseServiceTest {
     @Autowired
     protected TripRepository tripRepository;
 
     @Autowired
-    protected TripDemandRepository tripDemandRepository;
+    protected EntityManager em;
+
+    @Autowired
+    protected TripDemandReadRepository tripDemandReadRepository;
 
     @Autowired
     protected TripParticipantRepository tripParticipantRepository;
@@ -45,6 +42,6 @@ public abstract class BaseTripServiceTest {
 
         tripService =
                 new TripService(
-                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandRepository, tripParticipantRepository);
+                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripParticipantRepository);
     }
 }

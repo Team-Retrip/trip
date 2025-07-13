@@ -3,7 +3,7 @@ package com.retrip.trip.application.in;
 import com.retrip.trip.application.in.base.BaseItineraryServiceTest;
 import com.retrip.trip.application.in.request.ItineraryDetailsCreateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
-import com.retrip.trip.application.in.request.ItineraryFixture;
+import com.retrip.trip.application.in.request.ItineraryRequestFixture;
 import com.retrip.trip.application.in.response.ItineraryDetailsCreateResponse;
 import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
@@ -31,7 +31,7 @@ public class ItineraryServiceTest extends BaseItineraryServiceTest {
 
         Itinerary itinerary = saveTrip.getItineraries().getValues().getFirst();
         LocalDateTime time = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now());
-        ItineraryDetailsCreateRequest request = ItineraryFixture.createItineraryDetails(time, "속초 만석 닭강정", 20000L, locationId);
+        ItineraryDetailsCreateRequest request = ItineraryRequestFixture.createItineraryDetails(time, "속초 만석 닭강정", 20000L, locationId);
 
         ItineraryDetailsCreateResponse response = itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), request);
 
@@ -50,10 +50,10 @@ public class ItineraryServiceTest extends BaseItineraryServiceTest {
         LocalDateTime time1 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now());
         LocalDateTime time2 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now()).plusHours(1);
         LocalDateTime time3 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now()).plusHours(2);
-        ItineraryDetailsCreateRequest createRequest1 = ItineraryFixture.createItineraryDetails(time1, "속초 만석 닭강정", 20000L, locationId);
-        ItineraryDetailsCreateRequest createRequest2 = ItineraryFixture.createItineraryDetails(time2, "속초 바다", null, locationId);
+        ItineraryDetailsCreateRequest createRequest1 = ItineraryRequestFixture.createItineraryDetails(time1, "속초 만석 닭강정", 20000L, locationId);
+        ItineraryDetailsCreateRequest createRequest2 = ItineraryRequestFixture.createItineraryDetails(time2, "속초 바다", null, locationId);
 
-        ItineraryDetailsUpdateRequest updateRequest = ItineraryFixture.updateItineraryDetails(time3, "속초 관람차", 10000L, locationId);
+        ItineraryDetailsUpdateRequest updateRequest = ItineraryRequestFixture.updateItineraryDetails(time3, "속초 관람차", 10000L, locationId);
 
         ItineraryDetailsCreateResponse createResponse = itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), createRequest1);
         itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), createRequest2);
@@ -74,9 +74,9 @@ public class ItineraryServiceTest extends BaseItineraryServiceTest {
         LocalDateTime time1 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now());
         LocalDateTime time2 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now()).plusHours(1);
         LocalDateTime time3 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now());
-        ItineraryDetailsCreateRequest createRequest1 = ItineraryFixture.createItineraryDetails(time1, "속초 만석 닭강정", 20000L, locationId);
-        ItineraryDetailsCreateRequest createRequest2 = ItineraryFixture.createItineraryDetails(time2, "속초 바다", null, locationId);
-        ItineraryDetailsUpdateRequest updateRequest = ItineraryFixture.updateItineraryDetails(time3, "속초 관람차", 10000L, locationId);
+        ItineraryDetailsCreateRequest createRequest1 = ItineraryRequestFixture.createItineraryDetails(time1, "속초 만석 닭강정", 20000L, locationId);
+        ItineraryDetailsCreateRequest createRequest2 = ItineraryRequestFixture.createItineraryDetails(time2, "속초 바다", null, locationId);
+        ItineraryDetailsUpdateRequest updateRequest = ItineraryRequestFixture.updateItineraryDetails(time3, "속초 관람차", 10000L, locationId);
 
         itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), createRequest1);
         ItineraryDetailsCreateResponse createResponse = itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), createRequest2);
@@ -93,7 +93,7 @@ public class ItineraryServiceTest extends BaseItineraryServiceTest {
 
         Itinerary itinerary = saveTrip.getItineraries().getValues().getFirst();
         LocalDateTime time = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now());
-        ItineraryDetailsCreateRequest createRequest = ItineraryFixture.createItineraryDetails(time, "속초 만석 닭강정", 20000L, locationId);
+        ItineraryDetailsCreateRequest createRequest = ItineraryRequestFixture.createItineraryDetails(time, "속초 만석 닭강정", 20000L, locationId);
         ItineraryDetailsCreateResponse createResponse = itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), createRequest);
 
         //
@@ -108,9 +108,9 @@ public class ItineraryServiceTest extends BaseItineraryServiceTest {
         LocalDateTime time1 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now());
         LocalDateTime time2 = trip.getItineraries().getValues().getFirst().getDate().atTime(LocalTime.now()).plusHours(1);
         LocalDateTime time3 = trip.getItineraries().getValues().getLast().getDate().atTime(LocalTime.now());
-        ItineraryDetailsCreateRequest createRequest1 = ItineraryFixture.createItineraryDetails(time1, "속초 만석 닭강정", 20000L, locationId);
-        ItineraryDetailsCreateRequest createRequest2 = ItineraryFixture.createItineraryDetails(time2, "속초 바다", null, locationId);
-        ItineraryDetailsCreateRequest createRequest3 = ItineraryFixture.createItineraryDetails(time3, "집가자", null, locationId);
+        ItineraryDetailsCreateRequest createRequest1 = ItineraryRequestFixture.createItineraryDetails(time1, "속초 만석 닭강정", 20000L, locationId);
+        ItineraryDetailsCreateRequest createRequest2 = ItineraryRequestFixture.createItineraryDetails(time2, "속초 바다", null, locationId);
+        ItineraryDetailsCreateRequest createRequest3 = ItineraryRequestFixture.createItineraryDetails(time3, "집가자", null, locationId);
 
         Itinerary firstItinerary = saveTrip.getItineraries().getValues().getFirst();
         Itinerary lastItinerary = saveTrip.getItineraries().getValues().getLast();

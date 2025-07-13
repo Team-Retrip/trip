@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.vo.TripStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
@@ -20,6 +21,13 @@ public class TripDemands {
     }
 
     public void addDemand(TripDemand demand) {
+        validateTripRecruitingStatus(demand.getTrip().getStatus());
         values.add(demand);
+    }
+
+    private void validateTripRecruitingStatus(TripStatus status) {
+        if (!TripStatus.RECRUITING.equals(status)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
     }
 }
