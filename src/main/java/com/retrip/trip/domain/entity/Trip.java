@@ -2,11 +2,6 @@ package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
 import com.retrip.trip.domain.exception.common.BusinessException;
-import com.retrip.trip.domain.vo.TripCategory;
-import com.retrip.trip.domain.vo.TripDescription;
-import com.retrip.trip.domain.vo.TripPeriod;
-import com.retrip.trip.domain.vo.TripStatus;
-import com.retrip.trip.domain.vo.TripTitle;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -155,10 +150,6 @@ public class Trip extends BaseEntity {
 
     public void banMembers(UUID loginMemberId, List<UUID> memberIds) {
         this.tripParticipants.banMembers(loginMemberId, memberIds, this);
-    }
-
-    public void createInvitations(UUID leaderId, List<UUID> memberIds) {
-        invitations.add(this, leaderId, memberIds, tripParticipants);
     }
 }
 
