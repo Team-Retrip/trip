@@ -4,6 +4,7 @@ import com.retrip.trip.application.in.request.DelegateLeaderRequest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
+import com.retrip.trip.application.in.request.TripMemberBanRequest;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.domain.vo.TripCategory;
@@ -30,8 +31,6 @@ public class TripController {
     private final GetTripUseCase getTripUseCase;
     private final TripDemandUseCase tripDemandUseCase;
     private final TripPeriodUseCase tripPeriodUseCase;
-    private final LeaveTripUseCase leaveTripUseCase;
-    private final DelegateLeaderUseCase delegateLeaderUseCase;
 
     @GetMapping("/categories")
     @Schema(description = "여행 카테고리 목록 조회")
@@ -123,5 +122,14 @@ public class TripController {
             @RequestBody DelegateLeaderRequest request) {
         DelegateLeaderResponse response = delegateLeaderUseCase.delegateLeader(tripId, request);
         return ApiResponse.ok(response);
+    }
+
+    @DeleteMapping("/{tripId}/members/ban")
+    @Schema(description = "여행 멤버 리스트 강퇴")
+    public ApiResponse<TripDemandRejectResponse> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+                                                           @PathVariable("tripId") UUID tripId,
+                                                           @RequestBody TripMemberBanRequest request) {
+        tripDemandUseCase.banMembers(memberId, tripId, request.memberIds());
+        return ApiResponse.noContent();
     }
 }

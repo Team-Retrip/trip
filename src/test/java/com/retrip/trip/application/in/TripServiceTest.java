@@ -14,6 +14,7 @@ import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.*;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -603,4 +604,42 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(myTrips.getTotalElements()).isZero();
     }
 
+    @Test
+    void 리더는_참여자들을_추방할_수_있다() {
+        // given
+        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
+        newTrip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(newTrip);
+        TripDemandApproveResponse response = tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
+
+        // then
+        tripService.banMembers(memberId, newTrip.getId(), List.of(newMemberId));
+
+        Trip trip = tripRepository.findById(newTrip.getId()).orElseThrow();
+        TripParticipant banParticipant = trip.getTripParticipants().getValues().stream()
+                .filter(participant -> participant.getMemberId().equals(newMemberId))
+                .findFirst()
+                .orElseThrow();
+
+        // when
+        assertThat(response).isNotNull();
+        assertThat(banParticipant.getStatus()).isEqualTo(ParticipantStatus.EXPELLED);
+    }
+
+    @Test
+    void 해당_여행에_강퇴당한_사용자는_다시_참여요청할_수_없다() {
+        // given
+        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
+        newTrip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(newTrip);
+        tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
+        tripService.banMembers(memberId, newTrip.getId(), List.of(newMemberId));
+
+        TripDemandRequest request = new TripDemandRequest(newMemberId, "강퇴당한 후 다시 참여 요청 메시지");
+
+        // when && then
+        assertThrows(BusinessException.class, () -> tripService.tripDemand(newTrip.getId(), request));
+    }
 }

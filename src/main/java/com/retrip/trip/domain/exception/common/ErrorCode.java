@@ -18,9 +18,12 @@ public enum ErrorCode {
     NOT_TRIP_LEADER(BAD_REQUEST, "Trip-003", "여행 리더가 아니면 접근할 수 없습니다."),
     TRIP_INVITATION_DUPLICATE(BAD_REQUEST, "Trip-004", "사용자를 여행에 중복 초대할 수 없습니다."),
     MEMBER_IS_NOT_LEADER(BAD_REQUEST, "Trip-005", "여행 리더가 아니면 접근할 수 없습니다."),
-    LEADER_CANNOT_LEAVE(BAD_REQUEST, "Trip-006", "리더는 여행을 나갈 수 없습니다. 먼저 리더를 위임해야 합니다."),
-    TRIP_NOT_READY(BAD_REQUEST, "Trip-007", "여행이 준비 상태일 때만 나갈 수 있습니다."),
-    NOT_PARTICIPANT(BAD_REQUEST, "Trip-008", "여행 참여자가 아닙니다.");
+    TRIP_MEMBER_NOT_IN_TRIP(BAD_REQUEST, "TRIP-006","강퇴 대상 멤버가 해당 여행에 포함되어 있지 않습니다."),
+    TRIP_MEMBER_BANNED_CANNOT_APPLY(HttpStatus.BAD_REQUEST, "TRIP-007", "강퇴된 사용자는 해당 여행에 참가 신청할 수 없습니다."),
+    MEMBER_IS_NOT_LEADER(BAD_REQUEST, "Trip-007", "여행 리더가 아니면 접근할 수 없습니다."),
+    LEADER_CANNOT_LEAVE(BAD_REQUEST, "Trip-008", "리더는 여행을 나갈 수 없습니다. 먼저 리더를 위임해야 합니다."),
+    TRIP_NOT_READY(BAD_REQUEST, "Trip-009", "여행이 준비 상태일 때만 나갈 수 있습니다."),
+    NOT_PARTICIPANT(BAD_REQUEST, "Trip-010", "여행 참여자가 아닙니다.");
 
 
     private final HttpStatus status;

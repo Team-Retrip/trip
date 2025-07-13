@@ -3,9 +3,12 @@ package com.retrip.trip.domain.entity;
 import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
 import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
 import com.retrip.trip.domain.exception.NotParticipantException;
+import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
+import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
 import com.retrip.trip.domain.exception.TripNotReadyException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
+import com.retrip.trip.domain.exception.TripNotReadyException;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -62,9 +66,6 @@ public class Trip extends BaseEntity {
 
     @Embedded
     private Itineraries itineraries;
-
-    @Embedded
-    private TripInvitations invitations;
 
     public static Trip create(
             UUID memberId,
@@ -115,7 +116,6 @@ public class Trip extends BaseEntity {
                 .build();
         trip.itineraries = new Itineraries(trip, period);
         trip.tripParticipants = new TripParticipants(leaderId, trip);
-        trip.invitations = new TripInvitations();
         return trip;
     }
 
@@ -124,7 +124,14 @@ public class Trip extends BaseEntity {
     }
 
     public void addDemand(TripDemand demand) {
+        validateAddDemand(demand);
         this.tripDemands.addDemand(demand);
+    }
+
+    private void validateAddDemand(TripDemand demand) {
+        if(this.tripParticipants.isBan(demand.getMemberId())){
+            throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
+        }
     }
 
     public void updatePeriod(
@@ -148,8 +155,8 @@ public class Trip extends BaseEntity {
         return getItineraries().ids();
     }
 
-    public void createInvitations(UUID leaderId, List<UUID> memberIds) {
-        invitations.add(this, leaderId, memberIds, tripParticipants);
+    public void banMembers(UUID loginMemberId, List<UUID> memberIds) {
+        this.tripParticipants.banMembers(loginMemberId, memberIds, this);
     }
 
     public void leave(UUID memberId) {
