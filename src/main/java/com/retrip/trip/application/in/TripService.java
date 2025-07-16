@@ -2,36 +2,58 @@ package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.request.DelegateLeaderRequest;
 import com.retrip.trip.application.in.request.PeriodUpdateRequest;
+import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
+import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripDemandRequest;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.repository.*;
+import com.retrip.trip.application.in.response.ConfirmationDemandAcceptResponse;
+import com.retrip.trip.application.in.response.PeriodUpdateResponse;
+import com.retrip.trip.application.in.response.TripCreateResponse;
+import com.retrip.trip.application.in.response.TripDemandApproveResponse;
+import com.retrip.trip.application.in.response.TripDemandRejectResponse;
+import com.retrip.trip.application.in.response.TripDemandResponse;
+import com.retrip.trip.application.in.response.TripResponse;
+import com.retrip.trip.application.in.usecase.CreateTripUseCase;
+import com.retrip.trip.application.in.usecase.GetTripUseCase;
+import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
+import com.retrip.trip.application.in.usecase.TripDemandUseCase;
+import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
+import com.retrip.trip.application.out.repository.TripConfirmationDemandRepository;
+import com.retrip.trip.application.out.repository.TripDemandReadRepository;
+import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
+import com.retrip.trip.application.out.repository.TripParticipantRepository;
+import com.retrip.trip.application.out.repository.TripQueryRepository;
+import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripConfirmationDemand;
+import com.retrip.trip.domain.entity.TripConfirmationDemand;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class TripService
-        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase {
+        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase, TripConfirmationUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
     private final TripDemandReadRepository tripDemandReadRepository;
     private final TripParticipantRepository tripParticipantRepository;
+    private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
 
     @Override
     public TripCreateResponse createTrip(TripCreateRequest request) {
@@ -116,5 +138,44 @@ public class TripService
         Trip trip = findTrip(tripId);
         trip.delegateLeader(request.currentLeaderId(), request.newLeaderId());
         return DelegateLeaderResponse.of(trip, request.newLeaderId());
+    }
+
+    @Override
+    public void demandTripConfirmation(UUID loginMemberId, UUID tripId, TripConfirmationDemandRequest request) {
+        Trip trip = findTrip(tripId);
+
+        TripConfirmationDemand confirmationDemand = TripConfirmationDemand.create(loginMemberId, trip, request.startDate(), request.endDate());
+        confirmationDemand.addTripMember(loginMemberId);
+
+        tripConfirmationDemandRepository.save(confirmationDemand);
+        //TODO: 알림 보내야함
+    }
+
+    @Override
+    public void demandAgainTripConfirmation(UUID loginMemberId, UUID tripId, UUID confirmationDemandId, TripConfirmationDemandRequest request) {
+        TripConfirmationDemand savedDemand = findTripConfirmationDemandById(confirmationDemandId);
+        savedDemand.demandAgain(loginMemberId, request.startDate(), request.endDate());
+        //TODO: 알림 보내야함
+    }
+
+    @Override
+    public ConfirmationDemandAcceptResponse acceptConfirmationDemand(UUID loginMemberId, UUID tripId, UUID confirmationDemandId) {
+        TripConfirmationDemand demand = findTripConfirmationDemandById(confirmationDemandId);
+        demand.accept(loginMemberId);
+        //TODO: 여행 방장에게 알림 보내야함
+
+        return ConfirmationDemandAcceptResponse.of(demand.getTrip());
+    }
+
+    @Override
+    public void rejectConfirmationDemand(UUID loginMemberId, UUID tripId, UUID confirmationDemandId) {
+        TripConfirmationDemand demand = findTripConfirmationDemandById(confirmationDemandId);
+        demand.reject(loginMemberId);
+        //TODO: 여행 방장에게 알림 보내야함
+    }
+
+    private TripConfirmationDemand findTripConfirmationDemandById(UUID confirmationDemandId) {
+        return tripConfirmationDemandRepository.findById(confirmationDemandId)
+                .orElseThrow(() -> new EntityNotFoundException("참여 확정 요청을 찾을 수 없습니다."));
     }
 }

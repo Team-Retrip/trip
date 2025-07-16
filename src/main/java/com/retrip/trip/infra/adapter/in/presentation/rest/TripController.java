@@ -3,6 +3,11 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
+import com.retrip.trip.application.in.usecase.CreateTripUseCase;
+import com.retrip.trip.application.in.usecase.GetTripUseCase;
+import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
+import com.retrip.trip.application.in.usecase.TripDemandUseCase;
+import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +34,7 @@ public class TripController {
     private final TripPeriodUseCase tripPeriodUseCase;
     private final LeaveTripUseCase leaveTripUseCase;
     private final DelegateLeaderUseCase delegateLeaderUseCase;
+    private final TripConfirmationUseCase tripConfirmationUseCase;
 
     @GetMapping("/categories")
     @Schema(description = "여행 카테고리 목록 조회")
@@ -125,9 +131,46 @@ public class TripController {
     @DeleteMapping("/{tripId}/members/ban")
     @Schema(description = "여행 멤버 리스트 강퇴")
     public ApiResponse<TripDemandRejectResponse> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                           @PathVariable("tripId") UUID tripId,
-                                                           @RequestBody TripMemberBanRequest request) {
+                                                            @PathVariable("tripId") UUID tripId,
+                                                            @RequestBody TripMemberBanRequest request) {
         tripDemandUseCase.banMembers(memberId, tripId, request.memberIds());
         return ApiResponse.noContent();
+    }
+
+    @PostMapping("/{tripId}/confirm/demand")
+    @Schema(description = "여행 확정 요청")
+    public ResponseEntity<?> demandTripConfirmation(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+                                                    @PathVariable UUID tripId,
+                                                    @RequestBody TripConfirmationDemandRequest request) {
+        tripConfirmationUseCase.demandTripConfirmation(memberId, tripId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/re-demand}")
+    @Schema(description = "여행 확정 재요청")
+    public ResponseEntity<?> demandAgainTripConfirmation(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+                                                         @PathVariable UUID tripId,
+                                                         @PathVariable UUID confirmationDemandId,
+                                                         @RequestBody TripConfirmationDemandRequest request) {
+        tripConfirmationUseCase.demandAgainTripConfirmation(memberId, tripId, confirmationDemandId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/accept")
+    @Schema(description = "여행 확정 요청 수락")
+    public ResponseEntity<?> acceptConfirmationRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+                                                       @PathVariable UUID tripId,
+                                                       @PathVariable UUID confirmationDemandId) {
+        ConfirmationDemandAcceptResponse response = tripConfirmationUseCase.acceptConfirmationDemand(memberId, tripId, confirmationDemandId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/reject")
+    @Schema(description = "여행 확정 요청 거절")
+    public ResponseEntity<?> rejectConfirmationRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+                                                       @PathVariable UUID tripId,
+                                                       @PathVariable UUID confirmationDemandId) {
+        tripConfirmationUseCase.rejectConfirmationDemand(memberId, tripId, confirmationDemandId);
+        return ResponseEntity.noContent().build();
     }
 }
