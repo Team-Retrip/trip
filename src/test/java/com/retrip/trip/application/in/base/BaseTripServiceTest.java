@@ -25,6 +25,9 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     protected TripParticipantRepository tripParticipantRepository;
 
     @Autowired
+    protected TripConfirmationDemandRepository tripConfirmationDemandRepository;
+
+    @Autowired
     protected JPAQueryFactory jpaQueryFactory;
 
     protected TripService tripService;
@@ -42,6 +45,6 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
         tripService =
                 new TripService(
-                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripParticipantRepository);
+                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripParticipantRepository, tripConfirmationDemandRepository);
     }
 }
