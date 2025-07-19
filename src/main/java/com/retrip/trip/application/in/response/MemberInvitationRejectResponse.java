@@ -5,7 +5,7 @@ import com.retrip.trip.domain.entity.invitation.Invitation;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record MemberInvitationsResponse(
+public record MemberInvitationRejectResponse(
         UUID memberId,
         UUID tripInvitationId,
         UUID tripId,
@@ -14,8 +14,8 @@ public record MemberInvitationsResponse(
         long expireDays,
         LocalDateTime expiresAt
 ) {
-    public static MemberInvitationsResponse of(Invitation invitation) {
-        return new MemberInvitationsResponse(
+    public static MemberInvitationRejectResponse of(Invitation invitation) {
+        return new MemberInvitationRejectResponse(
                 invitation.getMemberId(),
                 invitation.getId(),
                 invitation.getTripId(),

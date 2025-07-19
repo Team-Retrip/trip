@@ -2,10 +2,12 @@ package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.base.BaseInvitationServiceTest;
 import com.retrip.trip.application.in.request.TripInvitationsCreateRequest;
-import com.retrip.trip.application.in.response.MemberInvitationsResponse;
+import com.retrip.trip.application.in.response.MemberInvitationAcceptResponse;
+import com.retrip.trip.application.in.response.MemberInvitationResponse;
 import com.retrip.trip.application.in.response.InvitationsCreateResponse;
 import com.retrip.trip.application.in.response.InvitationsResponse;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.invitation.Invitation;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,10 +70,26 @@ class InvitationServiceTest extends BaseInvitationServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<MemberInvitationsResponse> invitations =
+        Page<MemberInvitationResponse> invitations =
                 invitationService.getMemberInvitations(홍석_ID, INVITED.name(), pageable, DATE, "desc");
 
         // then
         assertThat(invitations.getTotalElements()).isEqualTo(3);
+    }
+
+    @Test
+    void 초대를_수락하면_여행_멤버가_된다() {
+        // given
+        Trip trip = createTrip(TRIP_ID);
+        tripRepository.save(trip);
+        Invitation invitation = new Invitation(TRIP_ID, MEMBER_ID);
+        invitationRepository.save(invitation);
+
+        // when
+        MemberInvitationAcceptResponse acceptResponse =
+                invitationService.acceptMemberInvitations(MEMBER_ID, TRIP_ID, invitation.getId());
+
+        // then
+        assertThat(acceptResponse.memberId()).isEqualTo(MEMBER_ID);
     }
 }

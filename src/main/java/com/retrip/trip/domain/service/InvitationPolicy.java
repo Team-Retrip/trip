@@ -2,13 +2,15 @@ package com.retrip.trip.domain.service;
 
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipants;
-import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
-import com.retrip.trip.domain.exception.TripInvitationDuplicateException;
+import com.retrip.trip.domain.entity.invitation.Invitation;
+import com.retrip.trip.domain.exception.*;
 import com.retrip.trip.domain.exception.common.IllegalStateException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.retrip.trip.domain.vo.TripStatus.RECRUITING;
 
 @Service
 public class InvitationPolicy {
@@ -35,5 +37,24 @@ public class InvitationPolicy {
 
     public boolean isNotLeader(TripParticipants tripParticipants, UUID leaderId) {
         return !tripParticipants.isLeader(leaderId);
+    }
+
+    public void canAccept(Trip trip, Invitation invitation) {
+        if (invitation.isExpired()) {
+            throw new InvitationExpiredException();
+        }
+        if (trip.getStatus() != RECRUITING) {
+            throw new TripNotRecruitingException();
+        }
+        TripParticipants tripParticipants = trip.getTripParticipants();
+        if (tripParticipants.isFull()) {
+            throw new TripParticipantsIsFullException();
+        }
+    }
+
+    public void canReject(Invitation invitation) {
+        if (invitation.cannotReject()) {
+            throw new InvitationRejectNotAllowedException();
+        }
     }
 }

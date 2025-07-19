@@ -609,11 +609,9 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         tripService.leaveTrip(trip.getId(), newMemberId);
-        em.flush();
-        em.clear();
+        Page<TripResponse> myTrips = tripService.getMyTrips(newMemberId, PageRequest.of(0, 10));
 
         // then
-        Page<TripResponse> myTrips = tripService.getMyTrips(newMemberId, PageRequest.of(0, 10));
         assertThat(myTrips.getTotalElements()).isZero();
     }
 

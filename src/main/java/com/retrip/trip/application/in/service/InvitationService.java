@@ -2,13 +2,12 @@ package com.retrip.trip.application.in.service;
 
 import com.retrip.trip.application.in.request.TripInvitationOrder;
 import com.retrip.trip.application.in.request.TripInvitationsCreateRequest;
-import com.retrip.trip.application.in.response.InvitationsCreateResponse;
-import com.retrip.trip.application.in.response.InvitationsResponse;
-import com.retrip.trip.application.in.response.MemberInvitationsResponse;
+import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.InvitationManageUseCase;
 import com.retrip.trip.application.out.repository.InvitationRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.entity.invitation.Invitations;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
@@ -54,16 +53,39 @@ public class InvitationService implements InvitationManageUseCase {
     }
 
     @Override
-    public Page<MemberInvitationsResponse> getMemberInvitations(
+    public Page<MemberInvitationResponse> getMemberInvitations(
             UUID memberId, String status, Pageable page, TripInvitationOrder order, String sort) {
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
         Page<Invitation> tripInvitations =
                 invitationRepository.findByMemberIdAndStatus(memberId, InvitationStatus.valueOf(status), pageable);
-        return tripInvitations.map(MemberInvitationsResponse::of);
+        return tripInvitations.map(MemberInvitationResponse::of);
+    }
+
+    @Override
+    public MemberInvitationAcceptResponse acceptMemberInvitations(UUID memberId, UUID tripId, UUID invitationId) {
+        Trip trip = findTripWithParticipants(tripId);
+        Invitation invitation = findInvitation(invitationId);
+        invitationPolicy.canAccept(trip, invitation);
+        invitation.accept();
+        trip.addParticipant(TripParticipant.createTripParticipant(memberId, trip));
+        return MemberInvitationAcceptResponse.of(invitation);
+    }
+
+    @Override
+    public MemberInvitationRejectResponse rejectMemberInvitations(UUID memberId, UUID tripId, UUID invitationId) {
+        Invitation invitation = findInvitation(invitationId);
+        invitationPolicy.canReject(invitation);
+        invitation.reject();
+        return MemberInvitationRejectResponse.of(invitation);
     }
 
     private Trip findTripWithParticipants(UUID tripId) {
         return tripRepository.findWithParticipantsById(tripId)
+                .orElseThrow(EntityNotFoundException::new);
+    }
+
+    private Invitation findInvitation(UUID invitationId) {
+        return invitationRepository.findById(invitationId)
                 .orElseThrow(EntityNotFoundException::new);
     }
 }

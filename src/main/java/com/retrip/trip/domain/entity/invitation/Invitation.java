@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static com.retrip.trip.domain.vo.InvitationStatus.ACCEPTED;
-import static com.retrip.trip.domain.vo.InvitationStatus.INVITED;
+import static com.retrip.trip.domain.vo.InvitationStatus.*;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -46,8 +45,8 @@ public class Invitation extends BaseEntity {
     }
 
     public boolean cannotInviteAgain() {
-        return this.status == INVITED
-                || this.status == ACCEPTED;
+        return this.status == INVITED ||
+                this.status == ACCEPTED;
     }
 
     public void inviteAgain() {
@@ -59,5 +58,22 @@ public class Invitation extends BaseEntity {
                 .toLocalDate()
                 .plusDays(5)
                 .atStartOfDay();
+    }
+
+    public boolean isExpired() {
+        return status == EXPIRED ||
+                LocalDateTime.now().isAfter(expiresAt);
+    }
+
+    public void accept() {
+        this.status = ACCEPTED;
+    }
+
+    public boolean cannotReject() {
+        return this.status != INVITED;
+    }
+
+    public void reject() {
+        this.status = REJECTED;
     }
 }
