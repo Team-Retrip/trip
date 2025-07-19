@@ -9,6 +9,7 @@ import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static com.retrip.trip.domain.vo.InvitationStatus.ACCEPTED;
@@ -19,12 +20,17 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED, force = true)
 @Entity
 public class Invitation extends BaseEntity {
+    public static final long INVITATION_EXPIRE_DAYS = 5L;
+
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
     private UUID tripId;
     private UUID memberId;
     private InvitationStatus status;
+    private LocalDateTime invitedAt;
+    private long expireDays;
+    private LocalDateTime expiresAt;
 
     @Version
     private long version;
@@ -34,6 +40,9 @@ public class Invitation extends BaseEntity {
         this.tripId = tripId;
         this.memberId = memberId;
         this.status = INVITED;
+        this.invitedAt = LocalDateTime.now();
+        this.expireDays = INVITATION_EXPIRE_DAYS;
+        this.expiresAt = calculateExpiry();
     }
 
     public boolean cannotInviteAgain() {
@@ -43,5 +52,12 @@ public class Invitation extends BaseEntity {
 
     public void inviteAgain() {
         this.status = INVITED;
+    }
+
+    public LocalDateTime calculateExpiry() {
+        return this.invitedAt
+                .toLocalDate()
+                .plusDays(5)
+                .atStartOfDay();
     }
 }

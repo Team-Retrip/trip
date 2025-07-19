@@ -3,6 +3,7 @@ package com.retrip.trip.application.in.response;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.vo.InvitationStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,14 +16,21 @@ public record InvitationsCreateResponse(
                 tripId,
                 invitations.stream()
                         .map(invitation -> new InvitationCreateResponse(
-                                invitation.getMemberId(), invitation.getStatus())
-                        ).toList()
+                                invitation.getMemberId(),
+                                invitation.getStatus(),
+                                invitation.getInvitedAt(),
+                                invitation.getExpireDays(),
+                                invitation.getExpiresAt()
+                        )).toList()
         );
     }
 
     public record InvitationCreateResponse(
             UUID memberId,
-            InvitationStatus status
+            InvitationStatus status,
+            LocalDateTime invitedAt,
+            long expireDays,
+            LocalDateTime expiresAt
     ) {
     }
 }
