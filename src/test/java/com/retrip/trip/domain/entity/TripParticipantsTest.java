@@ -1,14 +1,17 @@
 package com.retrip.trip.domain.entity;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.retrip.trip.domain.exception.TripFullException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
-import com.retrip.trip.domain.vo.*;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripDescription;
+import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripTitle;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TripParticipantsTest {
     UUID userId = UUID.fromString("11111111-2222-3333-4444-555555555555");
@@ -94,7 +97,7 @@ class TripParticipantsTest {
 
         // then
         assertThrows(InvalidValueException.class, () -> {
-            tripParticipants.updateMaxParticipants(1);
+            tripParticipants.updateMaxParticipants(1,userId);
         });
     }
 
@@ -116,7 +119,7 @@ class TripParticipantsTest {
         TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip, 3);
 
         // when
-        tripParticipants.updateMaxParticipants(5);
+        tripParticipants.updateMaxParticipants(5,userId);
 
         // then
         assertEquals(5, tripParticipants.getMaxParticipants());

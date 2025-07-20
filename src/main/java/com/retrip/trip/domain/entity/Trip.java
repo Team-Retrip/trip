@@ -42,8 +42,6 @@ public class Trip extends BaseEntity {
 
     private boolean open;
 
-
-
     @Column(name = "status", length = 50, nullable = false)
     private TripStatus status;
 
@@ -118,19 +116,19 @@ public class Trip extends BaseEntity {
 
     public void addDemand(TripDemand demand) {
         validateAddDemand(demand);
+        validateParticipantLimitNotExceeded();
         this.tripDemands.addDemand(demand);
     }
 
     private void validateAddDemand(TripDemand demand) {
-        if(this.tripParticipants.isBan(demand.getMemberId())){
+        if (this.tripParticipants.isBan(demand.getMemberId())) {
             throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
         }
     }
-    public void validateCanJoin() {
-        validateTripRecruitingStatus();
+
+    public void validateParticipantLimitNotExceeded() {
         tripParticipants.validateCanJoin();
     }
-
 
     public void updatePeriod(
             TripPeriod period,
@@ -145,14 +143,6 @@ public class Trip extends BaseEntity {
             this.itineraries.updateByPeriod(period, this);
         }
     }
-    public void updateMaxParticipants(int newMaxParticipants, UUID memberId) {
-        if (!tripParticipants.updatableByLeader(memberId)) {
-            throw new IllegalStateException("여행 리더만 최대 참여 인원을 변경할 수 있습니다.");
-        }
-        validateTripRecruitingStatus();
-        tripParticipants.updateMaxParticipants(newMaxParticipants);
-    }
-
 
     public List<UUID> getItinerariesIds() {
         if (Objects.isNull(getItineraries())) {
@@ -170,18 +160,12 @@ public class Trip extends BaseEntity {
             throw new TripNotReadyException();
         }
 
-
-
-
-}
-
         TripParticipant participant = tripParticipants.findParticipantById(memberId)
                 .orElseThrow(() -> new NotParticipantException("현재 여행에 참여하고 있지 않습니다."));
 
         if (participant.isLeader()) {
             throw new LeaderCannotLeaveException();
         }
-
         tripParticipants.removeParticipant(memberId);
     }
 

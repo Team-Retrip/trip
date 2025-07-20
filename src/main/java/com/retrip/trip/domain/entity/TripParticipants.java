@@ -1,18 +1,14 @@
 package com.retrip.trip.domain.entity;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_LEADER;
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
-import static lombok.AccessLevel.PROTECTED;
-
-import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
 import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripFullException;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.ErrorCode;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
+import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.ParticipantStatus;
 import com.retrip.trip.domain.vo.TripStatus;
-import com.retrip.trip.domain.vo.ParticipantRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -24,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_LEADER;
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
+import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Embeddable
@@ -40,19 +40,13 @@ public class TripParticipants {
         validateMaxParticipants(maxParticipants);
         this.maxParticipants = maxParticipants;
         TripParticipant leader = TripParticipant.createTripLeader(memberId, trip);
-    public TripParticipants(UUID leaderId, Trip trip) {
-        TripParticipant leader = TripParticipant.createTripLeader(leaderId, trip);
         values.add(leader);
     }
-
-
 
     public void addParticipant(TripParticipant participant) {
         validateCanJoin();
         values.add(participant);
     }
-
-
 
     public boolean isFullParticipants() {
         return values.size() >= maxParticipants;
@@ -68,7 +62,6 @@ public class TripParticipants {
     }
 
     public void validateCanJoin() {
-
         if (isFullParticipants()) {
             throw new TripFullException();
         }
@@ -78,8 +71,10 @@ public class TripParticipants {
         return isLeader(memberId);
     }
 
-    public boolean isLeader(UUID memberId) {
-    public void updateMaxParticipants(int newMaxParticipants) {
+    public void updateMaxParticipants(int newMaxParticipants, UUID memberId) {
+        if (!isLeader(memberId)) {
+            throw new MemberIsNotLeaderException();
+        }
         validateMaxParticipants(newMaxParticipants);
         validateNewMaxParticipants(newMaxParticipants);
         this.maxParticipants = newMaxParticipants;
@@ -97,13 +92,17 @@ public class TripParticipants {
         }
     }
 
-    private boolean isLeader(UUID memberId) {
+
+
+    public boolean isLeader(UUID memberId) {
         return this.values.stream()
                 .filter(m -> memberId.equals(m.getMemberId()))
                 .findFirst()
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.LEADER_REQUIRED, "여행 회원이 아닙니다."))
                 .isLeader();
     }
+
+
 
     public void banMembers(UUID loginMemberId, List<UUID> memberIds, Trip trip) {
         validateTripRecruitingStatus(trip.getStatus());
@@ -141,7 +140,7 @@ public class TripParticipants {
     public boolean isBan(UUID memberId) {
         return values.stream()
                 .anyMatch(tripParticipant -> memberId.equals(tripParticipant.getMemberId()) &&
-                                                          tripParticipant.getStatus() == ParticipantStatus.EXPELLED);
+                        tripParticipant.getStatus() == ParticipantStatus.EXPELLED);
     }
 
     public boolean anyDuplicate(List<UUID> memberIds) {

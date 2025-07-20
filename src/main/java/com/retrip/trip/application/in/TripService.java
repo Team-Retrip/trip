@@ -54,16 +54,13 @@ public class TripService
     @Override
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
-        trip.validateTripRecruitingStatus();
-        trip.validateCanJoin();
-        TripDemand demand = TripDemand.create(request.memberId(), trip, request.message());
-        trip.addDemand(demand);
+        trip.addDemand(TripDemand.create(request.memberId(), trip, request.message()));
         tripRepository.save(trip);
-        return TripDemandResponse.of(demand);
+        return TripDemandResponse.of(trip.getTripDemands().getValues().getLast());
     }
 
     private Trip findTrip(UUID tripId) {
-        return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+        return tripRepository.findWithParticipantsById(tripId).orElseThrow(TripNotFoundException::new);
     }
 
     @Override
@@ -71,14 +68,6 @@ public class TripService
         TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, tripDemandId);
         tripDemand.approve(memberId);
         return TripDemandApproveResponse.of(tripDemand);
-    public TripDemandApproveResponse approve(UUID tripId, UUID joinRequestId) {
-        TripDemand tripDemand = findJoinRequestBy(tripId, joinRequestId);
-        Trip trip = tripDemand.getTrip();
-        trip.validateCanJoin();
-        tripDemand.approve();
-
-        addApprovedParticipant(tripDemand);
-        return new TripDemandApproveResponse(tripDemand.getStatus().getCode());
     }
 
     @Override
@@ -114,7 +103,6 @@ public class TripService
         Trip trip = findTrip(tripId);
         trip.banMembers(loginMemberId, memberIds);
     }
-
 
     @Override
     public void leaveTrip(UUID tripId, UUID memberId) {
