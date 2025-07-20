@@ -49,7 +49,7 @@ public record TripCreateResponse(
                 trip.getPeriod().getStart(),
                 trip.getPeriod().getEnd(),
                 trip.isOpen(),
-                trip.getMaxParticipants(),
+                trip.getTripParticipants().getMaxParticipants(),
                 trip.getCategory().getViewName(),
                 trip.getItineraries() == null ? new ArrayList<>() :
                         trip.getItineraries().getValues().stream()

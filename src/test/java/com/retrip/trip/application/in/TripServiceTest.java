@@ -6,10 +6,7 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.entity.TripParticipant;
-import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
-import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
-import com.retrip.trip.domain.exception.NotParticipantException;
-import com.retrip.trip.domain.exception.TripNotReadyException;
+import com.retrip.trip.domain.exception.*;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
@@ -657,5 +654,135 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when && then
         assertThrows(BusinessException.class, () -> tripService.tripDemand(newTrip.getId(), request));
+    }
+
+    @Test
+    @DisplayName("여행이 가득 찼을 경우, 새로운 사용자는 참여 요청을 할 수 없다.")
+    void tripIsFull_then_cannotJoin() {
+        // given
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("꽉 찬 여행"),
+                new TripDescription("더 이상 자리가 없어요"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                1,
+                TripCategory.DOMESTIC
+        );
+        tripRepository.save(trip);
+
+        // when & then
+        TripDemandRequest newRequest = new TripDemandRequest(UUID.randomUUID(), "저도 참여하고 싶어요!");
+
+        assertThrows(TripFullException.class, () -> {
+            tripService.tripDemand(trip.getId(), newRequest);
+        });
+    }
+
+    @Test
+    @DisplayName("여행 리더는 최대 참여 인원을 변경할 수 있다.")
+    void leader_can_update_maxParticipants() {
+        // given
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("인원 변경 테스트"),
+                new TripDescription("설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                3,
+                TripCategory.DOMESTIC
+        );
+        tripRepository.save(trip);
+
+        // when
+        int newMaxParticipants = 5;
+        trip.getTripParticipants().updateMaxParticipants(newMaxParticipants,memberId);
+        tripRepository.save(trip);
+
+        // then
+        Trip updatedTrip = tripRepository.findById(trip.getId()).get();
+        assertThat(updatedTrip.getTripParticipants().getMaxParticipants()).isEqualTo(newMaxParticipants);
+    }
+
+    @Test
+    @DisplayName("리더가 아닌 멤버는 최대 참여 인원을 변경할 수 없다.")
+    void nonLeader_cannot_update_maxParticipants() {
+        // given
+        UUID nonLeaderId = UUID.randomUUID();
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("권한 테스트"),
+                new TripDescription("설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                3,
+                TripCategory.DOMESTIC
+        );
+        trip.addParticipant(TripParticipant.createTripParticipant(nonLeaderId, trip));
+        tripRepository.save(trip);
+
+
+        // when & then
+        assertThrows(MemberIsNotLeaderException.class, () -> {
+            trip.getTripParticipants().updateMaxParticipants(5, nonLeaderId);
+        });
+    }
+
+    @Test
+    @DisplayName("최대 참여 인원을 현재 참여 인원보다 적게 변경할 수 없다.")
+    void cannot_update_maxParticipants_lessThan_currentParticipants() {
+        // given
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("인원 축소 테스트"),
+                new TripDescription("설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                4,
+                TripCategory.DOMESTIC
+        );
+        trip.addParticipant(TripParticipant.createTripParticipant(UUID.randomUUID(), trip));
+        trip.addParticipant(TripParticipant.createTripParticipant(UUID.randomUUID(), trip));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(InvalidValueException.class, () -> {
+            trip.getTripParticipants().updateMaxParticipants(2,memberId);
+        });
+    }
+
+    @Test
+    @DisplayName("isLeader 메서드가 정확하게 리더와 멤버를 구분하는지 확인한다.")
+    void isLeader_check_works_correctly() {
+        // given
+        UUID nonLeaderId = UUID.randomUUID();
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle("isLeader 테스트"),
+                new TripDescription("설명"),
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
+                true,
+                3,
+                TripCategory.DOMESTIC
+        );
+        trip.addParticipant(TripParticipant.createTripParticipant(nonLeaderId, trip));
+        tripRepository.save(trip);
+
+        // when
+        Trip savedTrip = tripRepository.findById(trip.getId()).get();
+        boolean isLeaderResult = savedTrip.getTripParticipants().isLeader(memberId);
+        boolean isNotLeaderResult = savedTrip.getTripParticipants().isLeader(nonLeaderId);
+
+
+        // then
+        assertTrue(isLeaderResult);
+        assertThrows(InvalidValueException.class, () -> {
+            savedTrip.getTripParticipants().isLeader(UUID.randomUUID());
+        });
     }
 }

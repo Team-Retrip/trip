@@ -54,13 +54,13 @@ public class TripService
     @Override
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
-        TripDemand demand = TripDemand.create(request.memberId(), trip, request.message());
-        trip.addDemand(demand);
-        return TripDemandResponse.of(demand);
+        trip.addDemand(TripDemand.create(request.memberId(), trip, request.message()));
+        tripRepository.save(trip);
+        return TripDemandResponse.of(trip.getTripDemands().getValues().getLast());
     }
 
     private Trip findTrip(UUID tripId) {
-        return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
+        return tripRepository.findWithParticipantsById(tripId).orElseThrow(TripNotFoundException::new);
     }
 
     @Override
@@ -103,7 +103,6 @@ public class TripService
         Trip trip = findTrip(tripId);
         trip.banMembers(loginMemberId, memberIds);
     }
-
 
     @Override
     public void leaveTrip(UUID tripId, UUID memberId) {

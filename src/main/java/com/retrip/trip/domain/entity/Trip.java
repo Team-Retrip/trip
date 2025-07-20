@@ -42,9 +42,6 @@ public class Trip extends BaseEntity {
 
     private boolean open;
 
-    @Column(name = "max_participants", nullable = false)
-    private int maxParticipants;
-
     @Column(name = "status", length = 50, nullable = false)
     private TripStatus status;
 
@@ -80,12 +77,11 @@ public class Trip extends BaseEntity {
                 .description(description)
                 .period(period)
                 .open(open)
-                .maxParticipants(maxParticipants)
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .tripDemands(new TripDemands())
                 .build();
-        trip.tripParticipants = new TripParticipants(memberId, trip);
+        trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
         return trip;
     }
 
@@ -106,12 +102,11 @@ public class Trip extends BaseEntity {
                 .description(description)
                 .period(period)
                 .open(open)
-                .maxParticipants(maxParticipants)
                 .category(category)
                 .status(TripStatus.RECRUITING)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.tripParticipants = new TripParticipants(leaderId, trip);
+        trip.tripParticipants = new TripParticipants(leaderId, trip, maxParticipants);
         return trip;
     }
 
@@ -121,13 +116,18 @@ public class Trip extends BaseEntity {
 
     public void addDemand(TripDemand demand) {
         validateAddDemand(demand);
+        validateParticipantLimitNotExceeded();
         this.tripDemands.addDemand(demand);
     }
 
     private void validateAddDemand(TripDemand demand) {
-        if(this.tripParticipants.isBan(demand.getMemberId())){
+        if (this.tripParticipants.isBan(demand.getMemberId())) {
             throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
         }
+    }
+
+    public void validateParticipantLimitNotExceeded() {
+        tripParticipants.validateCanJoin();
     }
 
     public void updatePeriod(
@@ -166,7 +166,6 @@ public class Trip extends BaseEntity {
         if (participant.isLeader()) {
             throw new LeaderCannotLeaveException();
         }
-
         tripParticipants.removeParticipant(memberId);
     }
 
