@@ -5,6 +5,7 @@ import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripFullException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.ErrorCode;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.ParticipantStatus;
@@ -29,7 +30,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Embeddable
 @NoArgsConstructor(access = PROTECTED, force = true)
 public class TripParticipants {
-
     @Column(name = "max_participants", nullable = false)
     private int maxParticipants;
 
@@ -92,8 +92,6 @@ public class TripParticipants {
         }
     }
 
-
-
     public boolean isLeader(UUID memberId) {
         return this.values.stream()
                 .filter(m -> memberId.equals(m.getMemberId()))
@@ -101,8 +99,6 @@ public class TripParticipants {
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.LEADER_REQUIRED, "여행 회원이 아닙니다."))
                 .isLeader();
     }
-
-
 
     public void banMembers(UUID loginMemberId, List<UUID> memberIds, Trip trip) {
         validateTripRecruitingStatus(trip.getStatus());
@@ -182,4 +178,9 @@ public class TripParticipants {
         oldLeader.changeRole(ParticipantRole.PARTICIPANT);
         newLeader.changeRole(ParticipantRole.LEADER);
     }
+
+    public boolean isFull() {
+        return this.values.size() >= this.maxParticipants;
+    }
 }
+

@@ -5,20 +5,20 @@ import com.retrip.trip.domain.entity.invitation.Invitation;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record InvitationsResponse(
-        UUID tripId,
-        UUID tripInvitationId,
+public record MemberInvitationResponse(
         UUID memberId,
+        UUID tripInvitationId,
+        UUID tripId,
         String status,
         LocalDateTime invitedAt,
         long expireDays,
         LocalDateTime expiresAt
 ) {
-    public static InvitationsResponse of(Invitation invitation) {
-        return new InvitationsResponse(
-                invitation.getTripId(),
-                invitation.getId(),
+    public static MemberInvitationResponse of(Invitation invitation) {
+        return new MemberInvitationResponse(
                 invitation.getMemberId(),
+                invitation.getId(),
+                invitation.getTripId(),
                 invitation.getStatus().name(),
                 invitation.getInvitedAt(),
                 invitation.getExpireDays(),

@@ -26,7 +26,12 @@ public enum ErrorCode {
     TRIP_FULL(BAD_REQUEST, "Trip-011", "여행 참가 인원이 가득 찼습니다."),
     INVALID_MAX_PARTICIPANTS(BAD_REQUEST, "Trip-012", "최대 참여 인원 변경이 불가능합니다."),
     LEADER_REQUIRED(BAD_REQUEST, "Trip-013", "여행 리더 권한이 필요합니다."),
-    NOT_RECRUITING(BAD_REQUEST, "Trip-014", "모집 중인 여행이 아닙니다.");
+    NOT_RECRUITING(BAD_REQUEST, "Trip-014", "모집 중인 여행이 아닙니다."),
+    INVITATION_EXPIRED(BAD_REQUEST, "Trip-015", "초대가 만료되었습니다."),
+    TRIP_NOT_RECRUITING(BAD_REQUEST, "Trip-016", "여행이 모집중이 아닙니다."),
+    TRIP_PARTICIPANTS_IS_FULL(BAD_REQUEST, "Trip-017", "여행 참여자가 가득 찼습니다."),
+    INVITATION_REJECT_NOT_ALLOWED(BAD_REQUEST, "Trip-018", "초대 거절이 불가능한 상태입니다.");
+
 
     private final HttpStatus status;
     private final String code;

@@ -2,42 +2,23 @@ package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.TripFullException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
-import com.retrip.trip.domain.vo.TripCategory;
-import com.retrip.trip.domain.vo.TripDescription;
-import com.retrip.trip.domain.vo.TripPeriod;
-import com.retrip.trip.domain.vo.TripTitle;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.fixture.TripFixture.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TripParticipantsTest {
-    UUID userId = UUID.fromString("11111111-2222-3333-4444-555555555555");
-    UUID tripId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-
-    private Trip createDummyTrip() {
-        return Trip.create(
-                userId,
-                tripId,
-                new TripTitle("테스트 여행"),
-                new TripDescription("테스트 설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                4,
-                TripCategory.DOMESTIC
-        );
-    }
 
     @Test
     public void 리더만_업데이트를_할_수_있다() {
         //given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip,4);
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 4);
 
         //when
-        boolean result = tripParticipants.updatableByLeader(userId);
+        boolean result = tripParticipants.updatableByLeader(LEADER_ID);
 
         //then
         assertTrue(result);
@@ -46,26 +27,23 @@ class TripParticipantsTest {
     @Test
     public void 여행에_포함된_맴버가_아니라면_업데이트를_할_수_없다() {
         //given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip,4);
-        UUID member1 = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        //when
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 4);
 
-        //then
-        assertThrows(InvalidValueException.class, () -> tripParticipants.updatableByLeader(member1));
+        //when, then
+        assertThrows(InvalidValueException.class, () -> tripParticipants.updatableByLeader(MEMBER_ID));
 
     }
 
     @Test
     public void 리더가_아니라면_업데이트를_할_수_없다() {
         //given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip,4);
-        UUID member1 = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, dummyTrip));
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 4);
+        tripParticipants.addParticipant(TripParticipant.createTripParticipant(MEMBER_ID, trip));
 
         //when
-        boolean result = tripParticipants.updatableByLeader(member1);
+        boolean result = tripParticipants.updatableByLeader(MEMBER_ID);
 
         //then
         assertFalse(result);
@@ -73,53 +51,53 @@ class TripParticipantsTest {
     @Test
     void 최대_참여_인원보다_많은_인원이_참여할_수_없다() {
         // given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip, 2);
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 2);
         UUID member1 = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
         // when
-        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, dummyTrip));
+        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, trip));
 
         // then
         assertThrows(TripFullException.class, () -> {
             UUID member2 = UUID.fromString("44444444-4444-4444-4444-444444444444");
-            tripParticipants.addParticipant(TripParticipant.createTripParticipant(member2, dummyTrip));
+            tripParticipants.addParticipant(TripParticipant.createTripParticipant(member2, trip));
         });
     }
 
     @Test
     void 최대_참여_인원을_현재_참여_인원보다_적게_변경할_수_없다() {
         // given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip, 3);
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 3);
         UUID member1 = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, dummyTrip));
+        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, trip));
 
         // then
-        assertThrows(InvalidValueException.class, () -> {
-            tripParticipants.updateMaxParticipants(1,userId);
-        });
+        assertThrows(InvalidValueException.class, () ->
+            tripParticipants.updateMaxParticipants(1, LEADER_ID)
+        );
     }
 
     @Test
     void 최대_참여_인원은_1명_이상이어야_한다() {
         // given
-        Trip dummyTrip = createDummyTrip();
+        Trip trip = createTrip(TRIP_ID);
 
         // then
-        assertThrows(InvalidValueException.class, () -> {
-            new TripParticipants(userId, dummyTrip, 0);
-        });
+        assertThrows(InvalidValueException.class, () ->
+            new TripParticipants(LEADER_ID, trip, 0)
+        );
     }
 
     @Test
     void 리더가_최대_참여_인원을_변경할_수_있다() {
         // given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip, 3);
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 3);
 
         // when
-        tripParticipants.updateMaxParticipants(5,userId);
+        tripParticipants.updateMaxParticipants(5,LEADER_ID);
 
         // then
         assertEquals(5, tripParticipants.getMaxParticipants());
@@ -128,10 +106,10 @@ class TripParticipantsTest {
     @Test
     void 현재_참여_인원수를_정확히_반환한다() {
         // given
-        Trip dummyTrip = createDummyTrip();
-        TripParticipants tripParticipants = new TripParticipants(userId, dummyTrip, 3);
+        Trip trip = createTrip(TRIP_ID);
+        TripParticipants tripParticipants = new TripParticipants(LEADER_ID, trip, 3);
         UUID member1 = UUID.fromString("33333333-3333-3333-3333-333333333333");
-        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, dummyTrip));
+        tripParticipants.addParticipant(TripParticipant.createTripParticipant(member1, trip));
 
         // when
         int currentCount = tripParticipants.getCurrentCount();
