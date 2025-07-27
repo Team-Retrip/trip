@@ -20,24 +20,22 @@ class ItineraryDetailsTest {
     @DisplayName("여행 상세 일정은 여행 일정과 일정이 같아야 한다.")
     @Test
     void ItineraryDetailsDayIsEqualToItineraryDay() {
-        TripPeriod period = new TripPeriod(
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(5));
-        Trip trip = Trip.createWithItineraries(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                period,
-                true,
-                4,
-                TripCategory.DOMESTIC
-        );
+        TripPeriod period =
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+        Trip trip =
+                Trip.createWithItineraries(
+                        UUID.randomUUID(),
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        period,
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
 
         Itineraries itineraries = new Itineraries(trip, period);
         Itinerary itinerary = itineraries.getValues().getFirst();
-        ItineraryDetail itineraryDetail
-                = ItineraryDetail.create(2000L, "속초 여행", LocalDateTime.now(), itinerary, locationId);
+        ItineraryDetail itineraryDetail =
+                ItineraryDetail.create(2000L, "속초 여행", LocalDateTime.now(), itinerary, locationId);
 
         assertThatThrownBy(() -> itinerary.addItineraryDetail(itineraryDetail))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
@@ -46,28 +44,28 @@ class ItineraryDetailsTest {
     @DisplayName("같은 시간에 상세 일정이 있으면 안된다.")
     @Test
     void canNotItineraryDetailsTimeConflicting() {
-        TripPeriod period = new TripPeriod(
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(5));
-        Trip trip = Trip.createWithItineraries(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                period,
-                true,
-                4,
-                TripCategory.DOMESTIC
-        );
+        TripPeriod period =
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+        Trip trip =
+                Trip.createWithItineraries(
+                        UUID.randomUUID(),
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        period,
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
 
         Itineraries itineraries = new Itineraries(trip, period);
         Itinerary itinerary = itineraries.getValues().getFirst();
-        ItineraryDetail itineraryDetail
-                = ItineraryDetail.create(2000L, "속초 여행", LocalDateTime.now().plusDays(1), itinerary, locationId);
+        ItineraryDetail itineraryDetail =
+                ItineraryDetail.create(
+                        2000L, "속초 여행", LocalDateTime.now().plusDays(1), itinerary, locationId);
         itinerary.addItineraryDetail(itineraryDetail);
 
-        ItineraryDetail itineraryDetail2
-                = ItineraryDetail.create(2000L, "속초 여행", LocalDateTime.now().plusDays(1), itinerary, locationId);
+        ItineraryDetail itineraryDetail2 =
+                ItineraryDetail.create(
+                        2000L, "속초 여행", LocalDateTime.now().plusDays(1), itinerary, locationId);
 
         assertThatThrownBy(() -> itinerary.addItineraryDetail(itineraryDetail2))
                 .isExactlyInstanceOf(IllegalArgumentException.class);

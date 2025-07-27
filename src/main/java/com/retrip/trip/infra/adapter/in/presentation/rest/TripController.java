@@ -79,28 +79,32 @@ public class TripController {
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
     @Schema(description = "여행 참가 신청 승인")
-    public ApiResponse<TripDemandApproveResponse> approveRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                                 @PathVariable("tripId") UUID tripId,
-                                                                 @PathVariable("tripDemandId") UUID tripDemandId) {
-        TripDemandApproveResponse response = tripDemandUseCase.approve(memberId, tripId, tripDemandId);
+    public ApiResponse<TripDemandApproveResponse> approveRequest(
+            @RequestParam("memberId") UUID memberId, // TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @PathVariable("tripId") UUID tripId,
+            @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandApproveResponse response =
+                tripDemandUseCase.approve(memberId, tripId, tripDemandId);
         return ApiResponse.ok(response);
     }
 
     @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
     @Schema(description = "여행 참가 신청 거절")
-    public ApiResponse<TripDemandRejectResponse> rejectRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                               @PathVariable("tripId") UUID tripId,
-                                                               @PathVariable("tripDemandId") UUID tripDemandId) {
-        TripDemandRejectResponse response = tripDemandUseCase.reject(memberId, tripId, tripDemandId);
+    public ApiResponse<TripDemandRejectResponse> rejectRequest(
+            @RequestParam("memberId") UUID memberId, // TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @PathVariable("tripId") UUID tripId,
+            @PathVariable("tripDemandId") UUID tripDemandId) {
+        TripDemandRejectResponse response =
+                tripDemandUseCase.reject(memberId, tripId, tripDemandId);
         return ApiResponse.ok(response);
     }
 
     @GetMapping("/my")
     @Schema(description = "나의 여행 목록 조회")
-    public ApiResponse<Page<TripResponse>> getMyTrips(
-            @RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+    public ApiResponse<Page<MyTripResponse>> getMyTrips(
+            @RequestParam("memberId") UUID memberId, // TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
             @PageableDefault(size = 10, page = 0) Pageable page) {
-        Page<TripResponse> trips = getTripUseCase.getMyTrips(memberId, page);
+        Page<MyTripResponse> trips = getTripUseCase.getMyTrips(memberId, page);
         return ApiResponse.ok(trips);
     }
 
@@ -108,7 +112,7 @@ public class TripController {
     @Schema(description = "여행 나가기")
     public ApiResponse<Void> leaveTrip(
             @PathVariable UUID tripId,
-            @PathVariable UUID memberId) { //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @PathVariable UUID memberId) { // TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
         leaveTripUseCase.leaveTrip(tripId, memberId);
         return ApiResponse.noContent();
     }
@@ -116,17 +120,17 @@ public class TripController {
     @PutMapping("/{tripId}/delegate-leader")
     @Schema(description = "여행 리더 위임")
     public ApiResponse<DelegateLeaderResponse> delegateLeader(
-            @PathVariable UUID tripId,
-            @RequestBody DelegateLeaderRequest request) {
+            @PathVariable UUID tripId, @RequestBody DelegateLeaderRequest request) {
         DelegateLeaderResponse response = delegateLeaderUseCase.delegateLeader(tripId, request);
         return ApiResponse.ok(response);
     }
 
     @DeleteMapping("/{tripId}/members/ban")
     @Schema(description = "여행 멤버 리스트 강퇴")
-    public ApiResponse<TripDemandRejectResponse> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                           @PathVariable("tripId") UUID tripId,
-                                                           @RequestBody TripMemberBanRequest request) {
+    public ApiResponse<TripDemandRejectResponse> banMembers(
+            @RequestParam("memberId") UUID memberId, // TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @PathVariable("tripId") UUID tripId,
+            @RequestBody TripMemberBanRequest request) {
         tripDemandUseCase.banMembers(memberId, tripId, request.memberIds());
         return ApiResponse.noContent();
     }

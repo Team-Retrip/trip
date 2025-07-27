@@ -1,7 +1,9 @@
-package com.retrip.trip.domain.entity;
+package com.retrip.trip.domain.entity.participant;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import com.retrip.trip.domain.entity.BaseEntity;
+import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.ParticipantStatus;
 import jakarta.persistence.Column;
@@ -22,10 +24,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED, force = true)
-public class TripParticipant extends BaseEntity {
+public class Participant extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
+
+    private UUID tripId;
+
     private UUID memberId;
 
     @Column(name = "role", length = 50, nullable = false)
@@ -34,33 +39,22 @@ public class TripParticipant extends BaseEntity {
     @Column(name = "status", length = 50, nullable = false)
     private ParticipantStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "trip_id",
-            nullable = false,
-            columnDefinition = "varbinary(16)",
-            foreignKey = @ForeignKey(name = "fk_trip_participant_to_trip")
-    )
-    private Trip trip;
-
-    public static TripParticipant createTripLeader(UUID memberId, Trip trip) {
-        return new TripParticipant(
-                UUID.randomUUID(),
-                memberId,
-                ParticipantRole.LEADER,
-                ParticipantStatus.ACTIVE,
-                trip
-        );
+    public Participant(UUID tripId, UUID memberId, ParticipantRole role) {
+        this.id = UUID.randomUUID();
+        this.memberId = memberId;
+        this.tripId = tripId;
+        this.role = role;
+        this.status = ParticipantStatus.ACTIVE;
     }
 
-    public static TripParticipant createTripParticipant(UUID memberId, Trip trip) {
-        return new TripParticipant(
+    public static Participant createTripParticipant(UUID memberId, Trip trip) {
+        return new Participant(
                 UUID.randomUUID(),
+                null,
                 memberId,
                 ParticipantRole.PARTICIPANT,
                 ParticipantStatus.ACTIVE,
-                trip
-        );
+                trip);
     }
 
     public boolean isLeader() {
@@ -71,8 +65,11 @@ public class TripParticipant extends BaseEntity {
         this.status = ParticipantStatus.EXPELLED;
     }
 
-
     public void changeRole(ParticipantRole newRole) {
         this.role = newRole;
+    }
+
+    public static Participant create(UUID tripId, UUID memberId, ParticipantRole role) {
+        return new Participant(tripId, memberId, role);
     }
 }

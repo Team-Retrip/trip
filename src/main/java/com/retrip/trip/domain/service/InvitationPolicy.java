@@ -1,7 +1,7 @@
 package com.retrip.trip.domain.service;
 
 import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripParticipants;
+import com.retrip.trip.domain.entity.participant.Participants;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.exception.*;
 import com.retrip.trip.domain.exception.common.IllegalStateException;
@@ -15,13 +15,13 @@ import static com.retrip.trip.domain.vo.TripStatus.RECRUITING;
 @Service
 public class InvitationPolicy {
     public void canInvite(Trip trip, UUID leaderId, List<UUID> memberIds) {
-        TripParticipants participants = trip.getTripParticipants();
+        Participants participants = trip.getParticipants();
         if (trip.getStatus().cannotCreateInvitations()) {
             throw new IllegalStateException("여행 초대를 생성할 수 없는 상태입니다. " + trip.getStatus().name());
         }
 
-        if (isNotLeader(trip.getTripParticipants(), leaderId)) {
-            throw new MemberIsNotLeaderException();
+        if (isNotLeader(trip.getParticipants(), leaderId)) {
+            throw new NotLeaderException();
         }
 
         if (participants.anyDuplicate(memberIds)) {
@@ -30,13 +30,13 @@ public class InvitationPolicy {
     }
 
     public void canViewInvitations(Trip trip, UUID leaderId) {
-        if (isNotLeader(trip.getTripParticipants(), leaderId)) {
-            throw new MemberIsNotLeaderException();
+        if (isNotLeader(trip.getParticipants(), leaderId)) {
+            throw new NotLeaderException();
         }
     }
 
-    public boolean isNotLeader(TripParticipants tripParticipants, UUID leaderId) {
-        return !tripParticipants.isLeader(leaderId);
+    public boolean isNotLeader(Participants participants, UUID leaderId) {
+        return !participants.isLeader(leaderId);
     }
 
     public void canAccept(Trip trip, Invitation invitation) {
@@ -46,8 +46,8 @@ public class InvitationPolicy {
         if (trip.getStatus() != RECRUITING) {
             throw new TripNotRecruitingException();
         }
-        TripParticipants tripParticipants = trip.getTripParticipants();
-        if (tripParticipants.isFull()) {
+        Participants participants = trip.getParticipants();
+        if (participants.isFull()) {
             throw new TripParticipantsIsFullException();
         }
     }
