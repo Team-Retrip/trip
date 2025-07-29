@@ -66,7 +66,7 @@ public class TripService
     @Override
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
-        participantService.canDemand(tripId, request.memberId());
+        participantService.canDemand(tripId, request.memberId(), trip.getMaxParticipants());
         trip.addDemand(TripDemand.create(request.memberId(), trip, request.message()));
         return TripDemandResponse.of(trip.getTripDemands().getValues().getLast());
     }
@@ -76,12 +76,13 @@ public class TripService
     }
 
     @Override
-    public TripDemandApproveResponse approve(UUID memberId, UUID tripId, UUID tripDemandId) {
+    public TripDemandApproveResponse approve(
+            UUID memberId, UUID approverMemberId, UUID tripId, UUID tripDemandId) {
         TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, tripDemandId);
         participantService.requireLeaderOrElseThrow(tripId, memberId);
         tripDemand.approve();
         participantService.createParticipant(
-                tripId, memberId, tripDemand.getTrip().getMaxParticipants());
+                tripId, approverMemberId, tripDemand.getTrip().getMaxParticipants());
         return TripDemandApproveResponse.of(tripDemand);
     }
 
@@ -155,7 +156,8 @@ public class TripService
     public MaxParticipantUpdateResponse updateMaxParticipants(
             UUID tripId, MaxParticipantUpdateRequest request) {
         Trip trip = findTrip(tripId);
-        participantService.requireLeaderOrElseThrow(tripId, request.memberId());
+        participantService.canUpdateMaxParticipant(
+                tripId, request.memberId(), request.maxParticipants());
         trip.updateMaxParticipants(request.maxParticipants());
         return MaxParticipantUpdateResponse.of(trip.getId(), trip.getMaxParticipants());
     }

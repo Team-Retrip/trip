@@ -13,6 +13,7 @@ import com.retrip.trip.domain.service.ParticipantPolicy;
 import com.retrip.trip.domain.vo.ParticipantRole;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class ParticipantService implements ParticipantManageUseCase {
     @Override
     public Participant createParticipant(UUID tripId, UUID memberId, int maxParticipants) {
         Long currentCount = participantQueryRepository.findByTripIdCount(memberId);
-        participantPolicy.validate(maxParticipants, currentCount);
+        participantPolicy.validate(maxParticipants, currentCount + 1);
         return participantRepository.save(
                 Participant.create(tripId, memberId, ParticipantRole.PARTICIPANT));
     }
@@ -122,11 +123,17 @@ public class ParticipantService implements ParticipantManageUseCase {
     }
 
     @Override
-    public void canDemand(UUID tripId, UUID memberId) {
-        Participant participant =
-                participantQueryRepository
-                        .findByTripIdAndMemberId(tripId, memberId)
-                        .orElseThrow(EntityNotFoundException::new);
-        participantPolicy.validateDemand(participant);
+    public void canDemand(UUID tripId, UUID memberId, int maxParticipants) {
+        Long count = participantQueryRepository.findByTripIdCount(tripId);
+        Optional<Participant> participant =
+                participantQueryRepository.findByTripIdAndMemberIdAndAllStatus(tripId, memberId);
+        participantPolicy.validateDemand(participant, count, maxParticipants);
+    }
+
+    @Override
+    public void canUpdateMaxParticipant(UUID tripId, UUID memberId, int maxParticipants) {
+        requireLeaderOrElseThrow(tripId, memberId);
+        Long currentCount = participantQueryRepository.findByTripIdCount(tripId);
+        participantPolicy.validate(maxParticipants, currentCount);
     }
 }

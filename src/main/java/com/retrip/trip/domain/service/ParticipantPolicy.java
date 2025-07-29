@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 public class ParticipantPolicy {
 
     public void validate(int maxParticipants, Long currentCount) {
-        if (maxParticipants <= currentCount + 1) {
+        if (maxParticipants <= currentCount) {
             throw new ParticipantFullException();
         }
     }
@@ -66,8 +66,12 @@ public class ParticipantPolicy {
         }
     }
 
-    public void validateDemand(Participant participant) {
-        if (participant.getStatus().isExpelled()) {
+    public void validateDemand(Optional<Participant> participant, Long count, int maxParticipants) {
+        if (count.intValue() + 1 >= maxParticipants) {
+            throw new ParticipantFullException();
+        }
+
+        if (participant.isPresent() && participant.get().getStatus().isExpelled()) {
             throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
         }
     }

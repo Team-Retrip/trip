@@ -28,5 +28,7 @@ public interface ParticipantManageUseCase {
 
     List<Participant> banMembers(UUID tripId, UUID loginMemberId, List<UUID> memberIds);
 
-    void canDemand(UUID tripId, UUID memberId);
+    void canDemand(UUID tripId, UUID memberId, int maxParticipants);
+
+    void canUpdateMaxParticipant(UUID tripId, UUID memberId, int maxParticipants);
 }

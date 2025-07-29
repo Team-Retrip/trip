@@ -65,4 +65,13 @@ public class ParticipantQuerydslRepository implements ParticipantQueryRepository
                                 )
                         .fetchOne());
     }
+
+    @Override
+    public Optional<Participant> findByTripIdAndMemberIdAndAllStatus(UUID tripId, UUID memberId) {
+        return Optional.ofNullable(
+                query.select(participant)
+                        .from(participant)
+                        .where(participant.tripId.eq(tripId), participant.memberId.eq(memberId))
+                        .fetchOne());
+    }
 }

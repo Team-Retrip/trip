@@ -19,4 +19,6 @@ public interface ParticipantQueryRepository {
     Long findByTripIdCount(UUID tripId);
 
     Optional<Participant> findByTripIdAndMemberId(UUID tripId, UUID memberId);
+
+    Optional<Participant> findByTripIdAndMemberIdAndAllStatus(UUID tripId, UUID memberId);
 }

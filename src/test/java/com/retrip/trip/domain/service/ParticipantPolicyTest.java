@@ -21,6 +21,7 @@ import com.retrip.trip.domain.fixture.ParticipantFixture;
 import com.retrip.trip.domain.vo.ParticipantRole;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -145,7 +146,31 @@ class ParticipantPolicyTest {
         participant.ban();
 
         // when, then
-        assertThatThrownBy(() -> participantPolicy.validateDemand(participant))
+        assertThatThrownBy(
+                        () ->
+                                participantPolicy.validateDemand(
+                                        Optional.of(participant), 2L, trip.getMaxParticipants()))
                 .isExactlyInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void 참여중인_인원이_꽉찼을_경우_요청할_수_없다() {
+        // given
+        Trip trip = createTrip(TRIP_ID);
+        Participant leader = ParticipantFixture.createLeaderParticipant(trip.getId(), MEMBER_ID);
+        List<Participant> participants =
+                List.of(
+                        ParticipantFixture.createParticipant(trip.getId(), UUID.randomUUID()),
+                        ParticipantFixture.createParticipant(trip.getId(), UUID.randomUUID()),
+                        ParticipantFixture.createParticipant(trip.getId(), UUID.randomUUID()));
+        Participant newParticipant =
+                ParticipantFixture.createParticipant(trip.getId(), UUID.randomUUID());
+
+        // when, then
+        assertThatThrownBy(
+                        () ->
+                                participantPolicy.validateDemand(
+                                        Optional.empty(), (long) participants.size() + 1, 4))
+                .isExactlyInstanceOf(ParticipantFullException.class);
     }
 }

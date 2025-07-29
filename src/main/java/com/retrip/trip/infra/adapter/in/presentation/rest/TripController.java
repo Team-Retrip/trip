@@ -81,11 +81,12 @@ public class TripController {
     @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
     @Schema(description = "여행 참가 신청 승인")
     public ApiResponse<TripDemandApproveResponse> approveRequest(
-            @RequestParam("memberId") UUID memberId, // TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @RequestParam("memberId") UUID memberId, // 승인하는 자
+            @RequestParam("approveMemberId") UUID approverMemberId, // 승인 받는자
             @PathVariable("tripId") UUID tripId,
             @PathVariable("tripDemandId") UUID tripDemandId) {
         TripDemandApproveResponse response =
-                tripDemandUseCase.approve(memberId, tripId, tripDemandId);
+                tripDemandUseCase.approve(memberId, approverMemberId, tripId, tripDemandId);
         return ApiResponse.ok(response);
     }
 

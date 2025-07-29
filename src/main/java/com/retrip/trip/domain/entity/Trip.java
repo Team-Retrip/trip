@@ -141,6 +141,7 @@ public class Trip extends BaseEntity {
     }
 
     public void updateMaxParticipants(int maxParticipants) {
+        validateMaxParticipants(maxParticipants);
         this.maxParticipants = maxParticipants;
     }
 
