@@ -16,5 +16,17 @@ public interface ParticipantManageUseCase {
 
     Participant createParticipant(UUID tripId, UUID memberId, int maxParticipants);
 
-    void updateByLeaderOrThrow(UUID tripId, UUID uuid);
+    void requireLeaderOrElseThrow(UUID tripId, UUID uuid);
+
+    void requireParticipantOrElseThrow(UUID tripId, UUID uuid);
+
+    void remove(UUID tripId, UUID memberId);
+
+    Participant delegateLeader(UUID tripId, UUID currentLeaderId, UUID newLeaderId);
+
+    void canInvite(UUID tripId, UUID leaderId, List<UUID> memberIds);
+
+    List<Participant> banMembers(UUID tripId, UUID loginMemberId, List<UUID> memberIds);
+
+    void canDemand(UUID tripId, UUID memberId);
 }

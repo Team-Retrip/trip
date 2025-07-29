@@ -29,6 +29,7 @@ public class TripController {
     private final TripPeriodUseCase tripPeriodUseCase;
     private final LeaveTripUseCase leaveTripUseCase;
     private final DelegateLeaderUseCase delegateLeaderUseCase;
+    private final TripManagementUseCase tripManagementUseCase;
 
     @GetMapping("/categories")
     @Schema(description = "여행 카테고리 목록 조회")
@@ -133,5 +134,14 @@ public class TripController {
             @RequestBody TripMemberBanRequest request) {
         tripDemandUseCase.banMembers(memberId, tripId, request.memberIds());
         return ApiResponse.noContent();
+    }
+
+    @PutMapping("/{tripId}/max-participants")
+    @Schema(description = "여행 최대 참여수 수정")
+    public ResponseEntity<MaxParticipantUpdateResponse> updateMaxParticipants(
+            @PathVariable UUID tripId, @RequestBody MaxParticipantUpdateRequest request) {
+        MaxParticipantUpdateResponse response =
+                tripManagementUseCase.updateMaxParticipants(tripId, request);
+        return ResponseEntity.ok().body(response);
     }
 }

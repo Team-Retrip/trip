@@ -8,7 +8,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ParticipantRole {
-
     LEADER("LEADER", "리더"),
     PARTICIPANT("PARTICIPANT", "참가자");
     private final String code;
@@ -23,5 +22,9 @@ public enum ParticipantRole {
 
     public boolean isLeader() {
         return this == LEADER;
+    }
+
+    public boolean isParticipant() {
+        return this == PARTICIPANT;
     }
 }

@@ -1,9 +1,6 @@
 package com.retrip.trip.application.in.service;
 
-import com.retrip.trip.application.in.request.DelegateLeaderRequest;
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripDemandRequest;
+import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.repository.*;
@@ -12,7 +9,6 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.entity.participant.Participant;
 import com.retrip.trip.domain.exception.TripNotFoundException;
-import com.retrip.trip.domain.service.ParticipantPolicy;
 import com.retrip.trip.domain.vo.TripPeriod;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -37,13 +33,13 @@ public class TripService
                 TripDemandUseCase,
                 TripPeriodUseCase,
                 LeaveTripUseCase,
-                DelegateLeaderUseCase {
+                DelegateLeaderUseCase,
+                TripManagementUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
     private final TripDemandReadRepository tripDemandReadRepository;
     private final ParticipantService participantService;
-    private final ParticipantPolicy participantPolicy;
 
     @Override
     public TripCreateResponse createTrip(TripCreateRequest request) {
@@ -70,20 +66,19 @@ public class TripService
     @Override
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
+        participantService.canDemand(tripId, request.memberId());
         trip.addDemand(TripDemand.create(request.memberId(), trip, request.message()));
         return TripDemandResponse.of(trip.getTripDemands().getValues().getLast());
     }
 
     private Trip findTrip(UUID tripId) {
-        return tripRepository
-                .findWithParticipantsById(tripId)
-                .orElseThrow(TripNotFoundException::new);
+        return tripRepository.findById(tripId).orElseThrow(TripNotFoundException::new);
     }
 
     @Override
     public TripDemandApproveResponse approve(UUID memberId, UUID tripId, UUID tripDemandId) {
         TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, tripDemandId);
-        participantService.updateByLeaderOrThrow(tripId, memberId);
+        participantService.requireLeaderOrElseThrow(tripId, memberId);
         tripDemand.approve();
         participantService.createParticipant(
                 tripId, memberId, tripDemand.getTrip().getMaxParticipants());
@@ -93,7 +88,7 @@ public class TripService
     @Override
     public TripDemandRejectResponse reject(UUID memberId, UUID tripId, UUID joinRequestId) {
         TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, joinRequestId);
-        participantService.updateByLeaderOrThrow(tripId, memberId);
+        participantService.requireLeaderOrElseThrow(tripId, memberId);
         tripDemand.reject();
         return TripDemandRejectResponse.of(tripDemand);
     }
@@ -114,7 +109,7 @@ public class TripService
         List<Itinerary> itineraries =
                 tripItineraryQueryRepository.findByIdsWithItineraryDetails(
                         trip.getItinerariesIds());
-        participantService.updateByLeaderOrThrow(tripId, request.memberId());
+        participantService.requireLeaderOrElseThrow(tripId, request.memberId());
         trip.updatePeriod(period, request.memberId());
         return PeriodUpdateResponse.of(trip);
     }
@@ -133,20 +128,35 @@ public class TripService
     @Override
     public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIds) {
         Trip trip = findTrip(tripId);
-        trip.banMembers(loginMemberId, memberIds);
+        trip.canBan();
+        List<Participant> participants =
+                participantService.banMembers(tripId, loginMemberId, memberIds);
     }
 
     @Override
     public void leaveTrip(UUID tripId, UUID memberId) {
         Trip trip = findTrip(tripId);
-        trip.leave(memberId);
-        tripRepository.save(trip);
+        trip.canLeave();
+        participantService.requireParticipantOrElseThrow(tripId, memberId);
+        participantService.remove(tripId, memberId);
     }
 
     @Override
     public DelegateLeaderResponse delegateLeader(UUID tripId, DelegateLeaderRequest request) {
         Trip trip = findTrip(tripId);
-        trip.delegateLeader(request.currentLeaderId(), request.newLeaderId());
-        return DelegateLeaderResponse.of(trip, request.newLeaderId());
+        trip.canDelegateLeader();
+        Participant participant =
+                participantService.delegateLeader(
+                        tripId, request.currentLeaderId(), request.newLeaderId());
+        return DelegateLeaderResponse.of(trip, participant);
+    }
+
+    @Override
+    public MaxParticipantUpdateResponse updateMaxParticipants(
+            UUID tripId, MaxParticipantUpdateRequest request) {
+        Trip trip = findTrip(tripId);
+        participantService.requireLeaderOrElseThrow(tripId, request.memberId());
+        trip.updateMaxParticipants(request.maxParticipants());
+        return MaxParticipantUpdateResponse.of(trip.getId(), trip.getMaxParticipants());
     }
 }

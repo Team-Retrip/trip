@@ -47,20 +47,6 @@ public class Participant extends BaseEntity {
         this.status = ParticipantStatus.ACTIVE;
     }
 
-    public static Participant createTripParticipant(UUID memberId, Trip trip) {
-        return new Participant(
-                UUID.randomUUID(),
-                null,
-                memberId,
-                ParticipantRole.PARTICIPANT,
-                ParticipantStatus.ACTIVE,
-                trip);
-    }
-
-    public boolean isLeader() {
-        return this.role.isLeader();
-    }
-
     public void ban() {
         this.status = ParticipantStatus.EXPELLED;
     }

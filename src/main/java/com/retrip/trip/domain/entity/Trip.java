@@ -1,9 +1,6 @@
 package com.retrip.trip.domain.entity;
 
-import com.retrip.trip.domain.entity.participant.Participant;
-import com.retrip.trip.domain.entity.participant.Participants;
 import com.retrip.trip.domain.exception.*;
-import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.ErrorCode;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.*;
@@ -18,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -48,8 +44,6 @@ public class Trip extends BaseEntity {
 
     @Column(name = "category", length = 50, nullable = false)
     private TripCategory category;
-
-    @Embedded private Participants participants;
 
     @Embedded private TripDemands tripDemands;
 
@@ -108,14 +102,7 @@ public class Trip extends BaseEntity {
     }
 
     public void addDemand(TripDemand demand) {
-        validateAddDemand(demand);
         this.tripDemands.addDemand(demand);
-    }
-
-    private void validateAddDemand(TripDemand demand) {
-        if (this.participants.isBan(demand.getMemberId())) {
-            throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
-        }
     }
 
     private static void validateMaxParticipants(int maxParticipants) {
@@ -141,34 +128,25 @@ public class Trip extends BaseEntity {
         return getItineraries().ids();
     }
 
-    public void banMembers(UUID loginMemberId, List<UUID> memberIds) {
-        this.participants.banMembers(loginMemberId, memberIds, this);
-    }
-
-    public void leave(UUID memberId) {
+    public void canLeave() {
         if (!this.status.canLeave()) {
             throw new TripNotReadyException();
         }
-
-        Participant participant =
-                participants
-                        .findParticipantById(memberId)
-                        .orElseThrow(() -> new NotParticipantException("현재 여행에 참여하고 있지 않습니다."));
-
-        if (participant.isLeader()) {
-            throw new LeaderCannotLeaveException();
-        }
-        participants.removeParticipant(memberId);
     }
 
-    public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
+    public void canDelegateLeader() {
         if (this.status != TripStatus.BEFORE_TRIP) {
             throw new TripNotReadyException();
         }
-        participants.delegateLeader(currentLeaderId, newLeaderId);
     }
 
     public void updateMaxParticipants(int maxParticipants) {
-        // todo: 최대 참여자 수 변경 함수 이동
+        this.maxParticipants = maxParticipants;
+    }
+
+    public void canBan() {
+        if (!TripStatus.RECRUITING.equals(status)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
     }
 }

@@ -8,4 +8,6 @@ import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ParticipantRepository extends JpaRepository<Participant, UUID> {}
+public interface ParticipantRepository extends JpaRepository<Participant, UUID> {
+    List<Participant> findByTripId(UUID tripId);
+}

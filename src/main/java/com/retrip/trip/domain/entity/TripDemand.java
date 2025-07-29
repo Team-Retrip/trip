@@ -56,12 +56,6 @@ public class TripDemand extends BaseEntity {
         this.status = TripDemandStatus.REJECTED;
     }
 
-    private void validateTripLeader(UUID memberId) {
-        if (!this.trip.getParticipants().isLeader(memberId)) {
-            throw new BusinessException(NOT_TRIP_LEADER);
-        }
-    }
-
     public void ensurePending() {
         if (!TripDemandStatus.PENDING.equals(this.status)) {
             throw new IllegalStateException("참여 요청의 상태가 '대기' 상태가 아닙니다.");

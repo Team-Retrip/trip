@@ -17,7 +17,7 @@ public class ParticipantFixture {
         return Participant.create(tripId, leaderId, ParticipantRole.LEADER);
     }
 
-    public static Participant createParticipant(UUID tripId, UUID leaderId) {
-        return Participant.create(tripId, leaderId, ParticipantRole.PARTICIPANT);
+    public static Participant createParticipant(UUID tripId, UUID participantId) {
+        return Participant.create(tripId, participantId, ParticipantRole.PARTICIPANT);
     }
 }
