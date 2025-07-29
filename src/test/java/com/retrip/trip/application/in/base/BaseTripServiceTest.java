@@ -1,8 +1,11 @@
 package com.retrip.trip.application.in.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.retrip.trip.application.in.TripService;
+import com.retrip.trip.application.in.service.ParticipantService;
+import com.retrip.trip.application.in.service.TripService;
 import com.retrip.trip.application.out.repository.*;
+import com.retrip.trip.domain.service.ParticipantPolicy;
+import com.retrip.trip.infra.adapter.out.persistence.mysql.query.ParticipantQuerydslRepository;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripItineraryQuerydslRepository;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
 import jakarta.persistence.EntityManager;
@@ -12,22 +15,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.UUID;
 
 public abstract class BaseTripServiceTest extends BaseServiceTest {
-    @Autowired
-    protected TripRepository tripRepository;
+    @Autowired protected TripRepository tripRepository;
 
-    @Autowired
-    protected EntityManager em;
+    @Autowired protected EntityManager em;
 
-    @Autowired
-    protected TripDemandReadRepository tripDemandReadRepository;
+    @Autowired protected TripDemandReadRepository tripDemandReadRepository;
+    @Autowired protected ParticipantRepository participantRepository;
+    protected ParticipantQueryRepository participantQueryRepository;
 
-    @Autowired
-    protected TripParticipantRepository tripParticipantRepository;
-
-    @Autowired
-    protected JPAQueryFactory jpaQueryFactory;
+    @Autowired protected JPAQueryFactory jpaQueryFactory;
 
     protected TripService tripService;
+    protected ParticipantPolicy participantPolicy;
+    protected ParticipantService participantService;
     protected TripQueryRepository tripQueryRepository;
     protected TripItineraryQueryRepository tripItineraryQueryRepository;
 
@@ -39,9 +39,17 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     void setUp() {
         tripQueryRepository = new TripQuerydslRepository(jpaQueryFactory);
         tripItineraryQueryRepository = new TripItineraryQuerydslRepository(jpaQueryFactory);
-
+        participantPolicy = new ParticipantPolicy();
+        participantQueryRepository = new ParticipantQuerydslRepository(jpaQueryFactory);
+        participantService =
+                new ParticipantService(
+                        participantPolicy, participantRepository, participantQueryRepository);
         tripService =
                 new TripService(
-                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripParticipantRepository);
+                        tripRepository,
+                        tripQueryRepository,
+                        tripItineraryQueryRepository,
+                        tripDemandReadRepository,
+                        participantService);
     }
 }

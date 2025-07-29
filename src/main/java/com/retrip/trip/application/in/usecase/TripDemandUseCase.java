@@ -11,7 +11,8 @@ import java.util.UUID;
 public interface TripDemandUseCase {
     TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request);
 
-    TripDemandApproveResponse approve(UUID memberId, UUID tripId, UUID tripDemandId);
+    TripDemandApproveResponse approve(
+            UUID memberId, UUID approverMemberId, UUID tripId, UUID tripDemandId);
 
     TripDemandRejectResponse reject(UUID memberId, UUID tripId, UUID tripDemandId);
 

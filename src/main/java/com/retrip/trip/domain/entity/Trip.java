@@ -1,10 +1,8 @@
 package com.retrip.trip.domain.entity;
 
-import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
-import com.retrip.trip.domain.exception.NotParticipantException;
-import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
-import com.retrip.trip.domain.exception.TripNotReadyException;
-import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.exception.*;
+import com.retrip.trip.domain.exception.common.ErrorCode;
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -29,18 +26,18 @@ public class Trip extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
+
     private UUID destinationId;
 
-    @Version
-    private long version;
+    @Version private long version;
 
-    @Embedded
-    private TripTitle title;
+    @Embedded private TripTitle title;
 
-    @Embedded
-    private TripDescription description;
+    @Embedded private TripDescription description;
 
     private boolean open;
+
+    private int maxParticipants;
 
     @Column(name = "status", length = 50, nullable = false)
     private TripStatus status;
@@ -48,94 +45,74 @@ public class Trip extends BaseEntity {
     @Column(name = "category", length = 50, nullable = false)
     private TripCategory category;
 
-    @Embedded
-    private TripParticipants tripParticipants;
+    @Embedded private TripDemands tripDemands;
 
-    @Embedded
-    private TripDemands tripDemands;
+    @Embedded private TripPeriod period;
 
-    @Embedded
-    private TripPeriod period;
-
-    @Embedded
-    private Itineraries itineraries;
+    @Embedded private Itineraries itineraries;
 
     public static Trip create(
-            UUID memberId,
             UUID destinationId,
             TripTitle title,
             TripDescription description,
             TripPeriod period,
             boolean open,
             int maxParticipants,
-            TripCategory category
-    ) {
-        Trip trip = Trip.builder()
-                .id(UUID.randomUUID())
-                .destinationId(destinationId)
-                .title(title)
-                .description(description)
-                .period(period)
-                .open(open)
-                .category(category)
-                .status(TripStatus.RECRUITING)
-                .tripDemands(new TripDemands())
-                .build();
-        trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
+            TripCategory category) {
+        validateMaxParticipants(maxParticipants);
+        Trip trip =
+                Trip.builder()
+                        .id(UUID.randomUUID())
+                        .destinationId(destinationId)
+                        .title(title)
+                        .description(description)
+                        .period(period)
+                        .open(open)
+                        .category(category)
+                        .status(TripStatus.RECRUITING)
+                        .maxParticipants(maxParticipants)
+                        .tripDemands(new TripDemands())
+                        .build();
         return trip;
     }
 
     public static Trip createWithItineraries(
-            UUID leaderId,
             UUID destinationId,
             TripTitle title,
             TripDescription description,
             TripPeriod period,
             boolean open,
             int maxParticipants,
-            TripCategory category
-    ) {
-        Trip trip = Trip.builder()
-                .id(UUID.randomUUID())
-                .destinationId(destinationId)
-                .title(title)
-                .description(description)
-                .period(period)
-                .open(open)
-                .category(category)
-                .status(TripStatus.RECRUITING)
-                .build();
+            TripCategory category) {
+        validateMaxParticipants(maxParticipants);
+        Trip trip =
+                Trip.builder()
+                        .id(UUID.randomUUID())
+                        .destinationId(destinationId)
+                        .title(title)
+                        .description(description)
+                        .period(period)
+                        .open(open)
+                        .category(category)
+                        .status(TripStatus.RECRUITING)
+                        .maxParticipants(maxParticipants)
+                        .build();
         trip.itineraries = new Itineraries(trip, period);
-        trip.tripParticipants = new TripParticipants(leaderId, trip, maxParticipants);
         return trip;
     }
 
-    public void addParticipant(TripParticipant participant) {
-        this.tripParticipants.addParticipant(participant);
-    }
-
     public void addDemand(TripDemand demand) {
-        validateAddDemand(demand);
-        validateParticipantLimitNotExceeded();
         this.tripDemands.addDemand(demand);
     }
 
-    private void validateAddDemand(TripDemand demand) {
-        if (this.tripParticipants.isBan(demand.getMemberId())) {
-            throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
+    private static void validateMaxParticipants(int maxParticipants) {
+        if (maxParticipants < 1) {
+            throw new InvalidValueException(
+                    ErrorCode.INVALID_MAX_PARTICIPANTS, "최대 참여 인원은 1명 이상이어야 합니다.");
         }
     }
 
-    public void validateParticipantLimitNotExceeded() {
-        tripParticipants.validateCanJoin();
-    }
-
-    public void updatePeriod(
-            TripPeriod period,
-            @NotNull UUID memberId) {
-        if (!tripParticipants.updatableByLeader(memberId)) {
-            throw new PeriodUpdateFailedException();
-        }
+    public void updatePeriod(TripPeriod period, @NotNull UUID memberId) {
         this.period = period;
         if (Objects.isNull(this.itineraries)) {
             this.itineraries = new Itineraries(this, period);
@@ -151,29 +128,26 @@ public class Trip extends BaseEntity {
         return getItineraries().ids();
     }
 
-    public void banMembers(UUID loginMemberId, List<UUID> memberIds) {
-        this.tripParticipants.banMembers(loginMemberId, memberIds, this);
-    }
-
-    public void leave(UUID memberId) {
+    public void canLeave() {
         if (!this.status.canLeave()) {
             throw new TripNotReadyException();
         }
-
-        TripParticipant participant = tripParticipants.findParticipantById(memberId)
-                .orElseThrow(() -> new NotParticipantException("현재 여행에 참여하고 있지 않습니다."));
-
-        if (participant.isLeader()) {
-            throw new LeaderCannotLeaveException();
-        }
-        tripParticipants.removeParticipant(memberId);
     }
 
-
-    public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
+    public void canDelegateLeader() {
         if (this.status != TripStatus.BEFORE_TRIP) {
             throw new TripNotReadyException();
         }
-        tripParticipants.delegateLeader(currentLeaderId, newLeaderId);
+    }
+
+    public void updateMaxParticipants(int maxParticipants) {
+        validateMaxParticipants(maxParticipants);
+        this.maxParticipants = maxParticipants;
+    }
+
+    public void canBan() {
+        if (!TripStatus.RECRUITING.equals(status)) {
+            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+        }
     }
 }

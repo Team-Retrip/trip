@@ -7,7 +7,7 @@ import com.retrip.trip.application.in.usecase.InvitationManageUseCase;
 import com.retrip.trip.application.out.repository.InvitationRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.entity.participant.Participant;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.entity.invitation.Invitations;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
@@ -29,12 +29,16 @@ import java.util.UUID;
 public class InvitationService implements InvitationManageUseCase {
     private final TripRepository tripRepository;
     private final InvitationRepository invitationRepository;
+    private final ParticipantService participantService;
     private final InvitationPolicy invitationPolicy;
 
     @Override
-    public InvitationsCreateResponse createInvitations(UUID tripId, TripInvitationsCreateRequest request) {
-        Trip trip = findTripWithParticipants(tripId);
-        invitationPolicy.canInvite(trip, request.leaderId(), request.memberIds());
+    public InvitationsCreateResponse createInvitations(
+            UUID tripId, TripInvitationsCreateRequest request) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(EntityNotFoundException::new);
+        invitationPolicy.canInvite(trip);
+        participantService.canInvite(trip.getId(), request.leaderId(), request.memberIds());
+
         Invitations invitations = new Invitations(invitationRepository.findByTripId(tripId));
         invitations.add(tripId, request.memberIds());
         List<Invitation> savedInvitations = invitationRepository.saveAll(invitations.getValues());
@@ -44,11 +48,17 @@ public class InvitationService implements InvitationManageUseCase {
     @Transactional(readOnly = true)
     @Override
     public Page<InvitationsResponse> getTripInvitations(
-            UUID tripId, UUID leaderId, String status, Pageable page, TripInvitationOrder order, String sort) {
-        invitationPolicy.canViewInvitations(findTripWithParticipants(tripId), leaderId);
+            UUID tripId,
+            UUID leaderId,
+            String status,
+            Pageable page,
+            TripInvitationOrder order,
+            String sort) {
+        participantService.requireLeaderOrElseThrow(tripId, leaderId);
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
         Page<Invitation> tripInvitations =
-                invitationRepository.findByTripIdAndStatus(tripId, InvitationStatus.valueOf(status), pageable);
+                invitationRepository.findByTripIdAndStatus(
+                        tripId, InvitationStatus.valueOf(status), pageable);
         return tripInvitations.map(InvitationsResponse::of);
     }
 
@@ -57,35 +67,34 @@ public class InvitationService implements InvitationManageUseCase {
             UUID memberId, String status, Pageable page, TripInvitationOrder order, String sort) {
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
         Page<Invitation> tripInvitations =
-                invitationRepository.findByMemberIdAndStatus(memberId, InvitationStatus.valueOf(status), pageable);
+                invitationRepository.findByMemberIdAndStatus(
+                        memberId, InvitationStatus.valueOf(status), pageable);
         return tripInvitations.map(MemberInvitationResponse::of);
     }
 
     @Override
-    public MemberInvitationAcceptResponse acceptMemberInvitations(UUID memberId, UUID tripId, UUID invitationId) {
-        Trip trip = findTripWithParticipants(tripId);
+    public MemberInvitationAcceptResponse acceptMemberInvitations(
+            UUID memberId, UUID tripId, UUID invitationId) {
+        Trip trip = tripRepository.findById(tripId).orElseThrow(EntityNotFoundException::new);
         Invitation invitation = findInvitation(invitationId);
         invitationPolicy.canAccept(trip, invitation);
         invitation.accept();
-        trip.addParticipant(TripParticipant.createTripParticipant(memberId, trip));
+        participantService.createParticipant(memberId, tripId, trip.getMaxParticipants());
         return MemberInvitationAcceptResponse.of(invitation);
     }
 
     @Override
-    public MemberInvitationRejectResponse rejectMemberInvitations(UUID memberId, UUID tripId, UUID invitationId) {
+    public MemberInvitationRejectResponse rejectMemberInvitations(
+            UUID memberId, UUID tripId, UUID invitationId) {
         Invitation invitation = findInvitation(invitationId);
         invitationPolicy.canReject(invitation);
         invitation.reject();
         return MemberInvitationRejectResponse.of(invitation);
     }
 
-    private Trip findTripWithParticipants(UUID tripId) {
-        return tripRepository.findWithParticipantsById(tripId)
-                .orElseThrow(EntityNotFoundException::new);
-    }
-
     private Invitation findInvitation(UUID invitationId) {
-        return invitationRepository.findById(invitationId)
+        return invitationRepository
+                .findById(invitationId)
                 .orElseThrow(EntityNotFoundException::new);
     }
 }

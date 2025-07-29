@@ -19,11 +19,12 @@ public enum ErrorCode {
     TRIP_INVITATION_DUPLICATE(BAD_REQUEST, "Trip-004", "사용자를 여행에 중복 초대할 수 없습니다."),
     MEMBER_IS_NOT_LEADER(BAD_REQUEST, "Trip-005", "여행 리더가 아니면 접근할 수 없습니다."),
     TRIP_MEMBER_NOT_IN_TRIP(BAD_REQUEST, "TRIP-006", "강퇴 대상 멤버가 해당 여행에 포함되어 있지 않습니다."),
-    TRIP_MEMBER_BANNED_CANNOT_APPLY(HttpStatus.BAD_REQUEST, "TRIP-007", "강퇴된 사용자는 해당 여행에 참가 신청할 수 없습니다."),
+    TRIP_MEMBER_BANNED_CANNOT_APPLY(
+            HttpStatus.BAD_REQUEST, "TRIP-007", "강퇴된 사용자는 해당 여행에 참가 신청할 수 없습니다."),
     LEADER_CANNOT_LEAVE(BAD_REQUEST, "Trip-008", "리더는 여행을 나갈 수 없습니다. 먼저 리더를 위임해야 합니다."),
     TRIP_NOT_READY(BAD_REQUEST, "Trip-009", "여행이 준비 상태일 때만 나갈 수 있습니다."),
     NOT_PARTICIPANT(BAD_REQUEST, "Trip-010", "여행 참여자가 아닙니다."),
-    TRIP_FULL(BAD_REQUEST, "Trip-011", "여행 참가 인원이 가득 찼습니다."),
+    PARTICIPANT_FULL(BAD_REQUEST, "Trip-011", "여행 최대 인원수보다 참가자가 많을 수 없습니다."),
     INVALID_MAX_PARTICIPANTS(BAD_REQUEST, "Trip-012", "최대 참여 인원 변경이 불가능합니다."),
     LEADER_REQUIRED(BAD_REQUEST, "Trip-013", "여행 리더 권한이 필요합니다."),
     NOT_RECRUITING(BAD_REQUEST, "Trip-014", "모집 중인 여행이 아닙니다."),
@@ -31,7 +32,6 @@ public enum ErrorCode {
     TRIP_NOT_RECRUITING(BAD_REQUEST, "Trip-016", "여행이 모집중이 아닙니다."),
     TRIP_PARTICIPANTS_IS_FULL(BAD_REQUEST, "Trip-017", "여행 참여자가 가득 찼습니다."),
     INVITATION_REJECT_NOT_ALLOWED(BAD_REQUEST, "Trip-018", "초대 거절이 불가능한 상태입니다.");
-
 
     private final HttpStatus status;
     private final String code;

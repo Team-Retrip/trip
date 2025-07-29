@@ -13,10 +13,10 @@ public class TripRequestFixture {
         return new PeriodUpdateRequest(memberId, start, end);
     }
 
-    public static Trip createTestTrip(UUID memberId, String title, String description, TripCategory category) {
+    public static Trip createTestTrip(
+            UUID memberId, String title, String description, TripCategory category) {
         TripPeriod period = createFuturePeriod();
         return Trip.create(
-                memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
                 new TripDescription(description),

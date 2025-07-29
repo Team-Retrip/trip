@@ -25,6 +25,7 @@ public class TripDemand extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
+
     private UUID memberId;
 
     @Column(name = "message")
@@ -38,35 +39,21 @@ public class TripDemand extends BaseEntity {
             name = "trip_id",
             nullable = false,
             columnDefinition = "varbinary(16)",
-            foreignKey = @ForeignKey(name = "fk_trip_demand_to_trip")
-    )
+            foreignKey = @ForeignKey(name = "fk_trip_demand_to_trip"))
     private Trip trip;
 
     public static TripDemand create(UUID memberId, Trip trip, String message) {
         return new TripDemand(UUID.randomUUID(), memberId, message, TripDemandStatus.PENDING, trip);
     }
 
-    public void setStatus(TripDemandStatus status) {
-        this.status = status;
-    }
-
-    public void approve(UUID memberId) {
-        validateTripLeader(memberId);
+    public void approve() {
         ensurePending();
         this.status = TripDemandStatus.APPROVED;
-        trip.addParticipant(TripParticipant.createTripParticipant(this.getMemberId(), this.getTrip()));
     }
 
-    public void reject(UUID memberId) {
-        validateTripLeader(memberId);
+    public void reject() {
         ensurePending();
         this.status = TripDemandStatus.REJECTED;
-    }
-
-    private void validateTripLeader(UUID memberId) {
-        if(!this.trip.getTripParticipants().isLeader(memberId)) {
-            throw new BusinessException(NOT_TRIP_LEADER);
-        }
     }
 
     public void ensurePending() {

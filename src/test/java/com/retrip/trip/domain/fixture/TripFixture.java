@@ -21,23 +21,22 @@ public class TripFixture {
     public static final UUID 혁진_ID = UUID.fromString("42880aaf-4b97-4b0c-8a8a-72df4bb592f6");
 
     public static Trip createTrip(UUID tripId) {
-        Trip trip = Trip.createWithItineraries(
-                LEADER_ID,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)),
-                true,
-                4,
-                TripCategory.DOMESTIC);
+        Trip trip =
+                Trip.createWithItineraries(
+                        UUID.randomUUID(),
+                        new TripTitle("속초 여행 멤버 구함"),
+                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
+                        new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)),
+                        true,
+                        4,
+                        TripCategory.DOMESTIC);
         ReflectionTestUtils.setField(trip, "id", tripId);
         return trip;
     }
 
-    public static Trip createTestTrip(UUID memberId, String title, String description, TripCategory category) {
+    public static Trip createTestTrip(String title, String description, TripCategory category) {
         TripPeriod period = createFuturePeriod();
         return Trip.create(
-                memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
                 new TripDescription(description),

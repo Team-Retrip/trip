@@ -1,4 +1,4 @@
-package com.retrip.trip.application.in;
+package com.retrip.trip.application.in.service;
 
 import com.retrip.trip.application.in.request.ItineraryDetailsCreateRequest;
 import com.retrip.trip.application.in.request.ItineraryDetailsUpdateRequest;
@@ -27,10 +27,12 @@ public class ItineraryService implements ManageItineraryDetailsUseCase, GetItine
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
 
     @Override
-    public ItineraryDetailsCreateResponse createItineraryDetails(UUID tripId, UUID itineraryId,
-                                                                 ItineraryDetailsCreateRequest request) {
-        Itinerary itinerary = tripItineraryQueryRepository.findByIdWithItineraryDetails(itineraryId)
-                .orElseThrow(EntityNotFoundException::new);
+    public ItineraryDetailsCreateResponse createItineraryDetails(
+            UUID tripId, UUID itineraryId, ItineraryDetailsCreateRequest request) {
+        Itinerary itinerary =
+                tripItineraryQueryRepository
+                        .findByIdWithItineraryDetails(itineraryId)
+                        .orElseThrow(EntityNotFoundException::new);
         ItineraryDetail itineraryDetail = request.to(itinerary);
         itinerary.addItineraryDetail(itineraryDetail);
         return ItineraryDetailsCreateResponse.of(itineraryDetail);
@@ -42,8 +44,10 @@ public class ItineraryService implements ManageItineraryDetailsUseCase, GetItine
             UUID itineraryId,
             UUID itineraryDetailId,
             ItineraryDetailsUpdateRequest request) {
-        Itinerary itinerary = tripItineraryQueryRepository.findByIdWithItineraryDetails(itineraryId)
-                .orElseThrow(EntityNotFoundException::new);
+        Itinerary itinerary =
+                tripItineraryQueryRepository
+                        .findByIdWithItineraryDetails(itineraryId)
+                        .orElseThrow(EntityNotFoundException::new);
         ItineraryDetail itineraryDetail = request.to(itinerary);
         itinerary.updateItineraryDetail(itineraryDetail, itineraryDetailId);
         return ItineraryDetailsUpdateResponse.of(itineraryDetail);
@@ -51,8 +55,10 @@ public class ItineraryService implements ManageItineraryDetailsUseCase, GetItine
 
     @Override
     public void deleteItineraryDetail(UUID tripId, UUID itineraryId, UUID itineraryDetailsId) {
-        Itinerary itinerary = tripItineraryQueryRepository.findByIdWithItineraryDetail(itineraryId, itineraryDetailsId)
-                .orElseThrow(EntityNotFoundException::new);
+        Itinerary itinerary =
+                tripItineraryQueryRepository
+                        .findByIdWithItineraryDetail(itineraryId, itineraryDetailsId)
+                        .orElseThrow(EntityNotFoundException::new);
         itinerary.removeItineraryDetail(itineraryDetailsId);
     }
 

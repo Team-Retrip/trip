@@ -7,6 +7,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ParticipantStatus {
+    ACTIVE,
+    EXPELLED;
 
-    ACTIVE, EXPELLED;
+    public boolean isExpelled() {
+        return this == EXPELLED;
+    }
 }
