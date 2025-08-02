@@ -45,6 +45,9 @@ public class Trip extends BaseEntity {
 
     private boolean open;
 
+    @Embedded
+    private TripPassword tripPassword;
+
     @Column(name = "status", length = 50, nullable = false)
     private TripStatus status;
 
@@ -194,5 +197,13 @@ public class Trip extends BaseEntity {
         if(this.status != RECRUITMENT_CLOSED){
             throw new BusinessException(NOT_TRIP_READY_STATUS);
         }
+    }
+
+    public void assignPassword(TripPassword password) {
+        this.tripPassword = password;
+    }
+
+    public void updateVisibility(boolean isOpen) {
+        this.open = isOpen;
     }
 }

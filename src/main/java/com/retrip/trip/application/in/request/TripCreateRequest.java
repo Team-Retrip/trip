@@ -41,6 +41,9 @@ public record TripCreateRequest(
         @Schema(description = "여행 공개 여부")
         boolean open,
 
+        @Schema(description = "여행 참여 비밀번호")
+        String password,
+
         @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
 
