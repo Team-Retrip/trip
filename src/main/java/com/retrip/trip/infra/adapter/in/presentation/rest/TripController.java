@@ -28,7 +28,7 @@ import java.util.UUID;
 @RestController
 @Tag(name = "Trip", description = "여행 관련 API")
 public class TripController {
-    private final ManageTripUseCase manageTripUseCase;
+    private final TripManageUseCase tripManageUseCase;
     private final GetTripUseCase getTripUseCase;
     private final TripDemandUseCase tripDemandUseCase;
     private final TripPeriodUseCase tripPeriodUseCase;
@@ -47,7 +47,7 @@ public class TripController {
     @PostMapping
     @Schema(description = "여행 생성")
     public ApiResponse<TripCreateResponse> createTrip(@RequestBody TripCreateRequest request) {
-        TripCreateResponse trip = manageTripUseCase.createTrip(request);
+        TripCreateResponse trip = tripManageUseCase.createTrip(request);
         return ApiResponse.created(trip);
     }
 
@@ -55,7 +55,7 @@ public class TripController {
     @Schema(description = "일정이 포함된 여행 생성")
     public ApiResponse<TripCreateResponse> createTripWithItineraries(
             @RequestBody TripCreateRequest request) {
-        TripCreateResponse trip = manageTripUseCase.createTripWithItineraries(request);
+        TripCreateResponse trip = tripManageUseCase.createTripWithItineraries(request);
         return ApiResponse.created(trip);
     }
 
@@ -63,7 +63,7 @@ public class TripController {
     @Schema(description = "여행 공개 여부 변경")
     public ApiResponse<TripUpdateVisibilityResponse> updateTripVisibility(
             @PathVariable UUID tripId, @RequestBody TripUpdateVisibilityRequest request) {
-        TripUpdateVisibilityResponse trip = manageTripUseCase.updateTripVisibility(tripId, request);
+        TripUpdateVisibilityResponse trip = tripManageUseCase.updateTripVisibility(tripId, request);
         return ApiResponse.created(trip);
     }
 

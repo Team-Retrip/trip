@@ -7,7 +7,7 @@ import com.retrip.trip.application.in.response.TripUpdateVisibilityResponse;
 
 import java.util.UUID;
 
-public interface ManageTripUseCase {
+public interface TripManageUseCase {
     TripCreateResponse createTrip(TripCreateRequest request);
 
     TripCreateResponse createTripWithItineraries(TripCreateRequest request);
