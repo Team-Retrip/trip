@@ -45,6 +45,6 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
         tripService =
                 new TripService(
-                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripParticipantRepository, tripConfirmationDemandRepository);
+                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripConfirmationDemandRepository);
     }
 }

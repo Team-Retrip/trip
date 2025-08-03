@@ -52,7 +52,6 @@ public class TripService
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
     private final TripDemandReadRepository tripDemandReadRepository;
-    private final TripParticipantRepository tripParticipantRepository;
     private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
 
     @Override

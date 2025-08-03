@@ -18,10 +18,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_READY_STATUS;
-import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_READY_STATUS;
 import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
-import static com.retrip.trip.domain.vo.TripStatus.BEFORE_TRIP;
-import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static com.retrip.trip.domain.vo.TripStatus.BEFORE_TRIP;
 import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
@@ -59,6 +56,9 @@ public class Trip extends BaseEntity {
 
     @Embedded
     private TripDemands tripDemands;
+
+    @Embedded
+    private TripConfirmationDemands tripConfirmationDemands;
 
     @Embedded
     private TripPeriod period;

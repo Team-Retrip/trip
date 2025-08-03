@@ -146,7 +146,7 @@ public class TripController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/re-demand}")
+    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/re-demand")
     @Schema(description = "여행 확정 재요청")
     public ResponseEntity<?> demandAgainTripConfirmation(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
                                                          @PathVariable UUID tripId,
