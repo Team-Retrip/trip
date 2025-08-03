@@ -30,8 +30,12 @@ public enum ErrorCode {
     INVITATION_EXPIRED(BAD_REQUEST, "Trip-015", "초대가 만료되었습니다."),
     TRIP_NOT_RECRUITING(BAD_REQUEST, "Trip-016", "여행이 모집중이 아닙니다."),
     TRIP_PARTICIPANTS_IS_FULL(BAD_REQUEST, "Trip-017", "여행 참여자가 가득 찼습니다."),
-    INVITATION_REJECT_NOT_ALLOWED(BAD_REQUEST, "Trip-018", "초대 거절이 불가능한 상태입니다.");
-
+    INVITATION_REJECT_NOT_ALLOWED(BAD_REQUEST, "Trip-018", "초대 거절이 불가능한 상태입니다."),
+    TRIP_CONFIRMATION_PERIOD_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "TRIP-019", "요청한 여행 확정 기간은 여행의 전체 기간 범위를 벗어날 수 없습니다."),
+    TRIP_CONFIRMATION_START_AFTER_END(HttpStatus.BAD_REQUEST, "TRIP-020", "요청한 여행 확정 시작일은 종료일보다 이후일 수 없습니다."),
+    NOT_FOUND_PARTICIPANTS(HttpStatus.BAD_REQUEST, "TRIP-021", "참가자가 존재하지 않습니다."),
+    NOT_TRIP_READY_STATUS(HttpStatus.BAD_REQUEST, "TRIP-022", "여행 준비 상태가 아닙니다."),
+    ;
 
     private final HttpStatus status;
     private final String code;

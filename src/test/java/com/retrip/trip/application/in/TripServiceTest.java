@@ -2,8 +2,17 @@ package com.retrip.trip.application.in;
 
 import com.retrip.trip.application.in.base.BaseTripServiceTest;
 import com.retrip.trip.application.in.request.*;
+import com.retrip.trip.application.in.request.PeriodUpdateRequest;
+import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
+import com.retrip.trip.application.in.request.TripCreateRequest;
+import com.retrip.trip.application.in.request.TripDemandRequest;
+import com.retrip.trip.application.in.request.TripRequestFixture;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripConfirmationDemand;
+import com.retrip.trip.domain.entity.TripConfirmationReply;
+import com.retrip.trip.domain.entity.TripConfirmationDemand;
+import com.retrip.trip.domain.entity.TripConfirmationReply;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.exception.*;
@@ -28,6 +37,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TripServiceTest extends BaseTripServiceTest {
     private TripPeriod createFuturePeriod() {
         return new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+    }
+
+    private Trip createTestTripWithParticipants() {
+        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        TripDemand tripDemand = TripDemand.create(newMemberId, trip, "참여요청");
+        trip.getTripDemands().getValues().add(tripDemand);
+        tripRepository.save(trip);
+        tripService.approve(memberId, trip.getId(), tripDemand.getId());
+        return trip;
     }
 
     private Trip createTestTrip(String title, String description, TripCategory category) {
@@ -782,5 +800,75 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThrows(InvalidValueException.class, () -> {
             savedTrip.getTripParticipants().isLeader(UUID.randomUUID());
         });
+    }
+
+    @Test
+    void 여행확정요청_생성_성공() {
+        //given
+        Trip trip = createTestTripWithParticipants();
+        trip.changeStatusToRecruitmentClosed();
+        TripConfirmationDemandRequest request = new TripConfirmationDemandRequest(LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+
+        //when
+        tripService.demandTripConfirmation(memberId, trip.getId(), request);
+        TripConfirmationDemand demand = tripConfirmationDemandRepository.findAll().get(0);
+
+        //then
+        assertThat(demand).isNotNull();
+        assertThat(demand.getTrip().getId()).isEqualTo(trip.getId());
+    }
+
+    @Test
+    void 여행확정_재요청_성공() {
+        //given
+        Trip trip = createTestTripWithParticipants();
+        trip.changeStatusToRecruitmentClosed();
+        TripConfirmationDemandRequest request = new TripConfirmationDemandRequest(LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        TripConfirmationDemand demand = TripConfirmationDemand.create(memberId, trip, request.startDate(), request.endDate());
+        demand.addTripMember(memberId);
+        tripConfirmationDemandRepository.save(demand);
+        TripConfirmationDemandRequest newRequest = new TripConfirmationDemandRequest(LocalDate.now().plusDays(2), LocalDate.now().plusDays(4));
+
+        //when
+        tripService.demandAgainTripConfirmation(memberId, trip.getId(), demand.getId(), newRequest);
+        TripConfirmationDemand updated = tripConfirmationDemandRepository.findById(demand.getId()).orElseThrow();
+
+        //then
+        assertThat(updated.getConfirmStartDate()).isEqualTo(newRequest.startDate());
+    }
+
+    @Test
+    void 여행확정요청_수락_성공() {
+        //given
+        Trip trip = createTestTripWithParticipants();
+        trip.changeStatusToRecruitmentClosed();
+        TripConfirmationDemand demand = TripConfirmationDemand.create(memberId, trip, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        demand.addTripMember(memberId);
+        tripConfirmationDemandRepository.save(demand);
+
+        //when
+        ConfirmationDemandAcceptResponse response = tripService.acceptConfirmationDemand(newMemberId, trip.getId(), demand.getId());
+
+        //then
+        assertThat(response).isNotNull();
+        assertThat(response.tripId()).isEqualTo(trip.getId());
+    }
+
+
+    @Test
+    void 여행확정요청_거절_성공() {
+        //given
+        Trip trip = createTestTripWithParticipants();
+        trip.changeStatusToRecruitmentClosed();
+        TripConfirmationDemand demand = TripConfirmationDemand.create(memberId, trip, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
+        demand.addTripMember(memberId);
+        tripConfirmationDemandRepository.save(demand);
+
+        //when
+        tripService.rejectConfirmationDemand(newMemberId, trip.getId(), demand.getId());
+        TripConfirmationDemand rejected = tripConfirmationDemandRepository.findById(demand.getId()).orElseThrow();
+
+        //then
+        assertThat(rejected.getReplies().getValues().stream().anyMatch(TripConfirmationReply::isAccepted)).isFalse();
     }
 }

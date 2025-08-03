@@ -17,7 +17,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_READY_STATUS;
 import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
+import static com.retrip.trip.domain.vo.TripStatus.BEFORE_TRIP;
+import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -53,6 +56,9 @@ public class Trip extends BaseEntity {
 
     @Embedded
     private TripDemands tripDemands;
+
+    @Embedded
+    private TripConfirmationDemands tripConfirmationDemands;
 
     @Embedded
     private TripPeriod period;
@@ -169,11 +175,24 @@ public class Trip extends BaseEntity {
         tripParticipants.removeParticipant(memberId);
     }
 
-
     public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
         if (this.status != TripStatus.BEFORE_TRIP) {
             throw new TripNotReadyException();
         }
         tripParticipants.delegateLeader(currentLeaderId, newLeaderId);
+    }
+
+    public void changeStatusToConfirming() {
+        this.status = BEFORE_TRIP;
+    }
+
+    public void changeStatusToRecruitmentClosed() {
+        this.status = RECRUITMENT_CLOSED;
+    }
+
+    public void validateReadyTripStatus() {
+        if(this.status != RECRUITMENT_CLOSED){
+            throw new BusinessException(NOT_TRIP_READY_STATUS);
+        }
     }
 }

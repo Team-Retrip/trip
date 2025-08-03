@@ -121,7 +121,7 @@ public class TripParticipants {
         }
     }
 
-    private void validateTripLeader(UUID loginMemberId) {
+    public void validateTripLeader(UUID loginMemberId) {
         if(!isLeader(loginMemberId)) {
             throw new BusinessException(NOT_TRIP_LEADER);
         }
