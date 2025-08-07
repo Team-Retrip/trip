@@ -17,9 +17,10 @@ public class VoteController {
 
     @PostMapping
     public ApiResponse<VoteCreateResponse> createVote(
+            @RequestParam UUID memberId,
             @PathVariable UUID tripId,
             @RequestBody VoteCreateRequest request) {
-        VoteCreateResponse vote = voteManageUseCase.createVote(tripId, request);
+        VoteCreateResponse vote = voteManageUseCase.createVote(tripId, memberId, request);
         return ApiResponse.created(vote);
     }
 }

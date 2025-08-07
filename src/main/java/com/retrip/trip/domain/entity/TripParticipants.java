@@ -5,7 +5,6 @@ import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripFullException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.ErrorCode;
-import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.ParticipantStatus;

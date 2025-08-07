@@ -6,5 +6,5 @@ import com.retrip.trip.application.in.response.vote.VoteCreateResponse;
 import java.util.UUID;
 
 public interface VoteManageUseCase {
-    VoteCreateResponse createVote(UUID tripId, VoteCreateRequest request);
+    VoteCreateResponse createVote(UUID tripId, UUID memberId, VoteCreateRequest request);
 }

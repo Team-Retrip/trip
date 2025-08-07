@@ -25,6 +25,7 @@ public class Vote {
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
     private UUID tripId;
+    private UUID createdBy;
 
     @Embedded
     private VoteSummary summary;
@@ -42,10 +43,11 @@ public class Vote {
     private VoteOptions options;
 
     @Builder
-    public Vote(UUID tripId, VoteSummary summary, VoteSetting setting,
-                VotePeriod period, VoteOptions voteOptions) {
+    public Vote(UUID tripId, UUID createdBy, VoteSummary summary,
+                VoteSetting setting, VotePeriod period, VoteOptions voteOptions) {
         this.id = UUID.randomUUID();
         this.tripId = tripId;
+        this.createdBy = createdBy;
         this.summary = summary;
         this.setting = setting;
         this.period = period;

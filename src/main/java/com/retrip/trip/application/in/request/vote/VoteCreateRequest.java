@@ -44,12 +44,12 @@ public record VoteCreateRequest(
         List<VoteOptionRequest> options
 ) {
 
-    public Vote to(UUID tripId) {
+    public Vote to(UUID tripId, UUID memberId) {
         VoteSummary voteSummary = new VoteSummary(title, description);
         VoteSetting voteSetting = new VoteSetting(anonymous, maxSelections, allowAddOption);
         VotePeriod votePeriod = new VotePeriod(Instant.from(openTIme), Instant.from(endTIme), ZoneId.of(timezone));
         VoteOptions voteOptions = VoteOptionRequest.toList(options);
-        return new Vote(tripId, voteSummary, voteSetting, votePeriod, voteOptions);
+        return new Vote(tripId, memberId, voteSummary, voteSetting, votePeriod, voteOptions);
     }
 
     @Schema(description = "투표 옵션 항목 Request")
