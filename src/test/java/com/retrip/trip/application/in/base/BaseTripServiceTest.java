@@ -25,9 +25,6 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     protected TripDemandReadRepository tripDemandReadRepository;
 
     @Autowired
-    protected TripParticipantRepository tripParticipantRepository;
-
-    @Autowired
     protected TripConfirmationDemandRepository tripConfirmationDemandRepository;
 
     @Autowired
@@ -50,7 +47,7 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
         tripService = new TripService(
                 tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository,
-                tripParticipantRepository, tripConfirmationDemandRepository, tripPasswordEncoder
+                tripConfirmationDemandRepository, tripPasswordEncoder
         );
     }
 }

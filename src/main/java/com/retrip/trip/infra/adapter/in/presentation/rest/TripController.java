@@ -3,7 +3,6 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
-import com.retrip.trip.application.in.usecase.CreateTripUseCase;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
 import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
 import com.retrip.trip.application.in.usecase.TripDemandUseCase;
