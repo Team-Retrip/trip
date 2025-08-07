@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.vo.TripPassword.PASSWORD_MIN_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -102,6 +103,7 @@ class TripServiceTest extends BaseTripServiceTest {
                         LocalDate.now().plusDays(1),
                         LocalDate.now().plusDays(5),
                         true,
+                        "a".repeat(PASSWORD_MIN_LENGTH + 1),
                         4,
                         TripCategory.DOMESTIC);
         TripCreateResponse response = tripService.createTrip(request);

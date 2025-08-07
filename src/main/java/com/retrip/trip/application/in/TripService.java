@@ -1,69 +1,63 @@
 package com.retrip.trip.application.in;
 
-import com.retrip.trip.application.in.request.DelegateLeaderRequest;
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
-import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripDemandRequest;
+import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
+import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
 import com.retrip.trip.application.out.repository.*;
-import com.retrip.trip.application.in.response.ConfirmationDemandAcceptResponse;
-import com.retrip.trip.application.in.response.PeriodUpdateResponse;
-import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripDemandApproveResponse;
-import com.retrip.trip.application.in.response.TripDemandRejectResponse;
-import com.retrip.trip.application.in.response.TripDemandResponse;
-import com.retrip.trip.application.in.response.TripResponse;
-import com.retrip.trip.application.in.usecase.CreateTripUseCase;
-import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
-import com.retrip.trip.application.in.usecase.TripDemandUseCase;
-import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
-import com.retrip.trip.application.out.repository.TripConfirmationDemandRepository;
-import com.retrip.trip.application.out.repository.TripDemandReadRepository;
-import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
-import com.retrip.trip.application.out.repository.TripParticipantRepository;
-import com.retrip.trip.application.out.repository.TripQueryRepository;
-import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripConfirmationDemand;
-import com.retrip.trip.domain.entity.TripConfirmationDemand;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.exception.TripNotFoundException;
+import com.retrip.trip.domain.exception.common.InvalidValueException;
+import com.retrip.trip.domain.vo.TripPassword;
 import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class TripService
-        implements CreateTripUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase, TripConfirmationUseCase {
+        implements TripManageUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase, TripConfirmationUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
     private final TripDemandReadRepository tripDemandReadRepository;
     private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
+    private final TripPasswordEncoder tripPasswordEncoder;
 
     @Override
     public TripCreateResponse createTrip(TripCreateRequest request) {
-        Trip trip = tripRepository.save(request.to());
-        return TripCreateResponse.of(trip);
+        Trip trip = request.to();
+        assignPasswordIfNotOpen(trip, request.password());
+        Trip savedTrip = tripRepository.save(trip);
+        return TripCreateResponse.of(savedTrip);
     }
 
     @Override
     public TripCreateResponse createTripWithItineraries(TripCreateRequest request) {
-        Trip trip = tripRepository.save(request.toWithItineraries());
-        return TripCreateResponse.of(trip);
+        Trip trip = request.toWithItineraries();
+        assignPasswordIfNotOpen(trip, request.password());
+        Trip savedTrip = tripRepository.save(trip);
+        return TripCreateResponse.of(savedTrip);
+    }
+
+    @Override
+    public TripUpdateVisibilityResponse updateTripVisibility(UUID tripId, TripUpdateVisibilityRequest request) {
+        Trip trip = findTrip(tripId);
+        assignPasswordIfNotOpen(trip, request.password());
+        trip.updateVisibility(request.open());
+        return TripUpdateVisibilityResponse.of(trip, request.password());
     }
 
     @Transactional(readOnly = true)
@@ -176,5 +170,18 @@ public class TripService
     private TripConfirmationDemand findTripConfirmationDemandById(UUID confirmationDemandId) {
         return tripConfirmationDemandRepository.findById(confirmationDemandId)
                 .orElseThrow(() -> new EntityNotFoundException("참여 확정 요청을 찾을 수 없습니다."));
+    }
+
+    private void assignPasswordIfNotOpen(Trip trip, String password) {
+        if (trip.isOpen()) {
+            return;
+        }
+        String trimPassword = password.trim();
+        if (!StringUtils.hasText(trimPassword)) {
+            throw new InvalidValueException("비공개 여행은 비밀번호를 반드시 입력해야 합니다.");
+        }
+        String passwordHash = tripPasswordEncoder.encode(trimPassword);
+        TripPassword tripPassword = new TripPassword(trimPassword, passwordHash);
+        trip.assignPassword(tripPassword);
     }
 }

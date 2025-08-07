@@ -2,12 +2,15 @@ package com.retrip.trip.application.in.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.TripService;
+import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
 import com.retrip.trip.application.out.repository.*;
+import com.retrip.trip.infra.adapter.out.crypto.TripBcryptTripPasswordEncoder;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripItineraryQuerydslRepository;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripQuerydslRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.UUID;
 
@@ -20,9 +23,6 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
     @Autowired
     protected TripDemandReadRepository tripDemandReadRepository;
-
-    @Autowired
-    protected TripParticipantRepository tripParticipantRepository;
 
     @Autowired
     protected TripConfirmationDemandRepository tripConfirmationDemandRepository;
@@ -42,9 +42,12 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     void setUp() {
         tripQueryRepository = new TripQuerydslRepository(jpaQueryFactory);
         tripItineraryQueryRepository = new TripItineraryQuerydslRepository(jpaQueryFactory);
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        TripPasswordEncoder tripPasswordEncoder = new TripBcryptTripPasswordEncoder(bCryptPasswordEncoder);
 
-        tripService =
-                new TripService(
-                        tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository, tripConfirmationDemandRepository);
+        tripService = new TripService(
+                tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository,
+                tripConfirmationDemandRepository, tripPasswordEncoder
+        );
     }
 }

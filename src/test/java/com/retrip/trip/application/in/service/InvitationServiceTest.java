@@ -1,4 +1,4 @@
-package com.retrip.trip.application.in;
+package com.retrip.trip.application.in.service;
 
 import com.retrip.trip.application.in.base.BaseInvitationServiceTest;
 import com.retrip.trip.application.in.request.TripInvitationsCreateRequest;
