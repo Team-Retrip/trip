@@ -25,10 +25,10 @@ public record VoteCreateResponse(
         boolean allowAddOption,
 
         @Schema(description = "투표 시작 시간")
-        Instant openedAt,
+        Instant openTIme,
 
         @Schema(description = "투표 종료 시간")
-        Instant expiresAt,
+        Instant endTIme,
 
         @Schema(description = "타임존")
         String timezone,
@@ -44,8 +44,8 @@ public record VoteCreateResponse(
                 vote.getSetting().isAnonymous(),
                 vote.getSetting().getMaxSelections(),
                 vote.getSetting().isAllowAddOption(),
-                vote.getPeriod().getOpenedAt(),
-                vote.getPeriod().getExpiresAt(),
+                vote.getPeriod().getOpenTIme(),
+                vote.getPeriod().getEndTime(),
                 vote.getPeriod().getTimezone().toString(),
                 VoteOptionRequest.toList(vote.getOptions().getValues())
         );

@@ -31,8 +31,11 @@ public record VoteCreateRequest(
         @Schema(description = "선택항목 추가 허용 여부")
         boolean allowAddOption,
 
+        @Schema(description = "투표 시작 시간")
+        Instant openTIme,
+
         @Schema(description = "투표 종료 시간")
-        Instant expiresAt,
+        Instant endTIme,
 
         @Schema(description = "타임존")
         String timezone,
@@ -44,7 +47,7 @@ public record VoteCreateRequest(
     public Vote to(UUID tripId) {
         VoteSummary voteSummary = new VoteSummary(title, description);
         VoteSetting voteSetting = new VoteSetting(anonymous, maxSelections, allowAddOption);
-        VotePeriod votePeriod = new VotePeriod(Instant.from(expiresAt), ZoneId.of(timezone));
+        VotePeriod votePeriod = new VotePeriod(Instant.from(openTIme), Instant.from(endTIme), ZoneId.of(timezone));
         VoteOptions voteOptions = VoteOptionRequest.toList(options);
         return new Vote(tripId, voteSummary, voteSetting, votePeriod, voteOptions);
     }
