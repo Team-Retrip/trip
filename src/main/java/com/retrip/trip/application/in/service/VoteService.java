@@ -30,7 +30,7 @@ public class VoteService implements VoteManageUseCase {
     private final VotePolicy votePolicy;
 
     @Override
-    public VoteCreateResponse createVote(UUID tripId, UUID memberId, VoteCreateRequest request) {
+    public VoteCreateResponse createVote(UUID memberId, UUID tripId, VoteCreateRequest request) {
         Trip trip = findTripWithParticipants(tripId);
         votePolicy.canCreate(trip, memberId);
         Vote save = voteRepository.save(request.to(tripId, memberId));
@@ -38,7 +38,7 @@ public class VoteService implements VoteManageUseCase {
     }
 
     @Override
-    public VoteUpdateResponse updateVote(UUID tripId, UUID memberId, UUID voteId, VoteUpdateRequest request) {
+    public VoteUpdateResponse updateVote(UUID memberId, UUID tripId, UUID voteId, VoteUpdateRequest request) {
         findTripWithParticipants(tripId);
         Vote vote = findVote(voteId);
 
@@ -49,6 +49,13 @@ public class VoteService implements VoteManageUseCase {
         vote.update(voteSummary, voteSetting, votePeriod, voteOptions, memberId);
 
         return VoteUpdateResponse.of(vote);
+    }
+
+    @Override
+    public void deleteVote(UUID memberId, UUID tripId, UUID voteId) {
+        Vote vote = findVote(voteId);
+        vote.validateDeletable(memberId);
+        voteRepository.delete(vote);
     }
 
     private Vote findVote(UUID voteId) {

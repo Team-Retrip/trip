@@ -11,4 +11,6 @@ public interface VoteManageUseCase {
     VoteCreateResponse createVote(UUID memberId, UUID tripId, VoteCreateRequest request);
 
     VoteUpdateResponse updateVote(UUID memberId, UUID tripId, UUID voteId, VoteUpdateRequest request);
+
+    void deleteVote(UUID memberId, UUID tripId, UUID voteId);
 }

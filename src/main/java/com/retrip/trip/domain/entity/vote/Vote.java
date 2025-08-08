@@ -93,4 +93,10 @@ public class Vote {
             throw new IllegalStateException("투표를 수정할 수 없는 상태입니다.");
         }
     }
+
+    public void validateDeletable(UUID memberId) {
+        if (this.createdBy != memberId) {
+            throw new InvalidValueException("투표를 만든 사람이 아니면 삭제할 수 없습니다.");
+        }
+    }
 }

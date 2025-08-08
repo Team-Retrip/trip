@@ -39,4 +39,14 @@ class VoteTest {
                 vote.update(vote.getSummary(), vote.getSetting(), vote.getPeriod(), vote.getOptions(), 홍석_ID))
                 .isInstanceOf(InvalidValueException.class);
     }
+
+    @Test
+    void 투표를_만든_사람이_아니면_삭제할_수_없다() {
+        // given
+        Vote vote = vote();
+
+        // when, then
+        assertThatThrownBy(() -> vote.validateDeletable(홍석_ID))
+                .isInstanceOf(InvalidValueException.class);
+    }
 }

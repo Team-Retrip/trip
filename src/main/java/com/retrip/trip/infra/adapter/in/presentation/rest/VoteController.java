@@ -35,5 +35,14 @@ public class VoteController {
         VoteUpdateResponse vote = voteManageUseCase.updateVote(memberId, tripId, voteId, request);
         return ApiResponse.ok(vote);
     }
+
+    @DeleteMapping("/{voteId}")
+    public ApiResponse<Void> deleteVote(
+            @RequestParam UUID memberId,
+            @PathVariable UUID tripId,
+            @PathVariable UUID voteId) {
+        voteManageUseCase.deleteVote(memberId, tripId, voteId);
+        return ApiResponse.noContent();
+    }
 }
 
