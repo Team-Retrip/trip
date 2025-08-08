@@ -85,18 +85,28 @@ public class Vote {
     }
 
     private void validateToUpdate(UUID memberId) {
-        if (this.createdBy != memberId) {
-            throw new InvalidValueException("투표를 만든 사람이 아니면 수정할 수 없습니다.");
-        }
-
+        validateOwner(memberId);
         if (this.status.isImmutable()) {
             throw new IllegalStateException("투표를 수정할 수 없는 상태입니다.");
         }
     }
 
+    public void end(UUID memberId) {
+        validateEndable(memberId);
+        this.status = ENDED;
+    }
+
+    public void validateEndable(UUID memberId) {
+        validateOwner(memberId);
+    }
+
     public void validateDeletable(UUID memberId) {
+        validateOwner(memberId);
+    }
+
+    private void validateOwner(UUID memberId) {
         if (this.createdBy != memberId) {
-            throw new InvalidValueException("투표를 만든 사람이 아니면 삭제할 수 없습니다.");
+            throw new InvalidValueException("투표를 만든 사람이 아니면 수정, 종료, 삭제 할 수 없습니다.");
         }
     }
 }

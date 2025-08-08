@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface VoteRepository extends JpaRepository<Vote, UUID> {
-    @Query("SELECT v FROM Vote v WHERE v.status = :status AND v.period.openTIme <= :now")
+    @Query("SELECT v FROM Vote v WHERE v.status = :status AND v.period.startTIme <= :now")
     List<Vote> findStartableVotes(VoteStatus status, Instant now);
 
-    @Query("SELECT v FROM Vote v WHERE v.status = :status AND v.period.endTime < :now")
+    @Query("SELECT v FROM Vote v WHERE v.status = :status AND v.period.startTIme < :now")
     List<Vote> findClosableVotes(VoteStatus status, Instant now);
 }

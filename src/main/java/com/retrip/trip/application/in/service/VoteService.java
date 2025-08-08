@@ -3,6 +3,7 @@ package com.retrip.trip.application.in.service;
 import com.retrip.trip.application.in.request.vote.VoteCreateRequest;
 import com.retrip.trip.application.in.request.vote.VoteUpdateRequest;
 import com.retrip.trip.application.in.response.vote.VoteCreateResponse;
+import com.retrip.trip.application.in.response.vote.VoteEndResponse;
 import com.retrip.trip.application.in.response.vote.VoteUpdateResponse;
 import com.retrip.trip.application.in.usecase.VoteManageUseCase;
 import com.retrip.trip.application.out.repository.TripRepository;
@@ -39,7 +40,6 @@ public class VoteService implements VoteManageUseCase {
 
     @Override
     public VoteUpdateResponse updateVote(UUID memberId, UUID tripId, UUID voteId, VoteUpdateRequest request) {
-        findTripWithParticipants(tripId);
         Vote vote = findVote(voteId);
 
         VoteSummary voteSummary = request.toSummary();
@@ -49,6 +49,13 @@ public class VoteService implements VoteManageUseCase {
         vote.update(voteSummary, voteSetting, votePeriod, voteOptions, memberId);
 
         return VoteUpdateResponse.of(vote);
+    }
+
+    @Override
+    public VoteEndResponse endVote(UUID memberId, UUID tripId, UUID voteId) {
+        Vote vote = findVote(voteId);
+        vote.end(memberId);
+        return VoteEndResponse.of(vote);
     }
 
     @Override

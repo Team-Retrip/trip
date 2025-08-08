@@ -3,6 +3,7 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 import com.retrip.trip.application.in.request.vote.VoteCreateRequest;
 import com.retrip.trip.application.in.request.vote.VoteUpdateRequest;
 import com.retrip.trip.application.in.response.vote.VoteCreateResponse;
+import com.retrip.trip.application.in.response.vote.VoteEndResponse;
 import com.retrip.trip.application.in.response.vote.VoteUpdateResponse;
 import com.retrip.trip.application.in.usecase.VoteManageUseCase;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
@@ -26,13 +27,22 @@ public class VoteController {
         return ApiResponse.created(vote);
     }
 
-    @PutMapping("/{voteId}")
+    @PutMapping("/{voteId}/update")
     public ApiResponse<VoteUpdateResponse> updateVote(
             @RequestParam UUID memberId,
             @PathVariable UUID tripId,
             @PathVariable UUID voteId,
             @RequestBody VoteUpdateRequest request) {
         VoteUpdateResponse vote = voteManageUseCase.updateVote(memberId, tripId, voteId, request);
+        return ApiResponse.ok(vote);
+    }
+
+    @PutMapping("/{voteId}/end")
+    public ApiResponse<VoteEndResponse> endVote(
+            @RequestParam UUID memberId,
+            @PathVariable UUID tripId,
+            @PathVariable UUID voteId) {
+        VoteEndResponse vote = voteManageUseCase.endVote(memberId, tripId, voteId);
         return ApiResponse.ok(vote);
     }
 
