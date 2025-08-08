@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 
-import static com.retrip.trip.domain.vo.vote.VoteStatus.OPEN;
+import static com.retrip.trip.domain.vo.vote.VoteStatus.CREATED;
+import static com.retrip.trip.domain.vo.vote.VoteStatus.START;
 
 @Component
 @RequiredArgsConstructor
@@ -19,9 +20,19 @@ public class VoteScheduler {
 
     @Scheduled(cron = "0 * * * * *")
     @Transactional
-    public void closeExpiredVotes() {
+    public void startExpiredVotes() {
         Instant now = Instant.now();
-        List<Vote> votesToClose = voteRepository.findClosableVotes(OPEN, now);
+        List<Vote> votesToStart = voteRepository.findStartableVotes(CREATED, now);
+        votesToStart.stream()
+                .filter(vote -> vote.isClosable(now))
+                .forEach(Vote::open);
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    @Transactional
+    public void endExpiredVotes() {
+        Instant now = Instant.now();
+        List<Vote> votesToClose = voteRepository.findClosableVotes(START, now);
         votesToClose.stream()
                 .filter(vote -> vote.isClosable(now))
                 .forEach(Vote::close);

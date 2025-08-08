@@ -18,24 +18,24 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED, force = true)
 public class VotePeriod {
     @Column(name = "open_time", columnDefinition = "TIMESTAMP(3)")
-    private final Instant openTIme;
+    private final Instant startTIme;
     @Column(name = "end_time", columnDefinition = "TIMESTAMP(3)")
     private final Instant endTime;
     private final ZoneId timezone;
 
-    public VotePeriod(Instant openTIme, Instant endTime, ZoneId timezone) {
-        this.openTIme = openTIme;
+    public VotePeriod(Instant startTIme, Instant endTime, ZoneId timezone) {
+        this.startTIme = startTIme;
         this.endTime = endTime;
         this.timezone = timezone;
     }
 
     public VoteStatus getVoteStatus(Instant now) {
-        if (now.isBefore(Objects.requireNonNull(openTIme))) {
+        if (now.isBefore(Objects.requireNonNull(startTIme))) {
             return VoteStatus.CREATED;
         }
 
         if (!now.isAfter(Objects.requireNonNull(endTime))) {
-            return VoteStatus.OPEN;
+            return VoteStatus.START;
         }
 
         return VoteStatus.ENDED;

@@ -1,14 +1,20 @@
 package com.retrip.trip.application.in.service;
 
 import com.retrip.trip.application.in.request.vote.VoteCreateRequest;
+import com.retrip.trip.application.in.request.vote.VoteUpdateRequest;
 import com.retrip.trip.application.in.response.vote.VoteCreateResponse;
+import com.retrip.trip.application.in.response.vote.VoteUpdateResponse;
 import com.retrip.trip.application.in.usecase.VoteManageUseCase;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.application.out.repository.VoteRepository;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.vote.Vote;
+import com.retrip.trip.domain.entity.vote.VoteOptions;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.VotePolicy;
+import com.retrip.trip.domain.vo.vote.VotePeriod;
+import com.retrip.trip.domain.vo.vote.VoteSetting;
+import com.retrip.trip.domain.vo.vote.VoteSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +35,25 @@ public class VoteService implements VoteManageUseCase {
         votePolicy.canCreate(trip, memberId);
         Vote save = voteRepository.save(request.to(tripId, memberId));
         return VoteCreateResponse.of(save);
+    }
+
+    @Override
+    public VoteUpdateResponse updateVote(UUID tripId, UUID memberId, UUID voteId, VoteUpdateRequest request) {
+        findTripWithParticipants(tripId);
+        Vote vote = findVote(voteId);
+
+        VoteSummary voteSummary = request.toSummary();
+        VoteSetting voteSetting = request.toSetting();
+        VotePeriod votePeriod = request.toPeriod();
+        VoteOptions voteOptions = request.toOptions();
+        vote.update(voteSummary, voteSetting, votePeriod, voteOptions, memberId);
+
+        return VoteUpdateResponse.of(vote);
+    }
+
+    private Vote findVote(UUID voteId) {
+        return voteRepository.findById(voteId)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     private Trip findTripWithParticipants(UUID tripId) {

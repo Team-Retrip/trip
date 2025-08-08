@@ -1,6 +1,5 @@
 package com.retrip.trip.application.in.request.vote;
 
-import com.retrip.trip.domain.entity.vote.Vote;
 import com.retrip.trip.domain.entity.vote.VoteOption;
 import com.retrip.trip.domain.entity.vote.VoteOptions;
 import com.retrip.trip.domain.vo.vote.VoteOptionContent;
@@ -12,10 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 
-@Schema(description = "투표 생성 Request")
-public record VoteCreateRequest(
+@Schema(description = "투표 수정 Request")
+public record VoteUpdateRequest(
         @Schema(description = "투표 제목")
         String title,
 
@@ -44,17 +42,25 @@ public record VoteCreateRequest(
         List<VoteOptionRequest> options
 ) {
 
-    public Vote to(UUID tripId, UUID memberId) {
-        VoteSummary voteSummary = new VoteSummary(title, description);
-        VoteSetting voteSetting = new VoteSetting(anonymous, maxSelections, allowAddOption, options.size());
-        VotePeriod votePeriod = new VotePeriod(Instant.from(startTIme), Instant.from(endTIme), ZoneId.of(timezone));
-        VoteOptions voteOptions = VoteOptionRequest.toList(options);
-        return new Vote(tripId, memberId, voteSummary, voteSetting, votePeriod, voteOptions);
+    public VoteSummary toSummary() {
+        return new VoteSummary(title, description);
+    }
+
+    public VoteSetting toSetting() {
+        return new VoteSetting(anonymous, maxSelections, allowAddOption, options.size());
+    }
+
+    public VotePeriod toPeriod() {
+        return new VotePeriod(Instant.from(startTIme), Instant.from(endTIme), ZoneId.of(timezone));
+    }
+
+    public VoteOptions toOptions() {
+        return VoteOptionRequest.toList(options);
     }
 
     @Schema(description = "투표 옵션 항목 Request")
     private record VoteOptionRequest(
-           String content
+            String content
     ) {
         private VoteOption to() {
             return new VoteOption(new VoteOptionContent(content));

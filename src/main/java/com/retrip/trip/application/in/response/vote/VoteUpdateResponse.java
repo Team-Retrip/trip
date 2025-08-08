@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 
-@Schema(description = "투표 생성 Response")
-public record VoteCreateResponse(
+@Schema(description = "투표 수정 Response")
+public record VoteUpdateResponse(
         @Schema(description = "투표 제목")
         String title,
 
@@ -37,8 +37,8 @@ public record VoteCreateResponse(
         List<VoteOptionRequest> options
 ) {
 
-    public static VoteCreateResponse of(Vote vote) {
-        return new VoteCreateResponse(
+    public static VoteUpdateResponse of(Vote vote) {
+        return new VoteUpdateResponse(
                 vote.getSummary().getTitle(),
                 vote.getSummary().getDescription(),
                 vote.getSetting().isAnonymous(),
