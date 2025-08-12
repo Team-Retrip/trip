@@ -62,7 +62,16 @@ jobs:
           docker stop retrip-trip || true
           docker rm retrip-trip || true
           docker pull bjisu/retrip-trip:latest
-          docker run -d --name retrip-trip -p 8080:8080 bjisu/retrip-trip:latest
+          docker run -d --name retrip-trip --restart unless-stopped \
+            -p 8080:8080 \
+            -e SPRING_DATASOURCE_URL='jdbc:h2:mem:trip;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE' \
+            -e SPRING_DATASOURCE_DRIVER_CLASS_NAME='org.h2.Driver' \
+            -e SPRING_DATASOURCE_USERNAME='sa' \
+            -e SPRING_DATASOURCE_PASSWORD='' \
+            -e SPRING_JPA_HIBERNATE_DDL_AUTO='update' \
+            -e SPRING_H2_CONSOLE_ENABLED='true' \
+            -e SPRING_H2_CONSOLE_PATH='/h2' \
+            bjisu/retrip-trip:latest
 
     - name: IP 제거 (SSH 포트)
       if: ${{ always() }}
