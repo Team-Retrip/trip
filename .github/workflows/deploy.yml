@@ -59,7 +59,7 @@ jobs:
           docker stop retrip-trip || true
           docker rm retrip-trip || true
           docker pull bjisu/retrip-trip:latest
-          docker run -d --name auth-server -p 8080:8080 bjisu/retrip-trip:latest
+          docker run -d --name retrip-trip -p 8080:8080 bjisu/retrip-trip:latest
 
     - name: IP 제거 (SSH 포트)
       if: ${{ always() }}
