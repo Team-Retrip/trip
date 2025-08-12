@@ -24,7 +24,7 @@ class TripTest {
     UUID memberId = UUID.fromString("c076d246-7e6d-4191-bf5c-310aebf4c003");
     UUID destinationId = UUID.fromString("13c8ab91-76bc-4f70-93e9-89f1a65dc64a");
 
-    @DisplayName("제목, 설명, 여행지, 기간, 공개 여부, 참가인원수,카테고리를 입력해 여행을 생성할 수 있다.")
+    @DisplayName("제목, 설명, 여행지, 기간, 공개 여부, 참가인원수,카테고리, 해시태그를 입력해 여행을 생성할 수 있다.")
     @Test
     void create() {
         assertThatCode(() -> Trip.create(
@@ -37,6 +37,7 @@ class TripTest {
                         LocalDate.now().plusDays(5)),
                 true,
                 4,
+                List.of("속초 여행"),
                 TripCategory.DOMESTIC
         )).doesNotThrowAnyException();
     }
@@ -54,6 +55,7 @@ class TripTest {
                         LocalDate.now().plusDays(5)),
                 true,
                 4,
+                List.of("속초 여행"),
                 TripCategory.DOMESTIC
         )).doesNotThrowAnyException();
     }
@@ -71,6 +73,7 @@ class TripTest {
                         LocalDate.now().plusDays(5)),
                 true,
                 4,
+                List.of("속초 여행"),
                 TripCategory.DOMESTIC
         );
 
@@ -96,6 +99,7 @@ class TripTest {
                 period,
                 true,
                 4,
+                List.of("Test Tag"),
                 TripCategory.DOMESTIC
         );
         //when
@@ -121,6 +125,7 @@ class TripTest {
                 period,
                 true,
                 4,
+                List.of("Test Tag"),
                 TripCategory.DOMESTIC
         );
         trip.addParticipant(TripParticipant.createTripParticipant(memberId, trip));

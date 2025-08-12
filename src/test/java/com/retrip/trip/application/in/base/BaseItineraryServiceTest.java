@@ -5,6 +5,7 @@ import com.retrip.trip.application.in.ItineraryService;
 import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
@@ -28,21 +29,13 @@ public abstract class BaseItineraryServiceTest extends BaseServiceTest {
     protected UUID locationId = UUID.fromString("13c8ab91-76bc-4f70-93e9-89f1a65dc64a");
     protected ItineraryService itineraryService;
 
-    protected Trip trip =
-            Trip.createWithItineraries(
-                    memberId,
-                    UUID.randomUUID(),
-                    new TripTitle("속초 여행 멤버 구함"),
-                    new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                    new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)),
-                    true,
-                    4,
-                    TripCategory.DOMESTIC);
+    protected Trip trip;
 
     @BeforeEach
     void setUp() {
         tripItineraryQueryRepository = new TripItineraryQuerydslRepository(jpaQueryFactory);
         itineraryService = new ItineraryService(tripItineraryQueryRepository);
-
+        trip = TripFixture.createTestTripWithPeriod(memberId, "속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC,
+                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)));
     }
 }
