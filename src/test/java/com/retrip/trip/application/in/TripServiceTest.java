@@ -11,8 +11,6 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripConfirmationDemand;
 import com.retrip.trip.domain.entity.TripConfirmationReply;
-import com.retrip.trip.domain.entity.TripConfirmationDemand;
-import com.retrip.trip.domain.entity.TripConfirmationReply;
 import com.retrip.trip.domain.entity.TripDemand;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.exception.*;
@@ -24,11 +22,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static com.retrip.trip.domain.vo.TripPassword.PASSWORD_MIN_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,10 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TripServiceTest extends BaseTripServiceTest {
-    private TripPeriod createFuturePeriod() {
-        return new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
-    }
-
     private Trip createTestTripWithParticipants() {
         Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
         TripDemand tripDemand = TripDemand.create(newMemberId, trip, "참여요청");
@@ -50,47 +45,20 @@ class TripServiceTest extends BaseTripServiceTest {
     }
 
     private Trip createTestTrip(String title, String description, TripCategory category) {
-        TripPeriod period = createFuturePeriod();
-        Trip trip =
-                Trip.create(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle(title),
-                        new TripDescription(description),
-                        period,
-                        true,
-                        4,
-                        category);
+        Trip trip = TripFixture.createTestTrip(memberId, title, description, category);
         return tripRepository.save(trip);
     }
 
     private Trip createReadyTrip(UUID leaderId) {
-        Trip trip = Trip.create(
-                leaderId,
-                locationId,
-                new TripTitle("준비된 여행"),
-                new TripDescription("설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                4,
-                TripCategory.DOMESTIC);
-        ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
+        Trip trip = TripFixture.createReadyTrip(leaderId, "준비된 여행", "설명", TripCategory.DOMESTIC);
         return tripRepository.save(trip);
     }
 
     private Trip createProgressTrip(UUID leaderId) {
-        Trip trip = Trip.create(
-                leaderId,
-                locationId,
-                new TripTitle("진행중 여행"),
-                new TripDescription("설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                4,
-                TripCategory.DOMESTIC);
-        ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
+        Trip trip = TripFixture.createProgressTrip(leaderId, "진행중 여행", "설명", TripCategory.DOMESTIC);
         return tripRepository.save(trip);
     }
+
 
     @Test
     void 여행을_생성_한다() {
@@ -105,61 +73,27 @@ class TripServiceTest extends BaseTripServiceTest {
                         true,
                         "a".repeat(PASSWORD_MIN_LENGTH + 1),
                         4,
+                        List.of("속초 여행", "MZ"),
                         TripCategory.DOMESTIC);
         TripCreateResponse response = tripService.createTrip(request);
         assertThat(response.id()).isNotNull();
         assertThat(response.destinationId()).isEqualTo(locationId);
+        assertThat(response.hashTags()).contains("속초 여행", "MZ");
     }
 
     @Test
     void 여행_목록을_조회한다() {
-        TripPeriod period = createFuturePeriod();
-        tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("속초 여행 멤버 구함"),
-                        new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC));
-        tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC));
-        tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("대구 여행 멤버 구함"),
-                        new TripDescription("대구 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC));
-        tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("부산 여행 멤버 구함"),
-                        new TripDescription("부산 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC));
-
+        tripRepository.save(TripFixture.createTestTrip(memberId, "속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC));
+        tripRepository.save(TripFixture.createTestTrip(memberId, "대구 여행 멤버 구함", "대구 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC));
+        tripRepository.save(TripFixture.createTestTrip(memberId, "부산 여행 멤버 구함", "부산 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC));
         Page<TripResponse> trips = tripService.getTrips(PageRequest.of(0, 2));
         assertThat(trips.getTotalElements()).isEqualTo(2);
         assertThat(trips.getPageable().getOffset()).isEqualTo(0);
         assertThat(trips.getPageable().getPageSize()).isEqualTo(2);
+        assertThat(trips.getContent().getFirst().hashTags()).contains("test", "Test 해시 코드");
+        assertThat(trips.getContent().getLast().hashTags()).contains("test", "Test 해시 코드");
     }
+
 
     @Test
     void 사용자가_참여_요청을_보낸다() {
@@ -268,18 +202,8 @@ class TripServiceTest extends BaseTripServiceTest {
     void updatePeriodIsBeforePrePeriodStart() {
         // given
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
-        Trip trip = tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC)
-        );
-
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "강릉 여행 멤버 구함", "강릉 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
+        tripRepository.save(trip);
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
@@ -309,18 +233,8 @@ class TripServiceTest extends BaseTripServiceTest {
     void updatePeriodBetweenPrePeriodStartBeforeAndPrePeriodEndBefore() {
         // given
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
-        Trip trip = tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC)
-        );
-
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "강릉 여행 멤버 구함", "강릉 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
+        tripRepository.save(trip);
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
@@ -352,21 +266,10 @@ class TripServiceTest extends BaseTripServiceTest {
     void updatePeriodBetweenPrePeriodStartBeforeAndPrePeriodEndAfter() {
         // given
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(7));
-        Trip trip = tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC)
-        );
-
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "강릉 여행 멤버 구함", "강릉 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
+        tripRepository.save(trip);
 
         // when
-
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
                 memberId,
                 LocalDate.now().plusDays(3),
@@ -396,17 +299,8 @@ class TripServiceTest extends BaseTripServiceTest {
     void updatePeriodBetweenPrePeriodStartAfterAndPrePeriodEndBefore() {
         // given
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
-        Trip trip = tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC)
-        );
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "강릉 여행 멤버 구함", "강릉 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
+        tripRepository.save(trip);
 
 
         // when
@@ -436,17 +330,8 @@ class TripServiceTest extends BaseTripServiceTest {
     void updatePeriodBetweenPrePeriodStartAfterAndPrePeriodEndAfter() {
         // given
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
-        Trip trip = tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC)
-        );
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "강릉 여행 멤버 구함", "강릉 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
+        tripRepository.save(trip);
 
 
         // when
@@ -480,17 +365,8 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // given
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(5), LocalDate.now().plusDays(10));
-        Trip trip = tripRepository.save(
-                Trip.createWithItineraries(
-                        memberId,
-                        UUID.randomUUID(),
-                        new TripTitle("강릉 여행 멤버 구함"),
-                        new TripDescription("강릉 여행은 이렇게이렇게 갈겁니다~"),
-                        period,
-                        true,
-                        4,
-                        TripCategory.DOMESTIC)
-        );
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "강릉 여행 멤버 구함", "강릉 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
+        tripRepository.save(trip);
 
 
         // when
@@ -686,6 +562,7 @@ class TripServiceTest extends BaseTripServiceTest {
                 new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
                 true,
                 1,
+                List.of("TEST"),
                 TripCategory.DOMESTIC
         );
         tripRepository.save(trip);
@@ -702,21 +579,13 @@ class TripServiceTest extends BaseTripServiceTest {
     @DisplayName("여행 리더는 최대 참여 인원을 변경할 수 있다.")
     void leader_can_update_maxParticipants() {
         // given
-        Trip trip = Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("인원 변경 테스트"),
-                new TripDescription("설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                3,
-                TripCategory.DOMESTIC
-        );
+
+        Trip trip = TripFixture.createTestTripWithMaxParticipants(memberId, "TEST", "TEST", TripCategory.DOMESTIC, 3);
         tripRepository.save(trip);
 
         // when
         int newMaxParticipants = 5;
-        trip.getTripParticipants().updateMaxParticipants(newMaxParticipants,memberId);
+        trip.getTripParticipants().updateMaxParticipants(newMaxParticipants, memberId);
         tripRepository.save(trip);
 
         // then
@@ -724,21 +593,13 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(updatedTrip.getTripParticipants().getMaxParticipants()).isEqualTo(newMaxParticipants);
     }
 
+
     @Test
     @DisplayName("리더가 아닌 멤버는 최대 참여 인원을 변경할 수 없다.")
     void nonLeader_cannot_update_maxParticipants() {
         // given
         UUID nonLeaderId = UUID.randomUUID();
-        Trip trip = Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("권한 테스트"),
-                new TripDescription("설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                3,
-                TripCategory.DOMESTIC
-        );
+        Trip trip = TripFixture.createTestTripWithMaxParticipants(memberId, "TEST", "TEST", TripCategory.DOMESTIC, 3);
         trip.addParticipant(TripParticipant.createTripParticipant(nonLeaderId, trip));
         tripRepository.save(trip);
 
@@ -753,23 +614,14 @@ class TripServiceTest extends BaseTripServiceTest {
     @DisplayName("최대 참여 인원을 현재 참여 인원보다 적게 변경할 수 없다.")
     void cannot_update_maxParticipants_lessThan_currentParticipants() {
         // given
-        Trip trip = Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("인원 축소 테스트"),
-                new TripDescription("설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                4,
-                TripCategory.DOMESTIC
-        );
+        Trip trip = TripFixture.createTestTrip(memberId, "인원 축소 테스트", "설명", TripCategory.DOMESTIC);
         trip.addParticipant(TripParticipant.createTripParticipant(UUID.randomUUID(), trip));
         trip.addParticipant(TripParticipant.createTripParticipant(UUID.randomUUID(), trip));
         tripRepository.save(trip);
 
         // when & then
         assertThrows(InvalidValueException.class, () -> {
-            trip.getTripParticipants().updateMaxParticipants(2,memberId);
+            trip.getTripParticipants().updateMaxParticipants(2, memberId);
         });
     }
 
@@ -778,16 +630,7 @@ class TripServiceTest extends BaseTripServiceTest {
     void isLeader_check_works_correctly() {
         // given
         UUID nonLeaderId = UUID.randomUUID();
-        Trip trip = Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("isLeader 테스트"),
-                new TripDescription("설명"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                3,
-                TripCategory.DOMESTIC
-        );
+        Trip trip = TripFixture.createTestTrip(memberId, "isLeader 테스트", "설명", TripCategory.DOMESTIC);
         trip.addParticipant(TripParticipant.createTripParticipant(nonLeaderId, trip));
         tripRepository.save(trip);
 

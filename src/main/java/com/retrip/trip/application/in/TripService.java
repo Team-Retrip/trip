@@ -5,10 +5,7 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
 import com.retrip.trip.application.out.repository.*;
-import com.retrip.trip.domain.entity.Itinerary;
-import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripConfirmationDemand;
-import com.retrip.trip.domain.entity.TripDemand;
+import com.retrip.trip.domain.entity.*;
 import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.TripPassword;
@@ -16,6 +13,7 @@ import com.retrip.trip.domain.vo.TripPeriod;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +61,9 @@ public class TripService
     @Transactional(readOnly = true)
     @Override
     public Page<TripResponse> getTrips(Pageable page) {
-        return tripQueryRepository.findTrips(page);
+        List<Trip> trips = tripQueryRepository.findTrips(page);
+        List<TripHashTag> hashTags = tripQueryRepository.findHashTags(trips);
+        return new PageImpl<>(TripResponse.of(trips, hashTags), page, trips.size());
     }
 
     @Override

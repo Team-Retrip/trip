@@ -1,9 +1,13 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripTitle;
+
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,16 +27,7 @@ class ItineraryDetailsTest {
         TripPeriod period = new TripPeriod(
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(5));
-        Trip trip = Trip.createWithItineraries(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                period,
-                true,
-                4,
-                TripCategory.DOMESTIC
-        );
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
 
         Itineraries itineraries = new Itineraries(trip, period);
         Itinerary itinerary = itineraries.getValues().getFirst();
@@ -49,16 +44,7 @@ class ItineraryDetailsTest {
         TripPeriod period = new TripPeriod(
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(5));
-        Trip trip = Trip.createWithItineraries(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("속초 여행 멤버 구함"),
-                new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
-                period,
-                true,
-                4,
-                TripCategory.DOMESTIC
-        );
+        Trip trip = TripFixture.createTestTripWithPeriod(memberId, "속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, period);
 
         Itineraries itineraries = new Itineraries(trip, period);
         Itinerary itinerary = itineraries.getValues().getFirst();

@@ -10,6 +10,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(description = "여행 생성 Request")
@@ -47,6 +48,9 @@ public record TripCreateRequest(
         @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
 
+        @Schema(description = "HashTag")
+        List<String> hashTags,
+
         @Schema(description = "여행 카테고리")
         TripCategory category
 
@@ -60,6 +64,7 @@ public record TripCreateRequest(
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
+                hashTags,
                 category
         );
     }
@@ -73,6 +78,7 @@ public record TripCreateRequest(
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
+                hashTags,
                 category
         );
     }

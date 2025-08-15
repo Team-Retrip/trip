@@ -1,6 +1,7 @@
 package com.retrip.trip.application.in.response;
 
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripHashTag;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -35,6 +36,9 @@ public record TripCreateResponse(
         int maxParticipants,
 
         @Schema(description = "여행 카테고리")
+        List<String> hashTags,
+
+        @Schema(description = "여행 카테고리")
         String category,
 
         @Schema(description = "여행 일정 리스트")
@@ -50,6 +54,7 @@ public record TripCreateResponse(
                 trip.getPeriod().getEnd(),
                 trip.isOpen(),
                 trip.getTripParticipants().getMaxParticipants(),
+                trip.getHashTags().getValues().stream().map(TripHashTag::getName).toList(),
                 trip.getCategory().getViewName(),
                 trip.getItineraries() == null ? new ArrayList<>() :
                         trip.getItineraries().getValues().stream()

@@ -1,9 +1,14 @@
 package com.retrip.trip.application.in.response;
 
+import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripHashTag;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Schema(description = "여행 목록 Response")
 public record TripResponse(
@@ -23,5 +28,29 @@ public record TripResponse(
         LocalDate end,
 
         @Schema(description = "여행 공개 여부")
-        boolean open
-) {}
+        boolean open,
+
+        @Schema(description = "HashTag 목록")
+        List<String> hashTags
+) {
+    public static List<TripResponse> of(List<Trip> trips, List<TripHashTag> hashTags) {
+        Map<UUID, List<String>> tags = hashTags.stream()
+                .collect(Collectors.groupingBy(
+                        h -> h.getTrip().getId(),
+                        Collectors.mapping(TripHashTag::getName, Collectors.toList())
+                ));
+
+        return trips.stream()
+                .map(trip -> new TripResponse(
+                        trip.getId(),
+                        trip.getTitle().getValue(),
+                        trip.getDestinationId(),
+                        trip.getPeriod().getStart(),
+                        trip.getPeriod().getEnd(),
+                        trip.isOpen(),
+                        tags.getOrDefault(trip.getId(), List.of())
+                ))
+                .toList();
+
+    }
+}

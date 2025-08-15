@@ -1,10 +1,11 @@
 package com.retrip.trip.domain.fixture;
 
 import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.vo.TripCategory;
-import com.retrip.trip.domain.vo.TripDescription;
-import com.retrip.trip.domain.vo.TripPeriod;
-import com.retrip.trip.domain.vo.TripTitle;
+import com.retrip.trip.domain.vo.*;
+
+import java.time.Period;
+import java.util.List;
+
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class TripFixture {
                 new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)),
                 true,
                 4,
+                List.of("test", "Test 해시 코드"),
                 TripCategory.DOMESTIC);
         ReflectionTestUtils.setField(trip, "id", tripId);
         return trip;
@@ -44,7 +46,68 @@ public class TripFixture {
                 period,
                 true,
                 4,
+                List.of("test", "Test 해시 코드"),
                 category);
+    }
+
+    public static Trip createTestTripWithPeriod(UUID memberId, String title, String description, TripCategory category, TripPeriod period) {
+        return Trip.createWithItineraries(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle(title),
+                new TripDescription(description),
+                period,
+                true,
+                4,
+                List.of("test", "Test 해시 코드"),
+                category);
+    }
+
+    public static Trip createTestTripWithMaxParticipants(UUID memberId, String title, String description, TripCategory category, int maxParticipants) {
+        TripPeriod period = createFuturePeriod();
+        return Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle(title),
+                new TripDescription(description),
+                period,
+                true,
+                maxParticipants,
+                List.of("test", "Test 해시 코드"),
+                category);
+    }
+
+    public static Trip createReadyTrip(UUID memberId, String title, String description, TripCategory category) {
+        TripPeriod period = createFuturePeriod();
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle(title),
+                new TripDescription(description),
+                period,
+                true,
+                4,
+                List.of("test", "Test 해시 코드"),
+                category);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
+        return trip;
+    }
+
+
+    public static Trip createProgressTrip(UUID memberId, String title, String description, TripCategory category) {
+        TripPeriod period = createFuturePeriod();
+        Trip trip = Trip.create(
+                memberId,
+                UUID.randomUUID(),
+                new TripTitle(title),
+                new TripDescription(description),
+                period,
+                true,
+                4,
+                List.of("test", "Test 해시 코드"),
+                category);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
+        return trip;
     }
 
     private static TripPeriod createFuturePeriod() {

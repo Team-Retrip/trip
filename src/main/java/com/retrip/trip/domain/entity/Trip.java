@@ -69,6 +69,9 @@ public class Trip extends BaseEntity {
     @Embedded
     private Itineraries itineraries;
 
+    @Embedded
+    private TripHashTags hashTags;
+
     public static Trip create(
             UUID memberId,
             UUID destinationId,
@@ -77,6 +80,7 @@ public class Trip extends BaseEntity {
             TripPeriod period,
             boolean open,
             int maxParticipants,
+            List<String> hashTags,
             TripCategory category
     ) {
         Trip trip = Trip.builder()
@@ -91,6 +95,7 @@ public class Trip extends BaseEntity {
                 .tripDemands(new TripDemands())
                 .build();
         trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
+        trip.hashTags = new TripHashTags(trip, hashTags);
         return trip;
     }
 
@@ -102,6 +107,7 @@ public class Trip extends BaseEntity {
             TripPeriod period,
             boolean open,
             int maxParticipants,
+            List<String> hashTags,
             TripCategory category
     ) {
         Trip trip = Trip.builder()
@@ -116,6 +122,7 @@ public class Trip extends BaseEntity {
                 .build();
         trip.itineraries = new Itineraries(trip, period);
         trip.tripParticipants = new TripParticipants(leaderId, trip, maxParticipants);
+        trip.hashTags = new TripHashTags(trip, hashTags);
         return trip;
     }
 
@@ -194,7 +201,7 @@ public class Trip extends BaseEntity {
     }
 
     public void validateReadyTripStatus() {
-        if(this.status != RECRUITMENT_CLOSED){
+        if (this.status != RECRUITMENT_CLOSED) {
             throw new BusinessException(NOT_TRIP_READY_STATUS);
         }
     }
