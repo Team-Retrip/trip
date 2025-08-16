@@ -62,23 +62,14 @@ public class TripQuerydslRepository implements TripQueryRepository {
     }
 
     @Override
-    public Page<TripResponse> findMyTrips(UUID memberId, Pageable page) {
-        List<TripResponse> trips =
+    public Page<Trip> findMyTrips(UUID memberId, Pageable page) {
+        List<Trip> trips =
                 query
-                        .select(
-                                Projections.constructor(
-                                        TripResponse.class,
-                                        trip.id,
-                                        trip.title.value,
-                                        trip.destinationId,
-                                        trip.period.start,
-                                        trip.period.end,
-                                        trip.open))
-                        .from(trip)
+                        .selectFrom(trip)
                         .join(trip.tripParticipants.values, tripParticipant)
                         .where(
                                 tripParticipant.memberId.eq(memberId),
-                                tripParticipant.status.eq(ACTIVE) // 수정된 부분
+                                tripParticipant.status.eq(ACTIVE)
                         )
                         .offset(page.getOffset())
                         .limit(page.getPageSize())
@@ -91,7 +82,7 @@ public class TripQuerydslRepository implements TripQueryRepository {
                 .join(trip.tripParticipants.values, tripParticipant)
                 .where(
                         tripParticipant.memberId.eq(memberId),
-                        tripParticipant.status.eq(ACTIVE) // 수정된 부분
+                        tripParticipant.status.eq(ACTIVE)
                 )
                 .fetchOne();
 
