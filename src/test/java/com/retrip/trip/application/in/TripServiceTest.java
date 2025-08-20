@@ -1,46 +1,47 @@
 package com.retrip.trip.application.in;
 
-import com.retrip.trip.application.in.base.BaseTripServiceTest;
-import com.retrip.trip.application.in.request.*;
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripDemandRequest;
-import com.retrip.trip.application.in.request.TripRequestFixture;
-import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripConfirmationDemand;
-import com.retrip.trip.domain.entity.TripConfirmationReply;
-import com.retrip.trip.domain.entity.TripDemand;
-import com.retrip.trip.domain.entity.TripParticipant;
-import com.retrip.trip.domain.exception.*;
-import com.retrip.trip.domain.exception.common.BusinessException;
-import com.retrip.trip.domain.exception.common.InvalidValueException;
-import com.retrip.trip.domain.fixture.TripFixture;
-import com.retrip.trip.domain.vo.*;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.test.util.ReflectionTestUtils;
-
+import static com.retrip.trip.domain.fixture.TripFixture.정수_ID;
 import static com.retrip.trip.domain.vo.TripPassword.PASSWORD_MIN_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.retrip.trip.application.in.base.BaseTripServiceTest;
+import com.retrip.trip.application.in.request.DelegateLeaderRequest;
+import com.retrip.trip.application.in.request.PeriodUpdateRequest;
+import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
+import com.retrip.trip.application.in.request.TripCreateRequest;
+import com.retrip.trip.application.in.request.TripRequestFixture;
+import com.retrip.trip.application.in.response.ConfirmationDemandAcceptResponse;
+import com.retrip.trip.application.in.response.PeriodUpdateResponse;
+import com.retrip.trip.application.in.response.TripCreateResponse;
+import com.retrip.trip.application.in.response.TripResponse;
+import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripConfirmationDemand;
+import com.retrip.trip.domain.entity.TripConfirmationReply;
+import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
+import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
+import com.retrip.trip.domain.exception.NotParticipantException;
+import com.retrip.trip.domain.exception.TripNotReadyException;
+import com.retrip.trip.domain.exception.common.InvalidValueException;
+import com.retrip.trip.domain.fixture.TripFixture;
+import com.retrip.trip.domain.vo.ParticipantStatus;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripPeriod;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 class TripServiceTest extends BaseTripServiceTest {
     private Trip createTestTripWithParticipants() {
         Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, trip, "참여요청");
-        trip.getTripDemands().getValues().add(tripDemand);
+        trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
         tripRepository.save(trip);
-        tripService.approve(memberId, trip.getId(), tripDemand.getId());
         return trip;
     }
 
@@ -58,7 +59,6 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip trip = TripFixture.createProgressTrip(leaderId, "진행중 여행", "설명", TripCategory.DOMESTIC);
         return tripRepository.save(trip);
     }
-
 
     @Test
     void 여행을_생성_한다() {
@@ -94,87 +94,6 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(trips.getContent().getLast().hashTags()).contains("test", "Test 해시 코드");
     }
 
-
-    @Test
-    void 사용자가_참여_요청을_보낸다() {
-        // given
-        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemandRequest request = new TripDemandRequest(newMemberId, "참여 요청 메시지");
-
-        // when
-        TripDemandResponse response = tripService.tripDemand(trip.getId(), request);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.tripId()).isEqualTo(trip.getId());
-        assertThat(response.memberId()).isEqualTo(newMemberId);
-        assertThat(response.status()).isEqualTo("대기");
-    }
-
-    @Test
-    void 리더가_참여_요청을_승인하면_실제_참여자로_등록된다() {
-        // given
-        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
-        newTrip.getTripDemands().getValues().add(tripDemand);
-        tripRepository.save(newTrip);
-
-        // then
-        TripDemandApproveResponse response = tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
-        Trip trip = tripRepository.findById(newTrip.getId()).orElseThrow();
-        UUID newParticipantMemberId = trip.getTripParticipants().getValues().stream()
-                .map(TripParticipant::getMemberId)
-                .filter(id -> id.equals(newMemberId))
-                .findFirst()
-                .orElseThrow();
-
-        // when
-        assertThat(response).isNotNull();
-        assertThat(newParticipantMemberId).isEqualTo(newMemberId);
-        assertThat(response.statusCode()).isEqualTo(TripDemandStatus.APPROVED.getCode());
-    }
-
-    @Test
-    void 리더가_아니면_참여_요청을_승인할_수_없다() {
-        // given
-        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
-        newTrip.getTripDemands().getValues().add(tripDemand);
-        tripRepository.save(newTrip);
-        tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
-
-        // then && when
-        assertThrows(BusinessException.class, () -> tripService.approve(newMemberId, newTrip.getId(), tripDemand.getId()));
-    }
-
-    @Test
-    void 리더가_참여_요청을_거절하면_요청_상태가_거절로_변경된다() {
-        // given
-        Trip newTrip = TripFixture.createTestTrip(memberId, "거절 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
-        newTrip.getTripDemands().getValues().add(tripDemand);
-        tripRepository.save(newTrip);
-
-        // then
-        TripDemandRejectResponse response = tripService.reject(memberId, newTrip.getId(), tripDemand.getId());
-
-        // when
-        assertThat(response).isNotNull();
-        assertThat(response.statusCode()).isEqualTo(TripDemandStatus.REJECTED.getCode());
-    }
-
-    @Test
-    void 리더가_아니면_참여_요청을_거절할_수_없다() {
-        // given
-        Trip newTrip = TripFixture.createTestTrip(memberId, "거절 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
-        newTrip.getTripDemands().getValues().add(tripDemand);
-        tripRepository.save(newTrip);
-        tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
-
-        // then && when
-        assertThrows(BusinessException.class, () -> tripService.reject(newMemberId, newTrip.getId(), tripDemand.getId()));
-    }
 
     @Test
     void 빈_여행_일정을_수정한다() {
@@ -514,72 +433,25 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 리더는_참여자들을_추방할_수_있다() {
         // given
-        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
-        newTrip.getTripDemands().getValues().add(tripDemand);
-        tripRepository.save(newTrip);
-        TripDemandApproveResponse response = tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
+        Trip newTrip = createTestTripWithParticipants();
 
         // then
-        tripService.banMembers(memberId, newTrip.getId(), List.of(newMemberId));
+        tripService.banMembers(memberId, newTrip.getId(), List.of(정수_ID));
 
         Trip trip = tripRepository.findById(newTrip.getId()).orElseThrow();
         TripParticipant banParticipant = trip.getTripParticipants().getValues().stream()
-                .filter(participant -> participant.getMemberId().equals(newMemberId))
+                .filter(participant -> participant.getMemberId().equals(정수_ID))
                 .findFirst()
                 .orElseThrow();
 
         // when
-        assertThat(response).isNotNull();
         assertThat(banParticipant.getStatus()).isEqualTo(ParticipantStatus.EXPELLED);
-    }
-
-    @Test
-    void 해당_여행에_강퇴당한_사용자는_다시_참여요청할_수_없다() {
-        // given
-        Trip newTrip = TripFixture.createTestTrip(memberId, "승인 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        TripDemand tripDemand = TripDemand.create(newMemberId, newTrip, "참여 요청 메시지");
-        newTrip.getTripDemands().getValues().add(tripDemand);
-        tripRepository.save(newTrip);
-        tripService.approve(memberId, newTrip.getId(), tripDemand.getId());
-        tripService.banMembers(memberId, newTrip.getId(), List.of(newMemberId));
-
-        TripDemandRequest request = new TripDemandRequest(newMemberId, "강퇴당한 후 다시 참여 요청 메시지");
-
-        // when && then
-        assertThrows(BusinessException.class, () -> tripService.tripDemand(newTrip.getId(), request));
-    }
-
-    @Test
-    @DisplayName("여행이 가득 찼을 경우, 새로운 사용자는 참여 요청을 할 수 없다.")
-    void tripIsFull_then_cannotJoin() {
-        // given
-        Trip trip = Trip.create(
-                memberId,
-                UUID.randomUUID(),
-                new TripTitle("꽉 찬 여행"),
-                new TripDescription("더 이상 자리가 없어요"),
-                new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5)),
-                true,
-                1,
-                List.of("TEST"),
-                TripCategory.DOMESTIC
-        );
-        tripRepository.save(trip);
-
-        // when & then
-        TripDemandRequest newRequest = new TripDemandRequest(UUID.randomUUID(), "저도 참여하고 싶어요!");
-
-        assertThrows(TripFullException.class, () -> {
-            tripService.tripDemand(trip.getId(), newRequest);
-        });
     }
 
     @Test
     @DisplayName("여행 리더는 최대 참여 인원을 변경할 수 있다.")
     void leader_can_update_maxParticipants() {
         // given
-
         Trip trip = TripFixture.createTestTripWithMaxParticipants(memberId, "TEST", "TEST", TripCategory.DOMESTIC, 3);
         tripRepository.save(trip);
 
@@ -592,7 +464,6 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip updatedTrip = tripRepository.findById(trip.getId()).get();
         assertThat(updatedTrip.getTripParticipants().getMaxParticipants()).isEqualTo(newMaxParticipants);
     }
-
 
     @Test
     @DisplayName("리더가 아닌 멤버는 최대 참여 인원을 변경할 수 없다.")
@@ -692,7 +563,7 @@ class TripServiceTest extends BaseTripServiceTest {
         tripConfirmationDemandRepository.save(demand);
 
         //when
-        ConfirmationDemandAcceptResponse response = tripService.acceptConfirmationDemand(newMemberId, trip.getId(), demand.getId());
+        ConfirmationDemandAcceptResponse response = tripService.acceptConfirmationDemand(정수_ID, trip.getId(), demand.getId());
 
         //then
         assertThat(response).isNotNull();
@@ -710,7 +581,7 @@ class TripServiceTest extends BaseTripServiceTest {
         tripConfirmationDemandRepository.save(demand);
 
         //when
-        tripService.rejectConfirmationDemand(newMemberId, trip.getId(), demand.getId());
+        tripService.rejectConfirmationDemand(정수_ID, trip.getId(), demand.getId());
         TripConfirmationDemand rejected = tripConfirmationDemandRepository.findById(demand.getId()).orElseThrow();
 
         //then

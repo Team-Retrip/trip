@@ -2,6 +2,7 @@ package com.retrip.trip.application.in.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.TripService;
+import com.retrip.trip.application.in.service.DemandService;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.infra.adapter.out.crypto.TripBcryptTripPasswordEncoder;
@@ -19,10 +20,10 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     protected TripRepository tripRepository;
 
     @Autowired
-    protected EntityManager em;
+    protected DemandRepository demandRepository;
 
     @Autowired
-    protected TripDemandReadRepository tripDemandReadRepository;
+    protected EntityManager em;
 
     @Autowired
     protected TripConfirmationDemandRepository tripConfirmationDemandRepository;
@@ -31,6 +32,7 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     protected JPAQueryFactory jpaQueryFactory;
 
     protected TripService tripService;
+    protected DemandService demandService;
     protected TripQueryRepository tripQueryRepository;
     protected TripItineraryQueryRepository tripItineraryQueryRepository;
 
@@ -46,7 +48,7 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
         TripPasswordEncoder tripPasswordEncoder = new TripBcryptTripPasswordEncoder(bCryptPasswordEncoder);
 
         tripService = new TripService(
-                tripRepository, tripQueryRepository, tripItineraryQueryRepository, tripDemandReadRepository,
+                tripRepository, tripQueryRepository, tripItineraryQueryRepository,
                 tripConfirmationDemandRepository, tripPasswordEncoder
         );
     }
