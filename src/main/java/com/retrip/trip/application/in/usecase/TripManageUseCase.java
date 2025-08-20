@@ -5,6 +5,8 @@ import com.retrip.trip.application.in.request.TripUpdateVisibilityRequest;
 import com.retrip.trip.application.in.response.TripCreateResponse;
 import com.retrip.trip.application.in.response.TripUpdateVisibilityResponse;
 
+import jakarta.validation.constraints.Size;
+import java.util.List;
 import java.util.UUID;
 
 public interface TripManageUseCase {
@@ -13,4 +15,6 @@ public interface TripManageUseCase {
     TripCreateResponse createTripWithItineraries(TripCreateRequest request);
 
     TripUpdateVisibilityResponse updateTripVisibility(UUID tripId, TripUpdateVisibilityRequest request);
+
+    void banMembers(UUID memberId, UUID tripId, List<UUID> memberIds);
 }

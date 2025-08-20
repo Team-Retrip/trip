@@ -1,11 +1,11 @@
-package com.retrip.trip.application.in.response;
+package com.retrip.trip.application.in.response.demand;
 
+import com.retrip.trip.domain.vo.DemandStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import com.retrip.trip.domain.entity.TripDemand;
 import java.util.UUID;
 
 @Schema(description = "여행 참가 신청 거절 Response")
-public record TripDemandRejectResponse(
+public record DemandRejectResponse(
         @Schema(description = "거절 회원 ID")
         UUID memberId,
         @Schema(description = "거절 상태 코드")
@@ -14,7 +14,7 @@ public record TripDemandRejectResponse(
         String statusName
 ) {
 
-    public static TripDemandRejectResponse of(TripDemand tripDemand) {
-        return new TripDemandRejectResponse(tripDemand.getMemberId(), tripDemand.getStatus().getCode(), tripDemand.getStatus().getViewName());
+    public static DemandRejectResponse of(UUID memberId, DemandStatus status) {
+        return new DemandRejectResponse(memberId, status.name(), status.getViewName());
     }
 }

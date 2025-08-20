@@ -20,7 +20,7 @@ public class InvitationPolicy {
             throw new IllegalStateException("여행 초대를 생성할 수 없는 상태입니다. " + trip.getStatus().name());
         }
 
-        if (isNotLeader(trip.getTripParticipants(), leaderId)) {
+        if (isNotLeader(participants, leaderId)) {
             throw new MemberIsNotLeaderException();
         }
 
