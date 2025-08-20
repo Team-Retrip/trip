@@ -70,7 +70,6 @@ public class TripService
     public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
         trip.addDemand(TripDemand.create(request.memberId(), trip, request.message()));
-        tripRepository.save(trip);
         return TripDemandResponse.of(trip.getTripDemands().getValues().getLast());
     }
 
@@ -110,7 +109,10 @@ public class TripService
     @Transactional(readOnly = true)
     @Override
     public Page<TripResponse> getMyTrips(UUID memberId, Pageable page) {
-        return tripQueryRepository.findMyTrips(memberId, page);
+        Page<Trip> trips = tripQueryRepository.findMyTrips(memberId, page);
+        List<TripHashTag> hashTags = tripQueryRepository.findHashTags(trips.getContent());
+        List<TripResponse> tripResponses = TripResponse.of(trips.getContent(), hashTags);
+        return new PageImpl<>(tripResponses, page, trips.getTotalElements());
     }
 
     @Override
@@ -123,7 +125,6 @@ public class TripService
     public void leaveTrip(UUID tripId, UUID memberId) {
         Trip trip = findTrip(tripId);
         trip.leave(memberId);
-        tripRepository.save(trip);
     }
 
     @Override
