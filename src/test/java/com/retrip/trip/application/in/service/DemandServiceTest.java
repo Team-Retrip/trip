@@ -2,9 +2,7 @@ package com.retrip.trip.application.in.service;
 
 import static com.retrip.trip.domain.fixture.TripFixture.LEADER_ID;
 import static com.retrip.trip.domain.fixture.TripFixture.정수_ID;
-import static com.retrip.trip.domain.fixture.TripFixture.준호_ID;
 import static com.retrip.trip.domain.fixture.TripFixture.지수_ID;
-import static com.retrip.trip.domain.fixture.TripFixture.홍석_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -31,12 +29,8 @@ import org.junit.jupiter.api.Test;
 class DemandServiceTest extends BaseDemandServiceTest {
 
     private Trip createTestTripWithParticipants() {
-        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
-        trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
-        trip.addParticipant(TripParticipant.createTripParticipant(홍석_ID, trip));
-        trip.addParticipant(TripParticipant.createTripParticipant(준호_ID, trip));
-        tripRepository.save(trip);
-        return trip;
+        Trip trip = TripFixture.createTestTripWithParticipants();
+        return tripRepository.save(trip);
     }
 
     private Trip createTestTrip(String title, String description, TripCategory category) {

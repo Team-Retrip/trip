@@ -1,6 +1,7 @@
 package com.retrip.trip.domain.fixture;
 
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.*;
 
 import java.time.Period;
@@ -112,5 +113,13 @@ public class TripFixture {
 
     private static TripPeriod createFuturePeriod() {
         return new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+    }
+
+    public static Trip createTestTripWithParticipants() {
+        Trip trip = createTestTrip(LEADER_ID, "테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
+        trip.addParticipant(TripParticipant.createTripParticipant(홍석_ID, trip));
+        trip.addParticipant(TripParticipant.createTripParticipant(준호_ID, trip));
+        return trip;
     }
 }
