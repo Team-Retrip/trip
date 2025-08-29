@@ -38,4 +38,10 @@ public class TripHashTags {
             });
         }
     }
+
+    public List<String> getHashTagNames() {
+        return this.values.stream()
+                .map(TripHashTag::getName)
+                .collect(Collectors.toList());
+    }
 }

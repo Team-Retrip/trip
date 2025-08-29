@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: trip
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://localhost/~/trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
+    username: sa
+    password:
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 100
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+logging:
+  level:
+    org.hibernate.type.descriptor.sql: trace
+    org.springframework.web.client.RestTemplate: DEBUG
+
+springdoc:
+  swagger-ui:
+    use-root-path: true
+    enabled: true
+  api-docs:
+    enabled: true

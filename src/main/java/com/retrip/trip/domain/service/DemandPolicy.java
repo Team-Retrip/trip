@@ -76,6 +76,6 @@ public class DemandPolicy {
     }
 
     public boolean isNotLeader(TripParticipants tripParticipants, UUID leaderId) {
-        return !tripParticipants.isLeader(leaderId);
+        return !tripParticipants.requireLeader(leaderId);
     }
 }

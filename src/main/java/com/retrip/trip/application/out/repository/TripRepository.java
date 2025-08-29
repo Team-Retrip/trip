@@ -8,6 +8,4 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TripRepository extends JpaRepository<Trip, UUID> {
-    @Query("select t FROM Trip t JOIN FETCH t.tripParticipants WHERE t.id = :id")
-    Optional<Trip> findWithParticipantsById(UUID id);
 }

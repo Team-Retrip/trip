@@ -43,7 +43,7 @@ public class ParticipantService implements ParticipantManageUseCase {
     }
 
     private Trip findTrip(UUID tripId) {
-        return tripRepository.findWithParticipantsById(tripId)
+        return tripRepository.findById(tripId)
                 .orElseThrow(TripNotFoundException::new);
     }
 }

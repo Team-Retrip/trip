@@ -33,7 +33,7 @@ public class InvitationService implements InvitationManageUseCase {
 
     @Override
     public InvitationsCreateResponse createInvitations(UUID tripId, TripInvitationsCreateRequest request) {
-        Trip trip = findTripWithParticipants(tripId);
+        Trip trip = findTrip(tripId);
         invitationPolicy.canInvite(trip, request.leaderId(), request.memberIds());
         Invitations invitations = new Invitations(invitationRepository.findByTripId(tripId));
         invitations.add(tripId, request.memberIds());
@@ -45,7 +45,7 @@ public class InvitationService implements InvitationManageUseCase {
     @Override
     public Page<InvitationsResponse> getTripInvitations(
             UUID tripId, UUID leaderId, String status, Pageable page, TripInvitationOrder order, String sort) {
-        invitationPolicy.canViewInvitations(findTripWithParticipants(tripId), leaderId);
+        invitationPolicy.canViewInvitations(findTrip(tripId), leaderId);
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
         Page<Invitation> tripInvitations =
                 invitationRepository.findByTripIdAndStatus(tripId, InvitationStatus.valueOf(status), pageable);
@@ -63,7 +63,7 @@ public class InvitationService implements InvitationManageUseCase {
 
     @Override
     public MemberInvitationAcceptResponse acceptMemberInvitations(UUID memberId, UUID tripId, UUID invitationId) {
-        Trip trip = findTripWithParticipants(tripId);
+        Trip trip = findTrip(tripId);
         Invitation invitation = findInvitation(invitationId);
         invitationPolicy.canAccept(trip, invitation);
         invitation.accept();
@@ -79,8 +79,8 @@ public class InvitationService implements InvitationManageUseCase {
         return MemberInvitationRejectResponse.of(invitation);
     }
 
-    private Trip findTripWithParticipants(UUID tripId) {
-        return tripRepository.findWithParticipantsById(tripId)
+    private Trip findTrip(UUID tripId) {
+        return tripRepository.findById(tripId)
                 .orElseThrow(EntityNotFoundException::new);
     }
 

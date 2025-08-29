@@ -66,14 +66,14 @@ public class TripQuerydslRepository implements TripQueryRepository {
         List<TripResponse> trips =
                 query
                         .select(
-                                Projections.constructor(
+                                Projections.fields(
                                         TripResponse.class,
-                                        trip.id,
-                                        trip.title.value,
-                                        trip.destinationId,
-                                        trip.period.start,
-                                        trip.period.end,
-                                        trip.open))
+                                        trip.id.as("id"),
+                                        trip.title.value.as("title"),
+                                        trip.destinationId.as("destinationId"),
+                                        trip.period.start.as("start"),
+                                        trip.period.end.as("end"),
+                                        trip.open.as("open")))
                         .from(trip)
                         .join(trip.tripParticipants.values, tripParticipant)
                         .where(

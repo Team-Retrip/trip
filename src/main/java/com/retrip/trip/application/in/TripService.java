@@ -68,8 +68,16 @@ public class TripService
         return new PageImpl<>(TripResponse.of(trips, hashTags), page, trips.size());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public TripDetailResponse getTripDetail(UUID memberId, UUID tripId) {
+        Trip trip = findTrip(tripId);
+        return TripDetailResponse.of(memberId, trip);
+    }
+
     private Trip findTrip(UUID tripId) {
-        return tripRepository.findWithParticipantsById(tripId).orElseThrow(TripNotFoundException::new);
+        return tripRepository.findById(tripId)
+                .orElseThrow(TripNotFoundException::new);
     }
 
     @Override

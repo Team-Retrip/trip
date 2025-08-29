@@ -32,7 +32,7 @@ public class VoteService implements VoteManageUseCase {
 
     @Override
     public VoteCreateResponse createVote(UUID memberId, UUID tripId, VoteCreateRequest request) {
-        Trip trip = findTripWithParticipants(tripId);
+        Trip trip = findTrip(tripId);
         votePolicy.canCreate(trip, memberId);
         Vote save = voteRepository.save(request.to(tripId, memberId));
         return VoteCreateResponse.of(save);
@@ -70,8 +70,8 @@ public class VoteService implements VoteManageUseCase {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    private Trip findTripWithParticipants(UUID tripId) {
-        return tripRepository.findWithParticipantsById(tripId)
+    private Trip findTrip(UUID tripId) {
+        return tripRepository.findById(tripId)
                 .orElseThrow(EntityNotFoundException::new);
     }
 }
