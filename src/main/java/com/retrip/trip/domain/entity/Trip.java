@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_READY_STATUS;
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
 import static com.retrip.trip.domain.vo.TripStatus.BEFORE_TRIP;
 import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
@@ -58,9 +57,6 @@ public class Trip extends BaseEntity {
     private TripParticipants tripParticipants;
 
     @Embedded
-    private TripDemands tripDemands;
-
-    @Embedded
     private TripConfirmationDemands tripConfirmationDemands;
 
     @Embedded
@@ -92,7 +88,6 @@ public class Trip extends BaseEntity {
                 .open(open)
                 .category(category)
                 .status(TripStatus.RECRUITING)
-                .tripDemands(new TripDemands())
                 .build();
         trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
         trip.hashTags = new TripHashTags(trip, hashTags);
@@ -128,22 +123,6 @@ public class Trip extends BaseEntity {
 
     public void addParticipant(TripParticipant participant) {
         this.tripParticipants.addParticipant(participant);
-    }
-
-    public void addDemand(TripDemand demand) {
-        validateAddDemand(demand);
-        validateParticipantLimitNotExceeded();
-        this.tripDemands.addDemand(demand);
-    }
-
-    private void validateAddDemand(TripDemand demand) {
-        if (this.tripParticipants.isBan(demand.getMemberId())) {
-            throw new BusinessException(TRIP_MEMBER_BANNED_CANNOT_APPLY);
-        }
-    }
-
-    public void validateParticipantLimitNotExceeded() {
-        tripParticipants.validateCanJoin();
     }
 
     public void updatePeriod(
@@ -212,5 +191,9 @@ public class Trip extends BaseEntity {
 
     public void updateVisibility(boolean isOpen) {
         this.open = isOpen;
+    }
+
+    public boolean isNotTripRecruitingStatus() {
+        return !TripStatus.RECRUITING.equals(status);
     }
 }

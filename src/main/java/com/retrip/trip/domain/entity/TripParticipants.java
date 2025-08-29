@@ -47,21 +47,12 @@ public class TripParticipants {
         values.add(participant);
     }
 
-    public boolean isFullParticipants() {
-        return values.size() >= maxParticipants;
-    }
-
     public int getCurrentCount() {
         return values.size();
     }
 
-    public boolean contains(UUID memberId) {
-        return values.stream()
-                .anyMatch(participant -> memberId.equals(participant.getMemberId()));
-    }
-
     public void validateCanJoin() {
-        if (isFullParticipants()) {
+        if (isFull()) {
             throw new TripFullException();
         }
     }

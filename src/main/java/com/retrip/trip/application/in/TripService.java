@@ -5,6 +5,9 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
 import com.retrip.trip.application.out.repository.*;
+import com.retrip.trip.domain.entity.Itinerary;
+import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripConfirmationDemand;
 import com.retrip.trip.domain.entity.*;
 import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
@@ -26,11 +29,10 @@ import java.util.UUID;
 @Transactional
 @Service
 public class TripService
-        implements TripManageUseCase, GetTripUseCase, TripDemandUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase, TripConfirmationUseCase {
+        implements TripManageUseCase, GetTripUseCase, TripPeriodUseCase, LeaveTripUseCase, DelegateLeaderUseCase, TripConfirmationUseCase {
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
-    private final TripDemandReadRepository tripDemandReadRepository;
     private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
     private final TripPasswordEncoder tripPasswordEncoder;
 
@@ -66,36 +68,8 @@ public class TripService
         return new PageImpl<>(TripResponse.of(trips, hashTags), page, trips.size());
     }
 
-    @Override
-    public TripDemandResponse tripDemand(UUID tripId, TripDemandRequest request) {
-        Trip trip = findTrip(tripId);
-        trip.addDemand(TripDemand.create(request.memberId(), trip, request.message()));
-        tripRepository.save(trip);
-        return TripDemandResponse.of(trip.getTripDemands().getValues().getLast());
-    }
-
     private Trip findTrip(UUID tripId) {
         return tripRepository.findWithParticipantsById(tripId).orElseThrow(TripNotFoundException::new);
-    }
-
-    @Override
-    public TripDemandApproveResponse approve(UUID memberId, UUID tripId, UUID tripDemandId) {
-        TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, tripDemandId);
-        tripDemand.approve(memberId);
-        return TripDemandApproveResponse.of(tripDemand);
-    }
-
-    @Override
-    public TripDemandRejectResponse reject(UUID memberId, UUID tripId, UUID joinRequestId) {
-        TripDemand tripDemand = findTripDemandByTripIdAndTripDemandId(tripId, joinRequestId);
-        tripDemand.reject(memberId);
-        return TripDemandRejectResponse.of(tripDemand);
-    }
-
-    private TripDemand findTripDemandByTripIdAndTripDemandId(UUID tripId, UUID tripDemandId) {
-        return tripDemandReadRepository
-                .findByTripIdAndId(tripId, tripDemandId)
-                .orElseThrow(() -> new EntityNotFoundException("참여 요청을 찾을 수 없습니다."));
     }
 
     @Override

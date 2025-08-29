@@ -5,7 +5,6 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
 import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
-import com.retrip.trip.application.in.usecase.TripDemandUseCase;
 import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
@@ -29,7 +28,6 @@ import java.util.UUID;
 public class TripController {
     private final TripManageUseCase tripManageUseCase;
     private final GetTripUseCase getTripUseCase;
-    private final TripDemandUseCase tripDemandUseCase;
     private final TripPeriodUseCase tripPeriodUseCase;
     private final LeaveTripUseCase leaveTripUseCase;
     private final DelegateLeaderUseCase delegateLeaderUseCase;
@@ -74,38 +72,12 @@ public class TripController {
         return ApiResponse.ok(trips);
     }
 
-    @PostMapping("/{tripId}/demand")
-    @Schema(description = "여행 참가 신청")
-    public ApiResponse<TripDemandResponse> joinTrip(
-            @PathVariable("tripId") UUID tripId, @RequestBody TripDemandRequest request) {
-        TripDemandResponse response = tripDemandUseCase.tripDemand(tripId, request);
-        return ApiResponse.ok(response);
-    }
-
     @PutMapping("/{tripId}/period")
     @Schema(description = "여행 기간 수정")
     public ResponseEntity<PeriodUpdateResponse> updatePeriod(
             @PathVariable UUID tripId, @RequestBody PeriodUpdateRequest request) {
         PeriodUpdateResponse period = tripPeriodUseCase.updatePeriod(tripId, request);
         return ResponseEntity.ok().body(period);
-    }
-
-    @PutMapping("/{tripId}/demand/{tripDemandId}/approve")
-    @Schema(description = "여행 참가 신청 승인")
-    public ApiResponse<TripDemandApproveResponse> approveRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                                 @PathVariable("tripId") UUID tripId,
-                                                                 @PathVariable("tripDemandId") UUID tripDemandId) {
-        TripDemandApproveResponse response = tripDemandUseCase.approve(memberId, tripId, tripDemandId);
-        return ApiResponse.ok(response);
-    }
-
-    @PutMapping("/{tripId}/demand/{tripDemandId}/reject")
-    @Schema(description = "여행 참가 신청 거절")
-    public ApiResponse<TripDemandRejectResponse> rejectRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                               @PathVariable("tripId") UUID tripId,
-                                                               @PathVariable("tripDemandId") UUID tripDemandId) {
-        TripDemandRejectResponse response = tripDemandUseCase.reject(memberId, tripId, tripDemandId);
-        return ApiResponse.ok(response);
     }
 
     @GetMapping("/my")
@@ -137,10 +109,10 @@ public class TripController {
 
     @DeleteMapping("/{tripId}/members/ban")
     @Schema(description = "여행 멤버 리스트 강퇴")
-    public ApiResponse<TripDemandRejectResponse> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                            @PathVariable("tripId") UUID tripId,
-                                                            @RequestBody TripMemberBanRequest request) {
-        tripDemandUseCase.banMembers(memberId, tripId, request.memberIds());
+    public ApiResponse<?> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+                                     @PathVariable("tripId") UUID tripId,
+                                     @RequestBody TripMemberBanRequest request) {
+        tripManageUseCase.banMembers(memberId, tripId, request.memberIds());
         return ApiResponse.noContent();
     }
 

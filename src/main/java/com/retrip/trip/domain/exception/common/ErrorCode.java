@@ -35,7 +35,9 @@ public enum ErrorCode {
     TRIP_CONFIRMATION_START_AFTER_END(HttpStatus.BAD_REQUEST, "TRIP-020", "요청한 여행 확정 시작일은 종료일보다 이후일 수 없습니다."),
     NOT_FOUND_PARTICIPANTS(HttpStatus.BAD_REQUEST, "TRIP-021", "참가자가 존재하지 않습니다."),
     NOT_TRIP_READY_STATUS(HttpStatus.BAD_REQUEST, "TRIP-022", "여행 준비 상태가 아닙니다."),
-    TRIP_PASSWORD_INVALID(BAD_REQUEST, "Trip-023", "비공개 여행 비밀번호의 길이가 적절하지 않습니다.")
+    TRIP_PASSWORD_INVALID(BAD_REQUEST, "Trip-023", "비공개 여행 비밀번호의 길이가 적절하지 않습니다."),
+    TRIP_DEMAND_NOT_ALLOWED(BAD_REQUEST, "Trip-024", "이미 참여를 요청했거나 참여 중인 여행이므로 참여 요청을 다시 할 수 없습니다."),
+    TRIP_DEMAND_STATUS_NOT_PENDING(BAD_REQUEST, "Trip-025", "현재 참여 요청 상태가 ‘대기’가 아니므로 해당 요청을 수행할 수 없습니다.")
     ;
 
 
