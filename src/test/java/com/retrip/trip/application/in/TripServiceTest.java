@@ -3,6 +3,7 @@ package com.retrip.trip.application.in;
 import static com.retrip.trip.domain.fixture.TripFixture.정수_ID;
 import static com.retrip.trip.domain.vo.TripPassword.PASSWORD_MIN_LENGTH;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +16,8 @@ import com.retrip.trip.application.in.request.TripRequestFixture;
 import com.retrip.trip.application.in.response.ConfirmationDemandAcceptResponse;
 import com.retrip.trip.application.in.response.PeriodUpdateResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
+import com.retrip.trip.application.in.response.TripDetailResponse;
+import com.retrip.trip.application.in.response.TripDetailResponse.TripParticipantResponse;
 import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripConfirmationDemand;
@@ -26,9 +29,11 @@ import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripNotReadyException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
+import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.ParticipantStatus;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -507,14 +512,14 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         Trip savedTrip = tripRepository.findById(trip.getId()).get();
-        boolean isLeaderResult = savedTrip.getTripParticipants().isLeader(memberId);
-        boolean isNotLeaderResult = savedTrip.getTripParticipants().isLeader(nonLeaderId);
+        boolean isLeaderResult = savedTrip.getTripParticipants().requireLeader(memberId);
+        boolean isNotLeaderResult = savedTrip.getTripParticipants().requireLeader(nonLeaderId);
 
 
         // then
         assertTrue(isLeaderResult);
         assertThrows(InvalidValueException.class, () -> {
-            savedTrip.getTripParticipants().isLeader(UUID.randomUUID());
+            savedTrip.getTripParticipants().requireLeader(UUID.randomUUID());
         });
     }
 
@@ -586,5 +591,38 @@ class TripServiceTest extends BaseTripServiceTest {
 
         //then
         assertThat(rejected.getReplies().getValues().stream().anyMatch(TripConfirmationReply::isAccepted)).isFalse();
+    }
+
+    @Test
+    void 사용자는_여행_상세를_조회할_수_있다() {
+        //given
+        Trip trip = createTestTripWithParticipants();
+
+        //when
+        TripDetailResponse tripDetail = tripService.getTripDetail(memberId, trip.getId());
+        TripDetailResponse expectedTripDetail =
+            new TripDetailResponse(
+                    trip.getId(),
+                    true,
+                    true,
+                    "테스트 여행",
+                    trip.getCreatedAt(),
+                    2,
+                    4,
+                    TripStatus.RECRUITING,
+                    TripStatus.RECRUITING.getViewName(),
+                    "",
+                    "여행 설명",
+                    List.of("test", "Test 해시 코드"),
+                    List.of(
+                            new TripParticipantResponse(UUID.randomUUID(), memberId, ParticipantRole.LEADER),
+                            new TripParticipantResponse(UUID.randomUUID(), 정수_ID, ParticipantRole.PARTICIPANT)
+                    )
+            );
+
+        //then
+        assertThat(tripDetail).usingRecursiveComparison()
+                .ignoringFields("participants.participantId")
+                .isEqualTo(expectedTripDetail);
     }
 }
