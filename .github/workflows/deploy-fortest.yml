@@ -28,7 +28,8 @@ jobs:
   open-ssh:
     runs-on: ubuntu-latest
     needs: build-and-push
-    outputs: { runner_ip: ${{ steps.ip.outputs.ipv4 }} }
+    outputs:
+      runner_ip: ${{ steps.ip.outputs.ipv4 }}
     steps:
       - id: ip
         uses: candidob/get-runner-ip@2e5406f1492227920ba96df909e648be5e8b8cb2
