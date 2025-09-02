@@ -1,4 +1,4 @@
-name: Build & Deploy (trip - deploy-test)
+name: Build & Deploy (trip - deploy-test) 
 
 on:
   push:
