@@ -67,7 +67,7 @@ jobs:
   close-ssh:
     if: always()
     runs-on: ubuntu-latest
-    needs: open-ssh
+    needs: deploy
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
