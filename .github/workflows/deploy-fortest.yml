@@ -94,7 +94,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - name: Debug mapping: EC2_HOST ↔ Instance ↔ SGs
+      - name: Debug mapping
         run: |
           HOST='${{ secrets.EC2_HOST }}'
           echo "EC2_HOST=$HOST"
