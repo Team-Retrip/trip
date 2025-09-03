@@ -87,6 +87,25 @@ jobs:
       - build-and-push
       - open-ssh
     steps:
+      - name: Configure AWS creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Debug mapping: EC2_HOST ↔ Instance ↔ SGs
+        run: |
+          HOST='${{ secrets.EC2_HOST }}'
+          echo "EC2_HOST=$HOST"
+          aws ec2 describe-instances \
+            --filters "Name=ip-address,Values=$HOST" "Name=private-ip-address,Values=$HOST" \
+            --query 'Reservations[].Instances[].{Id:InstanceId, SGs:SecurityGroups[].GroupId}' \
+            --output table
+
+          echo "We modify SG: ${{ secrets.AWS_SECURITY_GROUP_ID }}"
+          aws ec2 describe-security-groups --group-ids "${{ secrets.AWS_SECURITY_GROUP_ID }}" --output table
+
       - name: Probe 22/tcp from runner
         run: |
           timeout 5 bash -c "echo > /dev/tcp/${{ secrets.EC2_HOST }}/22" && echo "22 open" || (echo "22 closed"; exit 1)
