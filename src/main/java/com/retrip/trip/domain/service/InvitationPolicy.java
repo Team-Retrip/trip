@@ -36,7 +36,7 @@ public class InvitationPolicy {
     }
 
     public boolean isNotLeader(TripParticipants tripParticipants, UUID leaderId) {
-        return !tripParticipants.isLeader(leaderId);
+        return !tripParticipants.requireLeader(leaderId);
     }
 
     public void canAccept(Trip trip, Invitation invitation) {

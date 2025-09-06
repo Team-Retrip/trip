@@ -72,6 +72,14 @@ public class TripController {
         return ApiResponse.ok(trips);
     }
 
+    @GetMapping("/{tripId}")
+    @Schema(description = "여행 상세 조회")
+    public ApiResponse<TripDetailResponse> getTripDetail(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+                                                         @PathVariable UUID tripId) {
+        TripDetailResponse tripDetail = getTripUseCase.getTripDetail(memberId, tripId);
+        return ApiResponse.ok(tripDetail);
+    }
+
     @PutMapping("/{tripId}/period")
     @Schema(description = "여행 기간 수정")
     public ResponseEntity<PeriodUpdateResponse> updatePeriod(

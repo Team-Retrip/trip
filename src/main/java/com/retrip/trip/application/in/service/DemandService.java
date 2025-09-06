@@ -29,7 +29,7 @@ public class DemandService implements DemandManageUseCase {
 
     @Override
     public DemandResponse demand(UUID memberId, UUID tripId, TripDemandRequest request) {
-        Trip trip = findTripWithParticipants(tripId);
+        Trip trip = findTrip(tripId);
         List<Demand> savedDemands = demandRepository.findAllByTripId(tripId);
         demandPolicy.canDemand(memberId, trip, savedDemands);
         Demand savedDemand = demandRepository.save(Demand.create(memberId, tripId, request.message()));
@@ -40,8 +40,8 @@ public class DemandService implements DemandManageUseCase {
 
     @Override
     public DemandApproveResponse approve(UUID memberId, UUID tripId, UUID demandId) {
-        Trip trip = findTripWithParticipants(tripId);
-        Demand demand = findById(demandId);
+        Trip trip = findTrip(tripId);
+        Demand demand = findDemand(demandId);
         demandPolicy.canApprove(memberId, trip, demand);
         demand.approve();
         trip.addParticipant(TripParticipant.createTripParticipant(demand.getMemberId(), trip));
@@ -52,8 +52,8 @@ public class DemandService implements DemandManageUseCase {
 
     @Override
     public DemandRejectResponse reject(UUID memberId, UUID tripId, UUID demandId) {
-        Trip trip = findTripWithParticipants(tripId);
-        Demand demand = findById(demandId);
+        Trip trip = findTrip(tripId);
+        Demand demand = findDemand(demandId);
         demandPolicy.canReject(memberId, trip, demand);
         demand.reject();
 
@@ -64,7 +64,7 @@ public class DemandService implements DemandManageUseCase {
     @Override
     @Transactional(readOnly = true)
     public List<DemandsResponse> getDemands(UUID memberId, UUID tripId) {
-        Trip trip = findTripWithParticipants(tripId);
+        Trip trip = findTrip(tripId);
         demandPolicy.canViewDemands(memberId, trip);
         List<Demand> demands = demandRepository.findAllByTripId(tripId);
         return demands.stream()
@@ -72,12 +72,12 @@ public class DemandService implements DemandManageUseCase {
                 .toList();
     }
 
-    private Trip findTripWithParticipants(UUID tripId) {
-        return tripRepository.findWithParticipantsById(tripId)
+    private Trip findTrip(UUID tripId) {
+        return tripRepository.findById(tripId)
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    private Demand findById(UUID demandId) {
+    private Demand findDemand(UUID demandId) {
         return demandRepository.findById(demandId)
                 .orElseThrow(EntityNotFoundException::new);
     }

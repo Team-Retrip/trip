@@ -58,11 +58,11 @@ public class TripParticipants {
     }
 
     public boolean updatableByLeader(UUID memberId) {
-        return isLeader(memberId);
+        return requireLeader(memberId);
     }
 
     public void updateMaxParticipants(int newMaxParticipants, UUID memberId) {
-        if (!isLeader(memberId)) {
+        if (!requireLeader(memberId)) {
             throw new MemberIsNotLeaderException();
         }
         validateMaxParticipants(newMaxParticipants);
@@ -82,12 +82,22 @@ public class TripParticipants {
         }
     }
 
-    public boolean isLeader(UUID memberId) {
+    public boolean requireLeader(UUID memberId) {
         return this.values.stream()
                 .filter(m -> memberId.equals(m.getMemberId()))
                 .findFirst()
                 .orElseThrow(() -> new InvalidValueException(ErrorCode.LEADER_REQUIRED, "여행 회원이 아닙니다."))
                 .isLeader();
+    }
+
+    public boolean isLeader(UUID memberId) {
+        return this.values.stream()
+                .anyMatch(m -> memberId.equals(m.getMemberId()) && m.isLeader());
+    }
+
+    public boolean isParticipant(UUID memberId) {
+        return this.values.stream()
+                .anyMatch(m -> memberId.equals(m.getMemberId()));
     }
 
     public void banMembers(UUID loginMemberId, List<UUID> memberIds, Trip trip) {
@@ -112,7 +122,7 @@ public class TripParticipants {
     }
 
     public void validateTripLeader(UUID loginMemberId) {
-        if(!isLeader(loginMemberId)) {
+        if(!requireLeader(loginMemberId)) {
             throw new BusinessException(NOT_TRIP_LEADER);
         }
     }
@@ -159,7 +169,7 @@ public class TripParticipants {
         if (currentLeaderId.equals(newLeaderId)) {
             throw new InvalidValueException("자기 자신에게 리더를 위임할 수 없습니다.");
         }
-        if (!isLeader(currentLeaderId)) {
+        if (!requireLeader(currentLeaderId)) {
             throw new MemberIsNotLeaderException();
         }
     }
