@@ -4,7 +4,6 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.*;
 
-import java.time.Period;
 import java.util.List;
 
 import org.springframework.test.util.ReflectionTestUtils;
@@ -37,7 +36,7 @@ public class TripFixture {
         return trip;
     }
 
-    public static Trip createTestTrip(UUID memberId, String title, String description, TripCategory category) {
+    public static Trip createTestTrip(UUID memberId, String title, String description, TripCategory category, TripStatus status) {
         TripPeriod period = createFuturePeriod();
         return Trip.create(
                 memberId,
@@ -48,7 +47,8 @@ public class TripFixture {
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category,
+                status);
     }
 
     public static Trip createTestTripWithPeriod(UUID memberId, String title, String description, TripCategory category, TripPeriod period) {
@@ -75,7 +75,7 @@ public class TripFixture {
                 true,
                 maxParticipants,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category, TripStatus.RECRUITING);
     }
 
     public static Trip createReadyTrip(UUID memberId, String title, String description, TripCategory category) {
@@ -89,7 +89,7 @@ public class TripFixture {
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category, TripStatus.RECRUITING);
         ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
         return trip;
     }
@@ -106,7 +106,7 @@ public class TripFixture {
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category, TripStatus.RECRUITING);
         ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
         return trip;
     }
@@ -116,7 +116,7 @@ public class TripFixture {
     }
 
     public static Trip createTestTripWithParticipants() {
-        Trip trip = createTestTrip(LEADER_ID, "테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        Trip trip = createTestTrip(LEADER_ID, "테스트 여행", "여행 설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
         trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
         trip.addParticipant(TripParticipant.createTripParticipant(홍석_ID, trip));
         trip.addParticipant(TripParticipant.createTripParticipant(준호_ID, trip));
