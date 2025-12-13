@@ -38,7 +38,7 @@ public class DemandController {
     @GetMapping("/{tripId}/demand")
     @Schema(description = "리더 여행 참가 신청 목록 조회")
     public ApiResponse<List<DemandsResponse>> getTripDemands(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-                                                       @PathVariable("tripId") UUID tripId) {
+                                                             @PathVariable("tripId") UUID tripId) {
         List<DemandsResponse> response = demandManageUseCase.getDemands(memberId, tripId);
         return ApiResponse.ok(response);
     }

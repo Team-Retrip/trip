@@ -77,8 +77,8 @@ public class Trip extends BaseEntity {
             boolean open,
             int maxParticipants,
             List<String> hashTags,
-            TripCategory category
-    ) {
+            TripCategory category,
+            TripStatus status) {
         Trip trip = Trip.builder()
                 .id(UUID.randomUUID())
                 .destinationId(destinationId)
@@ -87,7 +87,7 @@ public class Trip extends BaseEntity {
                 .period(period)
                 .open(open)
                 .category(category)
-                .status(TripStatus.RECRUITING)
+                .status(status)
                 .build();
         trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
         trip.hashTags = new TripHashTags(trip, hashTags);

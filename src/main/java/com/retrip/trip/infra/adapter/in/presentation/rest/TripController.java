@@ -7,10 +7,13 @@ import com.retrip.trip.application.in.usecase.GetTripUseCase;
 import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
 import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
+import io.swagger.v3.oas.annotations.media.DependentSchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -90,10 +93,11 @@ public class TripController {
 
     @GetMapping("/my")
     @Schema(description = "나의 여행 목록 조회")
-    public ApiResponse<Page<TripResponse>> getMyTrips(
-            @RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-            @PageableDefault(size = 10, page = 0) Pageable page) {
-        Page<TripResponse> trips = getTripUseCase.getMyTrips(memberId, page);
+    @DependentSchema(name = "나의 여행 목록 조회는 tripStatus = null, 보관함(종료된여행)을 클릭시 tripStatus = COMPLETED")
+    public ApiResponse<Page<MyTripResponse>> getMyTrips(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+                                                      @RequestParam TripStatus tripStatus,
+                                                      @PageableDefault(size = 10, page = 0) Pageable page) {
+        Page<MyTripResponse> trips = getTripUseCase.getMyTrips(memberId, tripStatus, page);
         return ApiResponse.ok(trips);
     }
 

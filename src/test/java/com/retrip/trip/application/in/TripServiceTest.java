@@ -14,6 +14,7 @@ import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
 import com.retrip.trip.application.in.request.TripCreateRequest;
 import com.retrip.trip.application.in.request.TripRequestFixture;
 import com.retrip.trip.application.in.response.ConfirmationDemandAcceptResponse;
+import com.retrip.trip.application.in.response.MyTripResponse;
 import com.retrip.trip.application.in.response.PeriodUpdateResponse;
 import com.retrip.trip.application.in.response.TripCreateResponse;
 import com.retrip.trip.application.in.response.TripDetailResponse;
@@ -43,15 +44,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 class TripServiceTest extends BaseTripServiceTest {
-    private Trip createTestTripWithParticipants() {
-        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+    private Trip createTestTripWithParticipants(TripStatus status) {
+        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC, status);
         trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
         tripRepository.save(trip);
         return trip;
     }
 
-    private Trip createTestTrip(String title, String description, TripCategory category) {
-        Trip trip = TripFixture.createTestTrip(memberId, title, description, category);
+    private Trip createTestTrip(String title, String description, TripCategory category, TripStatus status) {
+        Trip trip = TripFixture.createTestTrip(memberId, title, description, category, status);
         return tripRepository.save(trip);
     }
 
@@ -88,9 +89,9 @@ class TripServiceTest extends BaseTripServiceTest {
 
     @Test
     void 여행_목록을_조회한다() {
-        tripRepository.save(TripFixture.createTestTrip(memberId, "속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC));
-        tripRepository.save(TripFixture.createTestTrip(memberId, "대구 여행 멤버 구함", "대구 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC));
-        tripRepository.save(TripFixture.createTestTrip(memberId, "부산 여행 멤버 구함", "부산 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC));
+        tripRepository.save(TripFixture.createTestTrip(memberId, "속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
+        tripRepository.save(TripFixture.createTestTrip(memberId, "대구 여행 멤버 구함", "대구 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
+        tripRepository.save(TripFixture.createTestTrip(memberId, "부산 여행 멤버 구함", "부산 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
         Page<TripResponse> trips = tripService.getTrips(PageRequest.of(0, 2));
         assertThat(trips.getTotalElements()).isEqualTo(2);
         assertThat(trips.getPageable().getOffset()).isEqualTo(0);
@@ -103,7 +104,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 빈_여행_일정을_수정한다() {
         // given
-        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
 
         // then
         LocalDate start = LocalDate.now().plusDays(1);
@@ -420,8 +421,62 @@ class TripServiceTest extends BaseTripServiceTest {
     }
 
     @Test
-    @DisplayName("여행을 나간 후 '나의 여행 목록'에 보이지 않는다")
-    void getMyTrips_afterLeaving() {
+    void 나의_여행_목록_리스트를_조회한다() {
+        // given
+        Trip 정수_joinedTrip1 = createTestTripWithParticipants(TripStatus.RECRUITING);
+        Trip 정수_joinedTrip2 = createTestTripWithParticipants(TripStatus.RECRUITMENT_CLOSED);
+        Trip 정수_joinedTrip3 = createTestTripWithParticipants(TripStatus.IN_PROGRESS);
+        Trip 정수_joinedTrip4 = createTestTripWithParticipants(TripStatus.COMPLETED);
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, null, PageRequest.of(0, 10));
+        List<UUID> tripIds = myTrips.getContent()
+                .stream()
+                .map(MyTripResponse::id)
+                .toList();
+
+        // then
+        assertThat(myTrips).isNotNull();
+        assertThat(myTrips.getTotalElements()).isEqualTo(3);
+        assertThat(myTrips.getContent()).hasSize(3);
+
+        assertThat(tripIds)
+                .containsExactlyInAnyOrder(
+                        정수_joinedTrip1.getId(),
+                        정수_joinedTrip2.getId(),
+                        정수_joinedTrip3.getId()
+                );
+    }
+
+    @Test
+    void 나의_종료된_여행이담긴_보관함을_조회한다() {
+        // given
+        Trip 정수_joinedTrip1 = createTestTripWithParticipants(TripStatus.RECRUITING);
+        Trip 정수_joinedTrip2 = createTestTripWithParticipants(TripStatus.IN_PROGRESS);
+        Trip 정수_joinedTrip3 = createTestTripWithParticipants(TripStatus.COMPLETED);
+        Trip 정수_joinedTrip4 = createTestTripWithParticipants(TripStatus.COMPLETED);
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, TripStatus.COMPLETED, PageRequest.of(0, 10));
+        List<UUID> tripIds = myTrips.getContent()
+                .stream()
+                .map(MyTripResponse::id)
+                .toList();
+
+        // then
+        assertThat(myTrips).isNotNull();
+        assertThat(myTrips.getTotalElements()).isEqualTo(2);
+        assertThat(myTrips.getContent()).hasSize(2);
+
+        assertThat(tripIds)
+                .containsExactlyInAnyOrder(
+                        정수_joinedTrip3.getId(),
+                        정수_joinedTrip4.getId()
+                );
+    }
+
+    @Test
+    void 사용자는_여행방을_나갈_수_있다() {
         // given
         Trip trip = createReadyTrip(memberId);
         trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
@@ -429,16 +484,16 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         tripService.leaveTrip(trip.getId(), newMemberId);
-        Page<TripResponse> myTrips = tripService.getMyTrips(newMemberId, PageRequest.of(0, 10));
 
         // then
-        assertThat(myTrips.getTotalElements()).isZero();
+        assertThat(trip.getTripParticipants().getValues().size()).isOne();
+        assertThat(trip.getTripParticipants().getValues().get(0).getMemberId()).isNotEqualTo(newMemberId);
     }
 
     @Test
     void 리더는_참여자들을_추방할_수_있다() {
         // given
-        Trip newTrip = createTestTripWithParticipants();
+        Trip newTrip = createTestTripWithParticipants(TripStatus.RECRUITING);
 
         // then
         tripService.banMembers(memberId, newTrip.getId(), List.of(정수_ID));
@@ -490,7 +545,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @DisplayName("최대 참여 인원을 현재 참여 인원보다 적게 변경할 수 없다.")
     void cannot_update_maxParticipants_lessThan_currentParticipants() {
         // given
-        Trip trip = TripFixture.createTestTrip(memberId, "인원 축소 테스트", "설명", TripCategory.DOMESTIC);
+        Trip trip = TripFixture.createTestTrip(memberId, "인원 축소 테스트", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
         trip.addParticipant(TripParticipant.createTripParticipant(UUID.randomUUID(), trip));
         trip.addParticipant(TripParticipant.createTripParticipant(UUID.randomUUID(), trip));
         tripRepository.save(trip);
@@ -506,7 +561,7 @@ class TripServiceTest extends BaseTripServiceTest {
     void isLeader_check_works_correctly() {
         // given
         UUID nonLeaderId = UUID.randomUUID();
-        Trip trip = TripFixture.createTestTrip(memberId, "isLeader 테스트", "설명", TripCategory.DOMESTIC);
+        Trip trip = TripFixture.createTestTrip(memberId, "isLeader 테스트", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
         trip.addParticipant(TripParticipant.createTripParticipant(nonLeaderId, trip));
         tripRepository.save(trip);
 
@@ -526,7 +581,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 여행확정요청_생성_성공() {
         //given
-        Trip trip = createTestTripWithParticipants();
+        Trip trip = createTestTripWithParticipants(TripStatus.RECRUITING);
         trip.changeStatusToRecruitmentClosed();
         TripConfirmationDemandRequest request = new TripConfirmationDemandRequest(LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
 
@@ -542,7 +597,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 여행확정_재요청_성공() {
         //given
-        Trip trip = createTestTripWithParticipants();
+        Trip trip = createTestTripWithParticipants(TripStatus.RECRUITING);
         trip.changeStatusToRecruitmentClosed();
         TripConfirmationDemandRequest request = new TripConfirmationDemandRequest(LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
         TripConfirmationDemand demand = TripConfirmationDemand.create(memberId, trip, request.startDate(), request.endDate());
@@ -561,7 +616,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 여행확정요청_수락_성공() {
         //given
-        Trip trip = createTestTripWithParticipants();
+        Trip trip = createTestTripWithParticipants(TripStatus.RECRUITING);
         trip.changeStatusToRecruitmentClosed();
         TripConfirmationDemand demand = TripConfirmationDemand.create(memberId, trip, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
         demand.addTripMember(memberId);
@@ -579,7 +634,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 여행확정요청_거절_성공() {
         //given
-        Trip trip = createTestTripWithParticipants();
+        Trip trip = createTestTripWithParticipants(TripStatus.RECRUITING);
         trip.changeStatusToRecruitmentClosed();
         TripConfirmationDemand demand = TripConfirmationDemand.create(memberId, trip, LocalDate.now().plusDays(1), LocalDate.now().plusDays(3));
         demand.addTripMember(memberId);
@@ -596,7 +651,7 @@ class TripServiceTest extends BaseTripServiceTest {
     @Test
     void 사용자는_여행_상세를_조회할_수_있다() {
         //given
-        Trip trip = createTestTripWithParticipants();
+        Trip trip = createTestTripWithParticipants(TripStatus.RECRUITING);
 
         //when
         TripDetailResponse tripDetail = tripService.getTripDetail(memberId, trip.getId());

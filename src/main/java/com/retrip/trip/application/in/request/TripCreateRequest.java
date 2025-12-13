@@ -4,6 +4,7 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.domain.vo.TripTitle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -65,7 +66,8 @@ public record TripCreateRequest(
                 open,
                 maxParticipants,
                 hashTags,
-                category
+                category,
+                TripStatus.RECRUITING
         );
     }
 
