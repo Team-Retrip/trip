@@ -42,15 +42,20 @@ public class Trip extends BaseEntity {
     @Embedded
     private TripDescription description;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     private boolean open;
 
     @Embedded
     private TripPassword tripPassword;
 
     @Column(name = "status", length = 50, nullable = false)
+    @Enumerated(EnumType.STRING)
     private TripStatus status;
 
     @Column(name = "category", length = 50, nullable = false)
+    @Enumerated(EnumType.STRING)
     private TripCategory category;
 
     @Embedded
@@ -72,17 +77,20 @@ public class Trip extends BaseEntity {
             UUID memberId,
             UUID destinationId,
             TripTitle title,
+            String imageUrl,
             TripDescription description,
             TripPeriod period,
             boolean open,
             int maxParticipants,
             List<String> hashTags,
             TripCategory category,
-            TripStatus status) {
+            TripStatus status
+    ) {
         Trip trip = Trip.builder()
                 .id(UUID.randomUUID())
                 .destinationId(destinationId)
                 .title(title)
+                .imageUrl(imageUrl)
                 .description(description)
                 .period(period)
                 .open(open)
@@ -98,22 +106,25 @@ public class Trip extends BaseEntity {
             UUID leaderId,
             UUID destinationId,
             TripTitle title,
+            String imageUrl,
             TripDescription description,
             TripPeriod period,
             boolean open,
             int maxParticipants,
             List<String> hashTags,
-            TripCategory category
+            TripCategory category,
+            TripStatus status
     ) {
         Trip trip = Trip.builder()
                 .id(UUID.randomUUID())
                 .destinationId(destinationId)
                 .title(title)
+                .imageUrl(imageUrl)
                 .description(description)
                 .period(period)
                 .open(open)
                 .category(category)
-                .status(TripStatus.RECRUITING)
+                .status(status)
                 .build();
         trip.itineraries = new Itineraries(trip, period);
         trip.tripParticipants = new TripParticipants(leaderId, trip, maxParticipants);
@@ -125,9 +136,7 @@ public class Trip extends BaseEntity {
         this.tripParticipants.addParticipant(participant);
     }
 
-    public void updatePeriod(
-            TripPeriod period,
-            @NotNull UUID memberId) {
+    public void updatePeriod(TripPeriod period, @NotNull UUID memberId) {
         if (!tripParticipants.updatableByLeader(memberId)) {
             throw new PeriodUpdateFailedException();
         }

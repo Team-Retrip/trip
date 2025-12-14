@@ -40,9 +40,11 @@ public record TripDetailResponse(
         @Schema(description = "여행 상태 명")
         String tripStatusName,
 
-        // TODO: 해당 부분은 아직 Trip 쪽에서 구현이 안되어있어서 추후 해당 응답에 값 담을 예정
         @Schema(description = "여행지")
         String tripLocation,
+
+        @Schema(description = "여행 대표 이미지 URL")
+        String imageUrl,
 
         @Schema(description = "여행 소개")
         String description,
@@ -65,7 +67,8 @@ public record TripDetailResponse(
                 .maxParticipantCount(trip.getTripParticipants().getMaxParticipants())
                 .tripStatus(trip.getStatus())
                 .tripStatusName(trip.getStatus().getViewName())
-                .tripLocation("") //TODO : 구현 되면 채워 넣을 예정
+                .tripLocation("") // TODO : Location 구현 시 채울 예정
+                .imageUrl(trip.getImageUrl())
                 .description(trip.getDescription().getValue())
                 .hashTags(trip.getHashTags().getHashTagNames())
                 .participants(TripParticipantResponse.toList(trip.getTripParticipants().getValues()))
@@ -74,7 +77,6 @@ public record TripDetailResponse(
 
     @Builder
     public record TripParticipantResponse (
-
             @Schema(description = "여행 참가자 고유 id")
             UUID participantId,
 

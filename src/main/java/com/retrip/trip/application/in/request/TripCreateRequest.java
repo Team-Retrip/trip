@@ -29,6 +29,9 @@ public record TripCreateRequest(
         @NotNull
         String title,
 
+        @Schema(description = "여행 대표 이미지 URL")
+        String imageUrl,
+
         @Schema(description = "여행 설명", example = "파리, 런던, 로마를 여행하는 일정입니다.")
         String description,
 
@@ -61,6 +64,7 @@ public record TripCreateRequest(
                 memberId,
                 locationId,
                 new TripTitle(title),
+                imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
                 open,
@@ -76,12 +80,14 @@ public record TripCreateRequest(
                 memberId,
                 locationId,
                 new TripTitle(title),
+                imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
                 hashTags,
-                category
+                category,
+                TripStatus.RECRUITING
         );
     }
 }
