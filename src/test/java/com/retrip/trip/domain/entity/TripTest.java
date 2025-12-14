@@ -32,6 +32,7 @@ class TripTest {
                 memberId,
                 destinationId,
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
                         LocalDate.now().plusDays(1),
@@ -50,6 +51,7 @@ class TripTest {
                 memberId,
                 destinationId,
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
                         LocalDate.now().plusDays(1),
@@ -57,7 +59,8 @@ class TripTest {
                 true,
                 4,
                 List.of("속초 여행"),
-                TripCategory.DOMESTIC
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING
         )).doesNotThrowAnyException();
     }
 
@@ -68,6 +71,7 @@ class TripTest {
                 memberId,
                 destinationId,
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
                         LocalDate.now().plusDays(1),
@@ -96,6 +100,7 @@ class TripTest {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
@@ -122,6 +127,7 @@ class TripTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,

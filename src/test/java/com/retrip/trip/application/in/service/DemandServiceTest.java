@@ -35,7 +35,7 @@ class DemandServiceTest extends BaseDemandServiceTest {
     }
 
     private Trip createTestTrip(String title, String description, TripCategory category) {
-        Trip trip = TripFixture.createTestTrip(LEADER_ID, title, description, category, TripStatus.RECRUITING);
+        Trip trip = TripFixture.createTestTrip(LEADER_ID, title, description, category);
         return tripRepository.save(trip);
     }
 
