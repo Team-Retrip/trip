@@ -104,6 +104,8 @@ jobs:
             docker run -d \
               --name $CONTAINER \
               -p 8080:8080 \
+              -v /home/ec2-user/trip-db:/var/lib/trip-db \
+              -e SPRING_PROFILES_ACTIVE=prod \
               --restart always \
               $IMAGE
       
