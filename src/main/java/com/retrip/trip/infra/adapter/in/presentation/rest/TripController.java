@@ -1,6 +1,8 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.*;
+import com.retrip.trip.application.in.request.context.UserContext;
+import com.retrip.trip.application.in.request.context.WithUserContext;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.in.usecase.GetTripUseCase;
@@ -43,16 +45,19 @@ public class TripController {
 
     @PostMapping
     @Schema(description = "여행 생성")
-    public ApiResponse<TripCreateResponse> createTrip(@RequestBody TripCreateRequest request) {
-        TripCreateResponse trip = tripManageUseCase.createTrip(request);
+    public ApiResponse<TripCreateResponse> createTrip(
+            @WithUserContext UserContext userContext,
+            @RequestBody TripCreateRequest request) {
+        TripCreateResponse trip = tripManageUseCase.createTrip(userContext.memberId(), request);
         return ApiResponse.created(trip);
     }
 
     @PostMapping("/regular")
     @Schema(description = "일정이 포함된 여행 생성")
     public ApiResponse<TripCreateResponse> createTripWithItineraries(
+            @WithUserContext UserContext userContext,
             @RequestBody TripCreateRequest request) {
-        TripCreateResponse trip = tripManageUseCase.createTripWithItineraries(request);
+        TripCreateResponse trip = tripManageUseCase.createTripWithItineraries(userContext.memberId(), request);
         return ApiResponse.created(trip);
     }
 
@@ -74,35 +79,35 @@ public class TripController {
 
     @GetMapping("/{tripId}")
     @Schema(description = "여행 상세 조회")
-    public ApiResponse<TripDetailResponse> getTripDetail(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+    public ApiResponse<TripDetailResponse> getTripDetail(@WithUserContext UserContext userContext,
                                                          @PathVariable UUID tripId) {
-        TripDetailResponse tripDetail = getTripUseCase.getTripDetail(memberId, tripId);
+        TripDetailResponse tripDetail = getTripUseCase.getTripDetail(userContext.memberId(), tripId);
         return ApiResponse.ok(tripDetail);
     }
 
     @PutMapping("/{tripId}/period")
     @Schema(description = "여행 기간 수정")
     public ResponseEntity<PeriodUpdateResponse> updatePeriod(
-            @PathVariable UUID tripId, @RequestBody PeriodUpdateRequest request) {
-        PeriodUpdateResponse period = tripPeriodUseCase.updatePeriod(tripId, request);
+            @WithUserContext UserContext userContext, @PathVariable UUID tripId, @RequestBody PeriodUpdateRequest request) {
+        PeriodUpdateResponse period = tripPeriodUseCase.updatePeriod(userContext.memberId(), tripId, request);
         return ResponseEntity.ok().body(period);
     }
 
     @GetMapping("/my")
     @Schema(description = "나의 여행 목록 조회")
     public ApiResponse<Page<TripResponse>> getMyTrips(
-            @RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+            @WithUserContext UserContext userContext,
             @PageableDefault(size = 10, page = 0) Pageable page) {
-        Page<TripResponse> trips = getTripUseCase.getMyTrips(memberId, page);
+        Page<TripResponse> trips = getTripUseCase.getMyTrips(userContext.memberId(), page);
         return ApiResponse.ok(trips);
     }
 
-    @DeleteMapping("/{tripId}/participants/{memberId}")
+    @DeleteMapping("/{tripId}/participants")
     @Schema(description = "여행 나가기")
     public ApiResponse<Void> leaveTrip(
             @PathVariable UUID tripId,
-            @PathVariable UUID memberId) { //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
-        leaveTripUseCase.leaveTrip(tripId, memberId);
+            @WithUserContext UserContext userContext) {
+        leaveTripUseCase.leaveTrip(tripId, userContext.memberId());
         return ApiResponse.noContent();
     }
 
@@ -117,47 +122,47 @@ public class TripController {
 
     @DeleteMapping("/{tripId}/members/ban")
     @Schema(description = "여행 멤버 리스트 강퇴")
-    public ApiResponse<?> banMembers(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정
+    public ApiResponse<?> banMembers(@WithUserContext UserContext userContext,
                                      @PathVariable("tripId") UUID tripId,
                                      @RequestBody TripMemberBanRequest request) {
-        tripManageUseCase.banMembers(memberId, tripId, request.memberIds());
+        tripManageUseCase.banMembers(userContext.memberId(), tripId, request.memberIds());
         return ApiResponse.noContent();
     }
 
     @PostMapping("/{tripId}/confirm/demand")
     @Schema(description = "여행 확정 요청")
-    public ResponseEntity<?> demandTripConfirmation(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+    public ResponseEntity<?> demandTripConfirmation(@WithUserContext UserContext userContext,
                                                     @PathVariable UUID tripId,
                                                     @RequestBody TripConfirmationDemandRequest request) {
-        tripConfirmationUseCase.demandTripConfirmation(memberId, tripId, request);
+        tripConfirmationUseCase.demandTripConfirmation(userContext.memberId(), tripId, request);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{tripId}/confirm/{confirmationDemandId}/re-demand")
     @Schema(description = "여행 확정 재요청")
-    public ResponseEntity<?> demandAgainTripConfirmation(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+    public ResponseEntity<?> demandAgainTripConfirmation(@WithUserContext UserContext userContext,
                                                          @PathVariable UUID tripId,
                                                          @PathVariable UUID confirmationDemandId,
                                                          @RequestBody TripConfirmationDemandRequest request) {
-        tripConfirmationUseCase.demandAgainTripConfirmation(memberId, tripId, confirmationDemandId, request);
+        tripConfirmationUseCase.demandAgainTripConfirmation(userContext.memberId(), tripId, confirmationDemandId, request);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{tripId}/confirm/{confirmationDemandId}/accept")
     @Schema(description = "여행 확정 요청 수락")
-    public ResponseEntity<?> acceptConfirmationRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+    public ResponseEntity<?> acceptConfirmationRequest(@WithUserContext UserContext userContext,
                                                        @PathVariable UUID tripId,
                                                        @PathVariable UUID confirmationDemandId) {
-        ConfirmationDemandAcceptResponse response = tripConfirmationUseCase.acceptConfirmationDemand(memberId, tripId, confirmationDemandId);
+        ConfirmationDemandAcceptResponse response = tripConfirmationUseCase.acceptConfirmationDemand(userContext.memberId(), tripId, confirmationDemandId);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{tripId}/confirm/{confirmationDemandId}/reject")
     @Schema(description = "여행 확정 요청 거절")
-    public ResponseEntity<?> rejectConfirmationRequest(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
+    public ResponseEntity<?> rejectConfirmationRequest(@WithUserContext UserContext userContext,
                                                        @PathVariable UUID tripId,
                                                        @PathVariable UUID confirmationDemandId) {
-        tripConfirmationUseCase.rejectConfirmationDemand(memberId, tripId, confirmationDemandId);
+        tripConfirmationUseCase.rejectConfirmationDemand(userContext.memberId(), tripId, confirmationDemandId);
         return ResponseEntity.noContent().build();
     }
 }

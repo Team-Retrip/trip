@@ -1,5 +1,7 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
+import com.retrip.trip.application.in.request.context.UserContext;
+import com.retrip.trip.application.in.request.context.WithUserContext;
 import com.retrip.trip.application.in.request.vote.VoteCreateRequest;
 import com.retrip.trip.application.in.request.vote.VoteUpdateRequest;
 import com.retrip.trip.application.in.response.vote.VoteCreateResponse;
@@ -20,38 +22,38 @@ public class VoteController {
 
     @PostMapping
     public ApiResponse<VoteCreateResponse> createVote(
-            @RequestParam UUID memberId,
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @RequestBody VoteCreateRequest request) {
-        VoteCreateResponse vote = voteManageUseCase.createVote(memberId, tripId, request);
+        VoteCreateResponse vote = voteManageUseCase.createVote(userContext.memberId(), tripId, request);
         return ApiResponse.created(vote);
     }
 
     @PutMapping("/{voteId}/update")
     public ApiResponse<VoteUpdateResponse> updateVote(
-            @RequestParam UUID memberId,
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @PathVariable UUID voteId,
             @RequestBody VoteUpdateRequest request) {
-        VoteUpdateResponse vote = voteManageUseCase.updateVote(memberId, tripId, voteId, request);
+        VoteUpdateResponse vote = voteManageUseCase.updateVote(userContext.memberId(), tripId, voteId, request);
         return ApiResponse.ok(vote);
     }
 
     @PutMapping("/{voteId}/end")
     public ApiResponse<VoteEndResponse> endVote(
-            @RequestParam UUID memberId,
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @PathVariable UUID voteId) {
-        VoteEndResponse vote = voteManageUseCase.endVote(memberId, tripId, voteId);
+        VoteEndResponse vote = voteManageUseCase.endVote(userContext.memberId(), tripId, voteId);
         return ApiResponse.ok(vote);
     }
 
     @DeleteMapping("/{voteId}")
     public ApiResponse<Void> deleteVote(
-            @RequestParam UUID memberId,
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @PathVariable UUID voteId) {
-        voteManageUseCase.deleteVote(memberId, tripId, voteId);
+        voteManageUseCase.deleteVote(userContext.memberId(), tripId, voteId);
         return ApiResponse.noContent();
     }
 }

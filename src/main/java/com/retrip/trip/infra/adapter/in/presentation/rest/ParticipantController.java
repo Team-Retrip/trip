@@ -1,6 +1,8 @@
 package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.TripJoinWithPasswordRequest;
+import com.retrip.trip.application.in.request.context.UserContext;
+import com.retrip.trip.application.in.request.context.WithUserContext;
 import com.retrip.trip.application.in.response.TripJoinWithPasswordResponse;
 import com.retrip.trip.application.in.usecase.ParticipantManageUseCase;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
@@ -22,8 +24,9 @@ public class ParticipantController {
     @Schema(description = "비공개 여행 비밀번호로 참여")
     public ApiResponse<TripJoinWithPasswordResponse> joinTripWithPassword(
             @PathVariable UUID tripId,
+            @WithUserContext UserContext userContext,
             @RequestBody TripJoinWithPasswordRequest request) {
-        TripJoinWithPasswordResponse response = participantManageUseCase.joinTripWithPassword(tripId, request);
+        TripJoinWithPasswordResponse response = participantManageUseCase.joinTripWithPassword(tripId, request, userContext.memberId());
         return ApiResponse.ok(response);
     }
 }

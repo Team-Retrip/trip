@@ -37,16 +37,16 @@ public class TripService
     private final TripPasswordEncoder tripPasswordEncoder;
 
     @Override
-    public TripCreateResponse createTrip(TripCreateRequest request) {
-        Trip trip = request.to();
+    public TripCreateResponse createTrip(UUID memberId, TripCreateRequest request) {
+        Trip trip = request.to(memberId);
         assignPasswordIfNotOpen(trip, request.password());
         Trip savedTrip = tripRepository.save(trip);
         return TripCreateResponse.of(savedTrip);
     }
 
     @Override
-    public TripCreateResponse createTripWithItineraries(TripCreateRequest request) {
-        Trip trip = request.toWithItineraries();
+    public TripCreateResponse createTripWithItineraries(UUID memberId, TripCreateRequest request) {
+        Trip trip = request.toWithItineraries(memberId);
         assignPasswordIfNotOpen(trip, request.password());
         Trip savedTrip = tripRepository.save(trip);
         return TripCreateResponse.of(savedTrip);
@@ -81,11 +81,11 @@ public class TripService
     }
 
     @Override
-    public PeriodUpdateResponse updatePeriod(UUID tripId, PeriodUpdateRequest request) {
+    public PeriodUpdateResponse updatePeriod(UUID memberId, UUID tripId, PeriodUpdateRequest request) {
         TripPeriod period = request.toPeriod();
         Trip trip = tripQueryRepository.findByIdWithItineraries(tripId).orElseThrow(TripNotFoundException::new);
         List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItinerariesIds());
-        trip.updatePeriod(period, request.memberId());
+        trip.updatePeriod(period, memberId);
         return PeriodUpdateResponse.of(trip);
     }
 

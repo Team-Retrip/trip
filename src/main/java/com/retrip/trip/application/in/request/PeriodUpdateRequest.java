@@ -10,10 +10,6 @@ import java.util.UUID;
 
 @Schema(description = "여행 기간 수정 Request")
 public record PeriodUpdateRequest(
-        @Schema(description = "멤버 ID")
-        @NotNull
-        UUID memberId,
-
         @Schema(description = "여행 시작 날짜")
         @FutureOrPresent
         LocalDate start,

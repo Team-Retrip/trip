@@ -16,10 +16,6 @@ import java.util.UUID;
 @Schema(description = "여행 생성 Request")
 public record TripCreateRequest(
 
-        @Schema(description = "여행 멤버 ID", example = "550e8400-e29b-41d4-a716-446655440000")
-        @NotNull
-        UUID memberId,
-
         @Schema(description = "여행 위치 ID", example = "550e8400-e29b-41d4-a716-446655440001")
         @NotNull
         UUID locationId,
@@ -55,7 +51,7 @@ public record TripCreateRequest(
         TripCategory category
 
 ) {
-    public Trip to() {
+    public Trip to(UUID memberId) {
         return Trip.create(
                 memberId,
                 locationId,
@@ -69,7 +65,7 @@ public record TripCreateRequest(
         );
     }
 
-    public Trip toWithItineraries() {
+    public Trip toWithItineraries(UUID memberId) {
         return Trip.createWithItineraries(
                 memberId,
                 locationId,

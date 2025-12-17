@@ -2,6 +2,8 @@ package com.retrip.trip.infra.adapter.in.presentation.rest;
 
 import com.retrip.trip.application.in.request.TripInvitationOrder;
 import com.retrip.trip.application.in.request.TripInvitationsCreateRequest;
+import com.retrip.trip.application.in.request.context.UserContext;
+import com.retrip.trip.application.in.request.context.WithUserContext;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.InvitationManageUseCase;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
@@ -40,35 +42,35 @@ public class InvitationController {
         return ApiResponse.ok(invitations);
     }
 
-    @GetMapping("/members/{memberId}/invitations")
+    @GetMapping("/members/invitations")
     public ApiResponse<Page<MemberInvitationResponse>> getMemberInvitations(
-            @PathVariable UUID memberId,
+            @WithUserContext UserContext userContext,
             @RequestParam String status,
             @PageableDefault(size = 10, page = 0) Pageable page,
             @RequestParam(name = "order", defaultValue = "DATE") TripInvitationOrder order,
             @RequestParam(name = "sort", defaultValue = "desc") String sort) {
         Page<MemberInvitationResponse> invitations =
-                invitationManageUseCase.getMemberInvitations(memberId, status, page, order, sort);
+                invitationManageUseCase.getMemberInvitations(userContext.memberId(), status, page, order, sort);
         return ApiResponse.ok(invitations);
     }
 
-    @PutMapping("/members/{memberId}/trips/{tripId}/invitations/{invitationId}/accept")
+    @PutMapping("/members/trips/{tripId}/invitations/{invitationId}/accept")
     public ApiResponse<MemberInvitationAcceptResponse> acceptMemberInvitations(
-            @PathVariable UUID memberId,
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @PathVariable UUID invitationId) {
         MemberInvitationAcceptResponse invitation =
-                invitationManageUseCase.acceptMemberInvitations(memberId, tripId, invitationId);
+                invitationManageUseCase.acceptMemberInvitations(userContext.memberId(), tripId, invitationId);
         return ApiResponse.ok(invitation);
     }
 
-    @PutMapping("/members/{memberId}/trips/{tripId}/invitations/{invitationId}/reject")
+    @PutMapping("/members/trips/{tripId}/invitations/{invitationId}/reject")
     public ApiResponse<MemberInvitationRejectResponse> rejectMemberInvitations(
-            @PathVariable UUID memberId,
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @PathVariable UUID invitationId) {
         MemberInvitationRejectResponse invitation =
-                invitationManageUseCase.rejectMemberInvitations(memberId, tripId, invitationId);
+                invitationManageUseCase.rejectMemberInvitations(userContext.memberId(), tripId, invitationId);
         return ApiResponse.ok(invitation);
     }
 }
