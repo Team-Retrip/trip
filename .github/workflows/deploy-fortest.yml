@@ -31,9 +31,9 @@ jobs:
       - name: Build & Push
         run: |
           REPO=${{ secrets.DOCKER_USERNAME }}/retrip-trip
-          docker build -t $REPO:deploy-test -t $REPO:deploy-test-${{ github.sha }} .
-          docker push $REPO:deploy-test
-          docker push $REPO:deploy-test-${{ github.sha }}
+          docker build -t $REPO:latest -t $REPO:latest-${{ github.sha }} .
+          docker push $REPO:latest
+          docker push $REPO:latest-${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -80,21 +80,35 @@ jobs:
             && echo "22 open" || (echo "22 closed"; exit 1)
 
       # === 배포 ===
-      - name: Deploy trip via compose (partial update)
+      - name: Deploy trip (docker only)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.EC2_HOST }}       # 퍼블릭 IP/DNS
-          username: ${{ secrets.EC2_USER }}   # Amazon Linux=ec2-user
-          key: ${{ secrets.EC2_PRIVATE_KEY }} # PEM 전체 내용
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           timeout: 120s
           command_timeout: 15m
           script: |
             set -e
-            cd ~/all-in-one
-            test -f docker-compose.yml || (echo "compose file not found"; ls -la; exit 1)
-            docker compose pull trip
-            docker compose up -d trip
-            docker compose ps
+      
+            IMAGE=${{ secrets.DOCKER_USERNAME }}/retrip-trip:latest
+            CONTAINER=trip
+      
+            docker pull $IMAGE
+      
+            if docker ps -a --format '{{.Names}}' | grep -q "^$CONTAINER$"; then
+              docker stop $CONTAINER
+              docker rm $CONTAINER
+            fi
+      
+            docker run -d \
+              --name $CONTAINER \
+              -p 8080:8080 \
+              --restart always \
+              $IMAGE
+      
+            docker ps
+
 
       # === 닫기(반드시 같은 job에서) ===
       - name: Revoke SSH (by rule-id or CIDR)
