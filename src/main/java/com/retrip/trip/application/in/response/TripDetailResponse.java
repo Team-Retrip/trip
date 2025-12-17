@@ -13,43 +13,82 @@ import lombok.Builder;
 @Builder
 @Schema(description = "여행 상세 Response")
 public record TripDetailResponse(
-        @Schema(description = "여행 ID")
+        @Schema(
+                description = "여행 고유 ID",
+                example = "550e8400-e29b-41d4-a716-446655440000"
+        )
         UUID id,
 
-        @Schema(description = "리더 여부")
+        @Schema(
+                description = "요청한 회원이 여행 리더인지 여부",
+                example = "true"
+        )
         Boolean isLeader,
 
-        @Schema(description = "여행 참가자 여부")
+        @Schema(
+                description = "요청한 회원이 여행 참가자인지 여부",
+                example = "true"
+        )
         Boolean isParticipant,
 
-        @Schema(description = "여행 제목")
+        @Schema(
+                description = "여행 제목",
+                example = "부산 2박 3일 여행"
+        )
         String title,
 
-        @Schema(description = "여행 개설일")
+        @Schema(
+                description = "여행 개설 일시",
+                example = "2025-01-10T14:30:00"
+        )
         LocalDateTime createdAt,
 
-        @Schema(description = "현재 여행 참가자 수")
+        @Schema(
+                description = "현재 여행 참가자 수",
+                example = "3"
+        )
         Integer participantCount,
 
-        @Schema(description = "수용 가능 참가자 수")
+        @Schema(
+                description = "최대 참가 가능 인원",
+                example = "5"
+        )
         Integer maxParticipantCount,
 
-        @Schema(description = "여행 상태")
+        @Schema(
+                description = "여행 상태",
+                example = "RECRUITING"
+        )
         TripStatus tripStatus,
 
-        @Schema(description = "여행 상태 명")
+        @Schema(
+                description = "여행 상태 표시명",
+                example = "모집 중"
+        )
         String tripStatusName,
 
-        @Schema(description = "여행지")
+        @Schema(
+                description = "여행 목적지",
+                example = "부산 해운대"
+        )
         String tripLocation,
 
-        @Schema(description = "여행 대표 이미지 URL")
+        @Schema(
+                description = "여행 대표 이미지 URL",
+                example = "https://cdn.retrip.com/trips/main-image.jpg"
+        )
         String imageUrl,
 
-        @Schema(description = "여행 소개")
+        @Schema(
+                description = "여행 소개글",
+                example = "바다 보면서 힐링할 분들 모집합니다."
+        )
         String description,
 
-        @Schema(description = "해쉬태그 목록")
+        @Schema(
+                description = "여행 해시태그 목록",
+                example = "[\"힐링\", \"바다\", \"맛집투어\"]"
+        )
         List<String> hashTags,
 
         @Schema(description = "여행 참가자 목록")
@@ -77,12 +116,40 @@ public record TripDetailResponse(
 
     @Builder
     public record TripParticipantResponse (
-            @Schema(description = "여행 참가자 고유 id")
+            @Schema(
+                    description = "여행 참가자 고유 ID",
+                    example = "a3f1c0e2-4b6d-4a3c-bf2e-1b8c12345678"
+            )
             UUID participantId,
 
-            @Schema(description = "여행 참가자 회원 고유 id")
+            @Schema(
+                    description = "회원 고유 ID",
+                    example = "b7e9f0c1-1234-4d2b-a123-abcdef123456"
+            )
             UUID memberId,
 
+            @Schema(
+                    description = "한줄소개",
+                    example = "안녕하세요"
+            )
+            String introduction,
+
+            @Schema(
+                    description = "닉네임",
+                    example = "박정수"
+            )
+            String nickName,
+
+            @Schema(
+                    description = "참가자 프로필 이미지 url",
+                    example = "http://ww~~~~"
+            )
+            String imageUrl,
+
+            @Schema(
+                    description = "참가자 역할 (LEADER / MEMBER)",
+                    example = "LEADER"
+            )
             ParticipantRole role
     ){
         public static List<TripParticipantResponse> toList(List<TripParticipant> tripParticipants) {
@@ -91,10 +158,14 @@ public record TripDetailResponse(
                     .toList();
         }
 
+        //TODO: 해당 참가자 정보 auth API 에서 따로 가져오도록 수정해야함
         private static TripParticipantResponse of(TripParticipant participant) {
             return TripParticipantResponse.builder()
                     .participantId(participant.getId())
                     .memberId(participant.getMemberId())
+                    .introduction("안녕하세여")
+                    .nickName("박정수")
+                    .imageUrl("http://~~~")
                     .role(participant.getRole())
                     .build();
         }

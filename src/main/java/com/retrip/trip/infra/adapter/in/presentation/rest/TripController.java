@@ -9,11 +9,14 @@ import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
+import com.retrip.trip.infra.adapter.in.presentation.rest.common.ErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.DependentSchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -75,8 +78,11 @@ public class TripController {
         return ApiResponse.ok(trips);
     }
 
+    @Operation(
+            summary = "여행 상세 조회",
+            description = "tripId를 이용하여 여행 상세 정보를 조회합니다."
+    )
     @GetMapping("/{tripId}")
-    @Schema(description = "여행 상세 조회")
     public ApiResponse<TripDetailResponse> getTripDetail(@RequestParam("memberId") UUID memberId, //TODO: 추후 로그인 구현되면 이부분은 바뀔 에정,
                                                          @PathVariable UUID tripId) {
         TripDetailResponse tripDetail = getTripUseCase.getTripDetail(memberId, tripId);

@@ -73,6 +73,7 @@ public class TripService
     @Transactional(readOnly = true)
     public TripDetailResponse getTripDetail(UUID memberId, UUID tripId) {
         Trip trip = findTrip(tripId);
+        //TODO: 해당 참가자 정보 auth API 에서 따로 가져오도록 수정해야함
         return TripDetailResponse.of(memberId, trip);
     }
 
