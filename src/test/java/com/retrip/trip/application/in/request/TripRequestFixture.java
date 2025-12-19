@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class TripRequestFixture {
-    public static PeriodUpdateRequest createPeriod(UUID memberId, LocalDate start, LocalDate end) {
-        return new PeriodUpdateRequest(memberId, start, end);
+    public static PeriodUpdateRequest createPeriod(LocalDate start, LocalDate end) {
+        return new PeriodUpdateRequest(start, end);
     }
 }

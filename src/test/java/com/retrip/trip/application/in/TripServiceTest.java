@@ -1,25 +1,9 @@
 package com.retrip.trip.application.in;
 
-import static com.retrip.trip.domain.fixture.TripFixture.정수_ID;
-import static com.retrip.trip.domain.vo.TripPassword.PASSWORD_MIN_LENGTH;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.retrip.trip.application.in.base.BaseTripServiceTest;
-import com.retrip.trip.application.in.request.DelegateLeaderRequest;
-import com.retrip.trip.application.in.request.PeriodUpdateRequest;
-import com.retrip.trip.application.in.request.TripConfirmationDemandRequest;
-import com.retrip.trip.application.in.request.TripCreateRequest;
-import com.retrip.trip.application.in.request.TripRequestFixture;
-import com.retrip.trip.application.in.response.ConfirmationDemandAcceptResponse;
-import com.retrip.trip.application.in.response.MyTripResponse;
-import com.retrip.trip.application.in.response.PeriodUpdateResponse;
-import com.retrip.trip.application.in.response.TripCreateResponse;
-import com.retrip.trip.application.in.response.TripDetailResponse;
+import com.retrip.trip.application.in.request.*;
+import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.response.TripDetailResponse.TripParticipantResponse;
-import com.retrip.trip.application.in.response.TripResponse;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripConfirmationDemand;
 import com.retrip.trip.domain.entity.TripConfirmationReply;
@@ -30,19 +14,22 @@ import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripNotReadyException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
-import com.retrip.trip.domain.vo.ParticipantRole;
-import com.retrip.trip.domain.vo.ParticipantStatus;
-import com.retrip.trip.domain.vo.TripCategory;
-import com.retrip.trip.domain.vo.TripPeriod;
-import com.retrip.trip.domain.vo.TripStatus;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import com.retrip.trip.domain.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import static com.retrip.trip.domain.fixture.TripFixture.정수_ID;
+import static com.retrip.trip.domain.vo.TripPassword.PASSWORD_MIN_LENGTH;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TripServiceTest extends BaseTripServiceTest {
 
@@ -75,7 +62,6 @@ class TripServiceTest extends BaseTripServiceTest {
     void 여행을_생성_한다() {
         TripCreateRequest request =
                 new TripCreateRequest(
-                        memberId,
                         locationId,
                         "속초 여행 멤버 구함",
                         "https://k.kakaocdn.net/dn/image.jpg",
@@ -87,7 +73,7 @@ class TripServiceTest extends BaseTripServiceTest {
                         4,
                         List.of("속초 여행", "MZ"),
                         TripCategory.DOMESTIC);
-        TripCreateResponse response = tripService.createTrip(request);
+        TripCreateResponse response = tripService.createTrip(memberId, request);
         assertThat(response.id()).isNotNull();
         assertThat(response.destinationId()).isEqualTo(locationId);
         assertThat(response.hashTags()).contains("속초 여행", "MZ");
@@ -117,11 +103,10 @@ class TripServiceTest extends BaseTripServiceTest {
         LocalDate start = LocalDate.now().plusDays(1);
         LocalDate end = LocalDate.now().plusDays(3);
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
                 start,
                 end
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // when
         assertThat(response.start()).isEqualTo(start);
@@ -139,11 +124,10 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(3)
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // then
         assertThat(response.itineraries()).hasSize(3);
@@ -170,11 +154,11 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
+
                 LocalDate.now().plusDays(3),
                 LocalDate.now().plusDays(8)
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // then
         assertThat(response.itineraries()).hasSize(6);
@@ -203,11 +187,10 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
                 LocalDate.now().plusDays(3),
                 LocalDate.now().plusDays(8)
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // then
         assertThat(response.itineraries()).hasSize(6);
@@ -237,11 +220,11 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
+
                 LocalDate.now().plusDays(7),
                 LocalDate.now().plusDays(9)
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // then
         assertThat(response.itineraries()).hasSize(3);
@@ -268,11 +251,10 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
                 LocalDate.now().plusDays(7),
                 LocalDate.now().plusDays(12)
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // then
         assertThat(response.itineraries()).hasSize(6);
@@ -303,11 +285,11 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         PeriodUpdateRequest request = TripRequestFixture.createPeriod(
-                memberId,
+
                 LocalDate.now().plusDays(11),
                 LocalDate.now().plusDays(14)
         );
-        PeriodUpdateResponse response = tripService.updatePeriod(trip.getId(), request);
+        PeriodUpdateResponse response = tripService.updatePeriod(memberId, trip.getId(), request);
 
         // then
         assertThat(response.itineraries()).hasSize(4);
@@ -663,25 +645,26 @@ class TripServiceTest extends BaseTripServiceTest {
         //when
         TripDetailResponse tripDetail = tripService.getTripDetail(memberId, trip.getId());
         TripDetailResponse expectedTripDetail =
-            new TripDetailResponse(
-                    trip.getId(),
-                    true,
-                    true,
-                    "테스트 여행",
-                    trip.getCreatedAt(),
-                    2,
-                    4,
-                    TripStatus.RECRUITING,
-                    TripStatus.RECRUITING.getViewName(),
-                    "",
-                    TEST_IMAGE_URL,
-                    "여행 설명",
-                    List.of("test", "Test 해시 코드"),
-                    List.of(
-                            new TripParticipantResponse(UUID.randomUUID(), memberId, ParticipantRole.LEADER),
-                            new TripParticipantResponse(UUID.randomUUID(), 정수_ID, ParticipantRole.PARTICIPANT)
-                    )
-            );
+                new TripDetailResponse(
+                        trip.getId(),
+                        true,
+                        true,
+                        "테스트 여행",
+                        trip.getCreatedAt(),
+                        2,
+                        4,
+                        TripStatus.RECRUITING,
+                        TripStatus.RECRUITING.getViewName(),
+                        "",
+                        TEST_IMAGE_URL,
+                        "여행 설명",
+                        List.of("test", "Test 해시 코드"),
+                        List.of(
+                                new TripParticipantResponse(UUID.randomUUID(), memberId, "안녕하세요 테스트 입니다", "홍길동", TEST_IMAGE_URL, ParticipantRole.LEADER),
+                                new TripParticipantResponse(UUID.randomUUID(), 정수_ID, "안녕하세요 박정수 입니다", "홍길동", TEST_IMAGE_URL, ParticipantRole.PARTICIPANT)
+                        )
+                );
+
 
         //then
         assertThat(tripDetail).usingRecursiveComparison()

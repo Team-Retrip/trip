@@ -5,14 +5,13 @@ import com.retrip.trip.application.in.request.TripUpdateVisibilityRequest;
 import com.retrip.trip.application.in.response.TripCreateResponse;
 import com.retrip.trip.application.in.response.TripUpdateVisibilityResponse;
 
-import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 
 public interface TripManageUseCase {
-    TripCreateResponse createTrip(TripCreateRequest request);
+    TripCreateResponse createTrip(UUID memberId, TripCreateRequest request);
 
-    TripCreateResponse createTripWithItineraries(TripCreateRequest request);
+    TripCreateResponse createTripWithItineraries(UUID memberId, TripCreateRequest request);
 
     TripUpdateVisibilityResponse updateTripVisibility(UUID tripId, TripUpdateVisibilityRequest request);
 

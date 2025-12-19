@@ -20,10 +20,10 @@ class ParticipantServiceTest extends BaseParticipantServiceTest {
         TripPassword tripPassword = new TripPassword(password, passwordHash);
         trip.assignPassword(tripPassword);
         tripRepository.save(trip);
-        TripJoinWithPasswordRequest request = new TripJoinWithPasswordRequest(MEMBER_ID, password);
+        TripJoinWithPasswordRequest request = new TripJoinWithPasswordRequest(password);
 
         // when
-        TripJoinWithPasswordResponse response = participantService.joinTripWithPassword(TRIP_ID, request);
+        TripJoinWithPasswordResponse response = participantService.joinTripWithPassword(TRIP_ID, request, MEMBER_ID);
 
         // then
         assertThat(response.participantId()).isEqualTo(MEMBER_ID);

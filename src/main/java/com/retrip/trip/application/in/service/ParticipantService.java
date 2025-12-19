@@ -26,11 +26,12 @@ public class ParticipantService implements ParticipantManageUseCase {
     private final TripPasswordEncoder tripPasswordEncoder;
 
     @Override
-    public TripJoinWithPasswordResponse joinTripWithPassword(UUID tripId, TripJoinWithPasswordRequest request) {
+    public TripJoinWithPasswordResponse joinTripWithPassword(UUID tripId, TripJoinWithPasswordRequest request,
+                                                             UUID memberId) {
         Trip trip = findTrip(tripId);
         TripPassword tripPassword = trip.getTripPassword();
         verifyPassword(request.password(), tripPassword);
-        Participant participant = new Participant(tripId, request.memberId());
+        Participant participant = new Participant(tripId, memberId);
         participantRepository.save(participant);
         return TripJoinWithPasswordResponse.of(trip, participant);
     }
