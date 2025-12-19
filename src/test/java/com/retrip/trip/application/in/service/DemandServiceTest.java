@@ -21,6 +21,7 @@ import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.DemandStatus;
 import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

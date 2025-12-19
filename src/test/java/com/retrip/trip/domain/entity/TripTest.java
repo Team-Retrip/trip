@@ -5,6 +5,7 @@ import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.domain.vo.TripTitle;
 
 import java.util.List;
@@ -31,6 +32,7 @@ class TripTest {
                 memberId,
                 destinationId,
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
                         LocalDate.now().plusDays(1),
@@ -38,8 +40,8 @@ class TripTest {
                 true,
                 4,
                 List.of("속초 여행"),
-                TripCategory.DOMESTIC
-        )).doesNotThrowAnyException();
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING)).doesNotThrowAnyException();
     }
 
     @DisplayName("제목, 여행지, 기간, 공개 여부를 입력해 여행과 일정 목록을 생성할 수 있다.")
@@ -49,6 +51,7 @@ class TripTest {
                 memberId,
                 destinationId,
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
                         LocalDate.now().plusDays(1),
@@ -56,7 +59,8 @@ class TripTest {
                 true,
                 4,
                 List.of("속초 여행"),
-                TripCategory.DOMESTIC
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING
         )).doesNotThrowAnyException();
     }
 
@@ -67,6 +71,7 @@ class TripTest {
                 memberId,
                 destinationId,
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(
                         LocalDate.now().plusDays(1),
@@ -74,8 +79,8 @@ class TripTest {
                 true,
                 4,
                 List.of("속초 여행"),
-                TripCategory.DOMESTIC
-        );
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING);
 
         // when
         List<TripParticipant> participants = trip.getTripParticipants().getValues();
@@ -95,13 +100,14 @@ class TripTest {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
                 4,
                 List.of("Test Tag"),
-                TripCategory.DOMESTIC
-        );
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING);
         //when
         TripPeriod updateTripPeriod = new TripPeriod(LocalDate.now().plusDays(2), LocalDate.now().plusDays(4));
         trip.updatePeriod(updateTripPeriod, memberId);
@@ -121,13 +127,14 @@ class TripTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 new TripTitle("속초 여행 멤버 구함"),
+                "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
                 4,
                 List.of("Test Tag"),
-                TripCategory.DOMESTIC
-        );
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING);
         trip.addParticipant(TripParticipant.createTripParticipant(memberId, trip));
 
         //when

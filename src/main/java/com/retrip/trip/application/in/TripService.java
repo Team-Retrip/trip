@@ -13,6 +13,7 @@ import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.TripPassword;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -72,6 +73,7 @@ public class TripService
     @Transactional(readOnly = true)
     public TripDetailResponse getTripDetail(UUID memberId, UUID tripId) {
         Trip trip = findTrip(tripId);
+        //TODO: 해당 참가자 정보 auth API 에서 따로 가져오도록 수정해야함
         return TripDetailResponse.of(memberId, trip);
     }
 
@@ -91,8 +93,8 @@ public class TripService
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TripResponse> getMyTrips(UUID memberId, Pageable page) {
-        return tripQueryRepository.findMyTrips(memberId, page);
+    public Page<MyTripResponse> getMyTrips(UUID memberId, TripStatus tripStatus, Pageable page) {
+        return tripQueryRepository.findMyTrips(memberId, tripStatus, page);
     }
 
     @Override
@@ -105,7 +107,6 @@ public class TripService
     public void leaveTrip(UUID tripId, UUID memberId) {
         Trip trip = findTrip(tripId);
         trip.leave(memberId);
-        tripRepository.save(trip);
     }
 
     @Override

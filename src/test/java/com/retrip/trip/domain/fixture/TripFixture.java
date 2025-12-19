@@ -3,13 +3,10 @@ package com.retrip.trip.domain.fixture;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.*;
-
-import java.time.Period;
-import java.util.List;
-
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public class TripFixture {
@@ -22,17 +19,21 @@ public class TripFixture {
     public static final UUID 지수_ID = UUID.fromString("de3b60d2-5672-464d-8769-bf5c9de5eaff");
     public static final UUID 혁진_ID = UUID.fromString("42880aaf-4b97-4b0c-8a8a-72df4bb592f6");
 
+    private static final String TEST_IMAGE_URL = "https://test-image.com/default.jpg";
+
     public static Trip createTrip(UUID tripId) {
         Trip trip = Trip.createWithItineraries(
                 LEADER_ID,
                 UUID.randomUUID(),
                 new TripTitle("속초 여행 멤버 구함"),
+                TEST_IMAGE_URL,
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)),
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                TripCategory.DOMESTIC);
+                TripCategory.DOMESTIC,
+                TripStatus.RECRUITING);
         ReflectionTestUtils.setField(trip, "id", tripId);
         return trip;
     }
@@ -43,12 +44,14 @@ public class TripFixture {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
+                TEST_IMAGE_URL,
                 new TripDescription(description),
                 period,
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category,
+                TripStatus.RECRUITING);
     }
 
     public static Trip createTestTripWithPeriod(UUID memberId, String title, String description, TripCategory category, TripPeriod period) {
@@ -56,12 +59,14 @@ public class TripFixture {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
+                TEST_IMAGE_URL,
                 new TripDescription(description),
                 period,
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category,
+                TripStatus.RECRUITING);
     }
 
     public static Trip createTestTripWithMaxParticipants(UUID memberId, String title, String description, TripCategory category, int maxParticipants) {
@@ -70,12 +75,14 @@ public class TripFixture {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
+                TEST_IMAGE_URL,
                 new TripDescription(description),
                 period,
                 true,
                 maxParticipants,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category,
+                TripStatus.RECRUITING);
     }
 
     public static Trip createReadyTrip(UUID memberId, String title, String description, TripCategory category) {
@@ -84,16 +91,17 @@ public class TripFixture {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
+                TEST_IMAGE_URL,
                 new TripDescription(description),
                 period,
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category,
+                TripStatus.RECRUITING);
         ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
         return trip;
     }
-
 
     public static Trip createProgressTrip(UUID memberId, String title, String description, TripCategory category) {
         TripPeriod period = createFuturePeriod();
@@ -101,12 +109,14 @@ public class TripFixture {
                 memberId,
                 UUID.randomUUID(),
                 new TripTitle(title),
+                TEST_IMAGE_URL,
                 new TripDescription(description),
                 period,
                 true,
                 4,
                 List.of("test", "Test 해시 코드"),
-                category);
+                category,
+                TripStatus.RECRUITING);
         ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
         return trip;
     }

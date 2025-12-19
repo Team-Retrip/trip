@@ -4,6 +4,7 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.domain.vo.TripTitle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -23,6 +24,9 @@ public record TripCreateRequest(
         @Schema(description = "여행 제목", example = "유럽 배낭여행")
         @NotNull
         String title,
+
+        @Schema(description = "여행 대표 이미지 URL")
+        String imageUrl,
 
         @Schema(description = "여행 설명", example = "파리, 런던, 로마를 여행하는 일정입니다.")
         String description,
@@ -56,12 +60,14 @@ public record TripCreateRequest(
                 memberId,
                 locationId,
                 new TripTitle(title),
+                imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
                 hashTags,
-                category
+                category,
+                TripStatus.RECRUITING
         );
     }
 
@@ -70,12 +76,14 @@ public record TripCreateRequest(
                 memberId,
                 locationId,
                 new TripTitle(title),
+                imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
                 hashTags,
-                category
+                category,
+                TripStatus.RECRUITING
         );
     }
 }

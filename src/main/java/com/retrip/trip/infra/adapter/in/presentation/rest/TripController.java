@@ -5,11 +5,11 @@ import com.retrip.trip.application.in.request.context.UserContext;
 import com.retrip.trip.application.in.request.context.WithUserContext;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
-import com.retrip.trip.application.in.usecase.GetTripUseCase;
-import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
-import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.DependentSchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +77,10 @@ public class TripController {
         return ApiResponse.ok(trips);
     }
 
+    @Operation(
+            summary = "여행 상세 조회",
+            description = "tripId를 이용하여 여행 상세 정보를 조회합니다."
+    )
     @GetMapping("/{tripId}")
     @Schema(description = "여행 상세 조회")
     public ApiResponse<TripDetailResponse> getTripDetail(@WithUserContext UserContext userContext,
@@ -95,10 +99,11 @@ public class TripController {
 
     @GetMapping("/my")
     @Schema(description = "나의 여행 목록 조회")
-    public ApiResponse<Page<TripResponse>> getMyTrips(
-            @WithUserContext UserContext userContext,
-            @PageableDefault(size = 10, page = 0) Pageable page) {
-        Page<TripResponse> trips = getTripUseCase.getMyTrips(userContext.memberId(), page);
+    @DependentSchema(name = "나의 여행 목록 조회는 tripStatus = null, 보관함(종료된여행)을 클릭시 tripStatus = COMPLETED")
+    public ApiResponse<Page<MyTripResponse>> getMyTrips(@WithUserContext UserContext userContext,
+                                                        @RequestParam TripStatus tripStatus,
+                                                        @PageableDefault(size = 10, page = 0) Pageable page) {
+        Page<MyTripResponse> trips = getTripUseCase.getMyTrips(userContext.memberId(), tripStatus, page);
         return ApiResponse.ok(trips);
     }
 
