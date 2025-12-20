@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ApiResponse<ErrorResponse> handleAccessDeniedException(HttpServletRequest request, AccessDeniedException e) {
         log.error("handleAccessDeniedException: ", e);
-        return handle(ErrorCode.HANDLE_ACCESS_DENIED, request);
+        return handle(ErrorCode.HANDLE_ACCESS_DENIED, request, e.getMessage());
     }
 
     @ExceptionHandler(BindException.class)
@@ -35,20 +35,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ApiResponse<ErrorResponse> handleBusinessException(HttpServletRequest request, BusinessException e) {
         log.error("handleBusinessException: ", e);
-        return handle(e.getErrorCode(), request);
+        return handle(e.getErrorCode(), request, e.getMessage());
     }
 
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<ErrorResponse> handleException(HttpServletRequest request, Exception e) {
         log.error("handleException: ", e);
-        return handle(ErrorCode.SERVER_ERROR, request);
+        return handle(ErrorCode.SERVER_ERROR, request, e.getMessage());
     }
 
-    private static ApiResponse<ErrorResponse> handle(ErrorCode errorCode, HttpServletRequest request) {
+    private static ApiResponse<ErrorResponse> handle(ErrorCode errorCode, HttpServletRequest request, String errorMessage) {
         return ApiResponse.of(
                 ErrorResponse.of(
-                        errorCode, request.getRequestURL().toString(), request.getMethod()
+                        errorCode, request.getRequestURL().toString(), request.getMethod(), errorMessage
                 ));
     }
 }

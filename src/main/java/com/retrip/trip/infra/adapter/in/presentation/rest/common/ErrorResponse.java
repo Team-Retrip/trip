@@ -27,6 +27,10 @@ public class ErrorResponse {
         this.method = method;
     }
 
+    public static ErrorResponse of(ErrorCode code, String url, String method, String errorMessage) {
+        return new ErrorResponse(code.getStatus().value(), code.getCode(), errorMessage, url, method);
+    }
+
     public static ErrorResponse of(ErrorCode code, String url, String method, BindingResult bindingResult) {
         return new ErrorResponse(code.getStatus().value(), code.getCode(), code.getMessage(), url, method, bindingResult.getFieldErrors());
     }
