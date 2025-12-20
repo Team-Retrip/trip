@@ -42,5 +42,4 @@ jwt:
     KucWwwIDAQAB
     -----END PUBLIC KEY-----
 
-server:
-  port: 8081
+
