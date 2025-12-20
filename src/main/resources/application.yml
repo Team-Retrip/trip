@@ -4,7 +4,7 @@ spring:
 
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
+    url: jdbc:h2:tcp://localhost/~/trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
     username: sa
     password:
 
@@ -30,17 +30,3 @@ springdoc:
     enabled: true
   api-docs:
     enabled: true
-
-jwt:
-  public-key: |
-    -----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlfO/CoX9EzhskpAKX9ADH0wfEQZP4rAq
-    ptqq80W2YaOHAnXu+oU1UrP0b9ccKKSzMCVDwdmXrecZB0dFLPnoazMEbVOf6MSwrhGfxupPRmmJ
-    sIYgmQwo8/vnjaq/GYFfnHyCy6yKL41G+GZVqgeKdhr+w1jUw4L9Fs0l2J/AYqwTxZOnzxrU5erP
-    GSE5Dd3AwWt/brxuwA7sRfVS3mbbsYyYExjUrEbst8VtF3Pis35T8YfSDKMOUgiDnp30EAdGU1Up
-    u59J3+ToLRrIqIszRZqmasrWTL2/ihPO76PSTIMAsJMScjAwjUXA47YOOy6Vkzy8r3bPTYHp5C1N
-    KucWwwIDAQAB
-    -----END PUBLIC KEY-----
-
-server:
-  port: 8081
