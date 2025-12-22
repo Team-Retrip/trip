@@ -106,8 +106,10 @@ jobs:
               -p 8080:8080 \
               -v /home/ec2-user/trip-db:/var/lib/trip-db \
               -e SPRING_PROFILES_ACTIVE=prod \
+              -e SERVER_PORT=8080 \
               --restart always \
               $IMAGE
+
       
             docker ps
 
