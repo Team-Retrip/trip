@@ -2,6 +2,7 @@ package com.retrip.trip.infra.adapter.in.presentation.rest.common;
 
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.ErrorCode;
+import com.retrip.trip.domain.exception.common.IllegalStateException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
@@ -38,6 +39,17 @@ public class GlobalExceptionHandler {
         return handle(e.getErrorCode(), request, e.getMessage());
     }
 
+    @ExceptionHandler(exception = IllegalArgumentException.class)
+    public ApiResponse<ErrorResponse> handleIllegalArgumentException(HttpServletRequest request, Exception e) {
+        log.error("handleException: ", e);
+        return handle(ErrorCode.ILLEGAL_ARGUMENT, request, e.getMessage());
+    }
+
+    @ExceptionHandler(exception = IllegalStateException.class)
+    public ApiResponse<ErrorResponse> handleIllegalStateException(HttpServletRequest request, Exception e) {
+        log.error("handleException: ", e);
+        return handle(ErrorCode.ILLEGAL_STATE, request, e.getMessage());
+    }
 
     @ExceptionHandler(Exception.class)
     public ApiResponse<ErrorResponse> handleException(HttpServletRequest request, Exception e) {

@@ -12,6 +12,7 @@ public enum ErrorCode {
     HANDLE_ACCESS_DENIED(FORBIDDEN, "Common-003", "Access is denied"),
     ENTITY_NOT_FOUND(BAD_REQUEST, "Common-004", "Entity not found"),
     ILLEGAL_STATE(BAD_REQUEST, "Common-005", "Illegal state"),
+    ILLEGAL_ARGUMENT(BAD_REQUEST, "Common-006", "Illegal argument"),
 
     TRIP_NOT_FOUND(BAD_REQUEST, "Trip-001", "트립 엔티티를 찾을 수 없습니다."),
     PERIOD_UPDATE_FAIL(INTERNAL_SERVER_ERROR, "Trip-002", "여행 일정을 변경할 수 없습니다."),
@@ -37,8 +38,7 @@ public enum ErrorCode {
     NOT_TRIP_READY_STATUS(HttpStatus.BAD_REQUEST, "TRIP-022", "여행 준비 상태가 아닙니다."),
     TRIP_PASSWORD_INVALID(BAD_REQUEST, "Trip-023", "비공개 여행 비밀번호의 길이가 적절하지 않습니다."),
     TRIP_DEMAND_NOT_ALLOWED(BAD_REQUEST, "Trip-024", "이미 참여를 요청했거나 참여 중인 여행이므로 참여 요청을 다시 할 수 없습니다."),
-    TRIP_DEMAND_STATUS_NOT_PENDING(BAD_REQUEST, "Trip-025", "현재 참여 요청 상태가 ‘대기’가 아니므로 해당 요청을 수행할 수 없습니다.")
-    ;
+    TRIP_DEMAND_STATUS_NOT_PENDING(BAD_REQUEST, "Trip-025", "현재 참여 요청 상태가 ‘대기’가 아니므로 해당 요청을 수행할 수 없습니다.");
 
 
     private final HttpStatus status;
