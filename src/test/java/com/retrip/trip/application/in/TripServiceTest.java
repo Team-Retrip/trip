@@ -81,7 +81,6 @@ class TripServiceTest extends BaseTripServiceTest {
 
     @Test
     void 여행_목록을_조회한다() {
-        // TripFixture 호출 시 status 파라미터 관련 문제 해결을 위해 createTestTrip 헬퍼 메서드 사용 (위에서 수정함)
         tripRepository.save(createTestTrip("속초 여행 맴버 구함", "속초 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
         tripRepository.save(createTestTrip("대구 여행 멤버 구함", "대구 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
         tripRepository.save(createTestTrip("부산 여행 멤버 구함", "부산 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));

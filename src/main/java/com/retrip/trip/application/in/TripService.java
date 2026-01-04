@@ -64,9 +64,11 @@ public class TripService
     @Transactional(readOnly = true)
     @Override
     public Page<TripResponse> getTrips(Pageable page) {
-        List<Trip> trips = tripQueryRepository.findTrips(page);
+        Page<Trip> tripsPage = tripQueryRepository.findTrips(page);
+        List<Trip> trips = tripsPage.getContent();
         List<TripHashTag> hashTags = tripQueryRepository.findHashTags(trips);
-        return new PageImpl<>(TripResponse.of(trips, hashTags), page, trips.size());
+        
+        return new PageImpl<>(TripResponse.of(trips, hashTags), page, tripsPage.getTotalElements());
     }
 
     @Override
