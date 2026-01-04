@@ -3,10 +3,10 @@ package com.retrip.trip.infra.adapter.out.persistence.mysql.query;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.response.MyTripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
-import com.retrip.trip.domain.entity.QTrip;
 import com.retrip.trip.domain.entity.QTripParticipant;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripHashTag;
@@ -14,6 +14,7 @@ import com.retrip.trip.domain.vo.TripStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,13 +34,19 @@ public class TripQuerydslRepository implements TripQueryRepository {
     private final JPAQueryFactory query;
 
     @Override
-    public List<Trip> findTrips(Pageable page) {
-        return query
+    public Page<Trip> findTrips(Pageable page) {
+        List<Trip> content = query
                 .selectFrom(trip)
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .orderBy(trip.createdAt.desc())
                 .fetch();
+
+        JPAQuery<Long> countQuery = query
+                .select(trip.count())
+                .from(trip);
+
+        return PageableExecutionUtils.getPage(content, page, countQuery::fetchOne);
     }
 
     @Override
