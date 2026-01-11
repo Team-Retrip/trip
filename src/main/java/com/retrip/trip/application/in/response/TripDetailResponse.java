@@ -98,8 +98,8 @@ public record TripDetailResponse(
     public static TripDetailResponse of(UUID memberId, Trip trip) {
         return TripDetailResponse.builder()
                 .id(trip.getId())
-                .isLeader(trip.getTripParticipants().isLeader(memberId))
-                .isParticipant(trip.getTripParticipants().isParticipant(memberId))
+                .isLeader(memberId != null && trip.getTripParticipants().isLeader(memberId))
+                .isParticipant(memberId != null && trip.getTripParticipants().isParticipant(memberId))
                 .title(trip.getTitle().getValue())
                 .createdAt(trip.getCreatedAt())
                 .participantCount(trip.getTripParticipants().getCurrentCount())
@@ -158,14 +158,13 @@ public record TripDetailResponse(
                     .toList();
         }
 
-        //TODO: 해당 참가자 정보 auth API 에서 따로 가져오도록 수정해야함
         private static TripParticipantResponse of(TripParticipant participant) {
             return TripParticipantResponse.builder()
                     .participantId(participant.getId())
                     .memberId(participant.getMemberId())
-                    .introduction("안녕하세여")
-                    .nickName("박정수")
-                    .imageUrl("http://~~~")
+                    .introduction(null)
+                    .nickName("여행자-" + participant.getMemberId().toString().substring(0, 8))
+                    .imageUrl(null)
                     .role(participant.getRole())
                     .build();
         }

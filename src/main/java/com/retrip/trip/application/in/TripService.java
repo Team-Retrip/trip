@@ -40,7 +40,6 @@ public class TripService
     @Override
     public TripCreateResponse createTrip(UUID memberId, TripCreateRequest request) {
         Trip trip = request.to(memberId);
-        assignPasswordIfNotOpen(trip, request.password());
         Trip savedTrip = tripRepository.save(trip);
         return TripCreateResponse.of(savedTrip);
     }
@@ -48,7 +47,6 @@ public class TripService
     @Override
     public TripCreateResponse createTripWithItineraries(UUID memberId, TripCreateRequest request) {
         Trip trip = request.toWithItineraries(memberId);
-        assignPasswordIfNotOpen(trip, request.password());
         Trip savedTrip = tripRepository.save(trip);
         return TripCreateResponse.of(savedTrip);
     }
@@ -161,7 +159,7 @@ public class TripService
         if (trip.isOpen()) {
             return;
         }
-        String trimPassword = password.trim();
+        String trimPassword = (password != null) ? password.trim() : "";
         if (!StringUtils.hasText(trimPassword)) {
             throw new InvalidValueException("비공개 여행은 비밀번호를 반드시 입력해야 합니다.");
         }
