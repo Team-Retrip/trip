@@ -1,6 +1,7 @@
 package com.retrip.trip.domain.vo.vote;
 
 import com.retrip.trip.domain.exception.common.InvalidValueException;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,6 +17,7 @@ import static lombok.AccessLevel.PROTECTED;
 public class VoteOptionContent {
     private static final int MIN_LENGTH = 1;
     private static final int MAX_LENGTH = 30;
+    @Column(name = "content", nullable = false, length = MAX_LENGTH)
     private final String value;
 
     public VoteOptionContent(String value) {
