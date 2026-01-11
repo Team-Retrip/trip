@@ -15,20 +15,26 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(WithUserContext.class);
+        return parameter.hasParameterAnnotation(WithUserContext.class)
+                && parameter.getParameterType().equals(UserContext.class);
     }
 
     @Override
-    public UserContext resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                       NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+
         UserContext userContext = (UserContext) webRequest.getAttribute(
                 "userContext",
                 RequestAttributes.SCOPE_REQUEST
         );
 
-        if (userContext == null) {
-            throw new IllegalStateException("UserContext not found in request");
+        WithUserContext annotation = parameter.getParameterAnnotation(WithUserContext.class);
+        boolean required = (annotation != null) && annotation.required();
+
+        if (required && userContext == null) {
+            throw new IllegalStateException("Login required");
         }
+
         return userContext;
     }
 }

@@ -77,15 +77,20 @@ public class TripController {
         return ApiResponse.ok(trips);
     }
 
+
     @Operation(
             summary = "여행 상세 조회",
-            description = "tripId를 이용하여 여행 상세 정보를 조회합니다."
+            description = "tripId를 이용하여 여행 상세 정보를 조회합니다. (비로그인 가능)"
     )
     @GetMapping("/{tripId}")
     @Schema(description = "여행 상세 조회")
-    public ApiResponse<TripDetailResponse> getTripDetail(@WithUserContext UserContext userContext,
-                                                         @PathVariable UUID tripId) {
-        TripDetailResponse tripDetail = getTripUseCase.getTripDetail(userContext.memberId(), tripId);
+    public ApiResponse<TripDetailResponse> getTripDetail(
+            @WithUserContext(required = false) UserContext userContext,
+            @PathVariable UUID tripId) {
+
+        UUID memberId = (userContext != null) ? userContext.memberId() : null;
+
+        TripDetailResponse tripDetail = getTripUseCase.getTripDetail(memberId, tripId);
         return ApiResponse.ok(tripDetail);
     }
 
