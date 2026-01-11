@@ -1,7 +1,9 @@
 spring:
   application:
     name: trip
-
+  h2:
+    console:
+      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
@@ -18,6 +20,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
+    defer-datasource-initialization: true
 
 logging:
   level:
