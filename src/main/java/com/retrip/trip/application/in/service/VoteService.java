@@ -11,6 +11,7 @@ import com.retrip.trip.application.out.repository.VoteRepository;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.vote.Vote;
 import com.retrip.trip.domain.entity.vote.VoteOptions;
+import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.VotePolicy;
 import com.retrip.trip.domain.vo.vote.VotePeriod;
@@ -72,6 +73,6 @@ public class VoteService implements VoteManageUseCase {
 
     private Trip findTrip(UUID tripId) {
         return tripRepository.findById(tripId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(TripNotFoundException::new);
     }
 }

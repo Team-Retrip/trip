@@ -165,7 +165,7 @@ public class Trip extends BaseEntity {
         }
 
         TripParticipant participant = tripParticipants.findParticipantById(memberId)
-                .orElseThrow(() -> new NotParticipantException("현재 여행에 참여하고 있지 않습니다."));
+                .orElseThrow(NotParticipantException::new);
 
         if (participant.isLeader()) {
             throw new LeaderCannotLeaveException();

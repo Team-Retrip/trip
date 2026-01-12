@@ -1,9 +1,10 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.common.EntityNotFoundException;
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.ItineraryDetailTime;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OneToMany;
 
 import lombok.Getter;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.ITINERARY_DATE_MISMATCH;
+import static com.retrip.trip.domain.exception.common.ErrorCode.ITINERARY_TIME_DUPLICATED;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -51,10 +54,10 @@ public class ItineraryDetails {
 
     private void validate(ItineraryDetailTime time, LocalDate baseDay) {
         if (!baseDay.equals(time.getValue().toLocalDate())) {
-            throw new IllegalArgumentException("일정과 상세 일정 일자가 다릅니다.");
+            throw new InvalidValueException(ITINERARY_DATE_MISMATCH);
         }
         if (this.values.stream().anyMatch(id -> id.getTime().equals(time))) {
-            throw new IllegalArgumentException("해당 시간에는 이미 상세 일정이 있습니다.");
+            throw new InvalidValueException(ITINERARY_TIME_DUPLICATED);
         }
     }
 

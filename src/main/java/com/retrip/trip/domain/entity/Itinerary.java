@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_DAY_MUST_BE_POSITIVE;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -46,7 +48,7 @@ public class Itinerary extends BaseEntity {
 
     private static void validate(int day) {
         if (day < 1) {
-            throw new IllegalArgumentException("여행 일차는 1보다 작을 수 없습니다.");
+            throw new InvalidValueException(TRIP_DAY_MUST_BE_POSITIVE);
         }
     }
 

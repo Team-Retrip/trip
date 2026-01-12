@@ -1,7 +1,9 @@
 package com.retrip.trip.domain.entity;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.*;
 import static lombok.AccessLevel.PROTECTED;
 
+import com.retrip.trip.domain.exception.common.BusinessException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
@@ -9,8 +11,6 @@ import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import java.util.Set;
 
 import java.util.stream.Collectors;
 
@@ -33,7 +33,7 @@ public class TripHashTags {
         if (hashTags != null && !hashTags.isEmpty()) {
             new HashSet<>(hashTags).forEach(hashTag -> {
                 if (hashTag.length() > 10 || hashTag.isEmpty()) {
-                    throw new IllegalArgumentException("HashTag는 1~10자 사이여야 합니다.");
+                    throw new BusinessException(INVALID_HASHTAG_LENGTH);
                 }
             });
         }
