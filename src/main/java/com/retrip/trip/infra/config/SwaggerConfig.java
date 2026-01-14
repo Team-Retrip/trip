@@ -20,6 +20,8 @@ import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse.*;
+
 @Configuration
 public class SwaggerConfig {
     private final String jwtSchemeName = "jwtAuth";
@@ -89,10 +91,11 @@ public class SwaggerConfig {
         MediaType mediaType = apiResponse.getContent()
                 .computeIfAbsent("application/json", k -> new MediaType());
 
-        ErrorResponse exampleBody = ErrorResponse.of(
-                errorCode,
-                "Current API URL",
-                "Current API Method"
+        var exampleBody = of(ErrorResponse.of(
+                                errorCode,
+                                "Current API URL",
+                                "Current API Method"
+                )
         );
 
         Example example = new Example();

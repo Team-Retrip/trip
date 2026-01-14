@@ -39,6 +39,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 pathLowercase.contains("actuator") ||
                 pathLowercase.contains("robots.txt") ||
                 pathLowercase.contains("status-check") ||
+                pathLowercase.contains("trips") ||
+                pathLowercase.contains("images") ||
                 pathLowercase.contains("/h2-console")) {
             filterChain.doFilter(request, response);
             return;
