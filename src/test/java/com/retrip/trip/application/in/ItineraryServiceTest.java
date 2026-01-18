@@ -9,6 +9,7 @@ import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -82,7 +83,7 @@ public class ItineraryServiceTest extends BaseItineraryServiceTest {
         ItineraryDetailsCreateResponse createResponse = itineraryService.createItineraryDetails(saveTrip.getId(), itinerary.getId(), createRequest2);
 
         assertThatThrownBy(() -> itineraryService.updateItineraryDetails(saveTrip.getId(), itinerary.getId(), createResponse.id(), updateRequest))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 
 

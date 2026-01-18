@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,6 @@ class ItineraryTest {
     @ValueSource(ints = {0, -1})
     void create_less_than_1(int day) {
         assertThatThrownBy(() -> Itinerary.create(new Trip(), day, LocalDate.now()))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 }
