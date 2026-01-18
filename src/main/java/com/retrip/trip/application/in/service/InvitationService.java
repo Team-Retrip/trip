@@ -10,6 +10,7 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.entity.invitation.Invitations;
+import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.InvitationPolicy;
 import com.retrip.trip.domain.vo.InvitationStatus;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.retrip.trip.domain.exception.common.ErrorCode.INVITATION_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Transactional
@@ -81,11 +84,11 @@ public class InvitationService implements InvitationManageUseCase {
 
     private Trip findTrip(UUID tripId) {
         return tripRepository.findById(tripId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(TripNotFoundException::new);
     }
 
     private Invitation findInvitation(UUID invitationId) {
         return invitationRepository.findById(invitationId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException(INVITATION_NOT_FOUND));
     }
 }

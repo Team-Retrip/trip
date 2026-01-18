@@ -11,13 +11,16 @@ import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.entity.demand.Demand;
-import com.retrip.trip.domain.exception.common.EntityNotFoundException;
+import com.retrip.trip.domain.exception.TripNotFoundException;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.service.DemandPolicy;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.retrip.trip.domain.exception.common.ErrorCode.DEMAND_NOT_FOUND;
 
 @Service
 @Transactional
@@ -74,11 +77,11 @@ public class DemandService implements DemandManageUseCase {
 
     private Trip findTrip(UUID tripId) {
         return tripRepository.findById(tripId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(TripNotFoundException::new);
     }
 
     private Demand findDemand(UUID demandId) {
         return demandRepository.findById(demandId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new BusinessException(DEMAND_NOT_FOUND));
     }
 }

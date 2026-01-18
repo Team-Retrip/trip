@@ -10,11 +10,11 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripConfirmationDemand;
 import com.retrip.trip.domain.entity.*;
 import com.retrip.trip.domain.exception.TripNotFoundException;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.TripPassword;
 import com.retrip.trip.domain.vo.TripPeriod;
 import com.retrip.trip.domain.vo.TripStatus;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,6 +25,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.retrip.trip.domain.exception.common.ErrorCode.PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND;
+import static com.retrip.trip.domain.exception.common.ErrorCode.PRIVATE_TRIP_PASSWORD_REQUIRED;
 
 @RequiredArgsConstructor
 @Transactional
@@ -152,7 +155,7 @@ public class TripService
 
     private TripConfirmationDemand findTripConfirmationDemandById(UUID confirmationDemandId) {
         return tripConfirmationDemandRepository.findById(confirmationDemandId)
-                .orElseThrow(() -> new EntityNotFoundException("참여 확정 요청을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND));
     }
 
     private void assignPasswordIfNotOpen(Trip trip, String password) {
@@ -161,7 +164,7 @@ public class TripService
         }
         String trimPassword = (password != null) ? password.trim() : "";
         if (!StringUtils.hasText(trimPassword)) {
-            throw new InvalidValueException("비공개 여행은 비밀번호를 반드시 입력해야 합니다.");
+            throw new InvalidValueException(PRIVATE_TRIP_PASSWORD_REQUIRED);
         }
         String passwordHash = tripPasswordEncoder.encode(trimPassword);
         TripPassword tripPassword = new TripPassword(trimPassword, passwordHash);

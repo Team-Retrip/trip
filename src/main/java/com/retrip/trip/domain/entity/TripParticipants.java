@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_LEADER;
-import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_NOT_IN_TRIP;
+import static com.retrip.trip.domain.exception.common.ErrorCode.*;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -72,13 +71,13 @@ public class TripParticipants {
 
     private void validateMaxParticipants(int maxParticipants) {
         if (maxParticipants < 1) {
-            throw new InvalidValueException(ErrorCode.INVALID_MAX_PARTICIPANTS, "최대 참여 인원은 1명 이상이어야 합니다.");
+            throw new InvalidValueException(INVALID_MAX_PARTICIPANTS_VALUE);
         }
     }
 
     private void validateNewMaxParticipants(int newMaxParticipants) {
         if (getCurrentCount() > newMaxParticipants) {
-            throw new InvalidValueException(ErrorCode.INVALID_MAX_PARTICIPANTS, "현재 참여 인원보다 적은 수로 변경할 수 없습니다.");
+            throw new InvalidValueException(MAX_PARTICIPANTS_LESS_THAN_CURRENT);
         }
     }
 
@@ -129,7 +128,7 @@ public class TripParticipants {
 
     public void validateTripRecruitingStatus(TripStatus status) {
         if (!TripStatus.RECRUITING.equals(status)) {
-            throw new IllegalStateException("해당 여행은 모집 중이 아닙니다.");
+            throw new BusinessException(TRIP_NOT_RECRUITING);
         }
     }
 
@@ -167,7 +166,7 @@ public class TripParticipants {
 
     private void validateLeaderDelegation(UUID currentLeaderId, UUID newLeaderId) {
         if (currentLeaderId.equals(newLeaderId)) {
-            throw new InvalidValueException("자기 자신에게 리더를 위임할 수 없습니다.");
+            throw new BusinessException(CANNOT_DELEGATE_LEADER_TO_SELF);
         }
         if (!requireLeader(currentLeaderId)) {
             throw new MemberIsNotLeaderException();

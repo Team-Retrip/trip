@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.vo;
 
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,7 @@ class TripPeriodTest {
         assertThatThrownBy(() -> new TripPeriod(
                 yesterday,
                 LocalDate.now().plusDays(1)))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 
     @DisplayName("여행 종료 일자가 시작 일자 보다 작을 수 없다.")
@@ -33,7 +34,7 @@ class TripPeriodTest {
         assertThatThrownBy(() -> new TripPeriod(
                 LocalDate.now().plusDays(1),
                 LocalDate.now().minusDays(1)))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 
     @DisplayName("여행 기간은 30일을 초과할 수 없다.")
@@ -42,7 +43,7 @@ class TripPeriodTest {
         assertThatThrownBy(() -> new TripPeriod(
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusMonths(2)))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 
     @DisplayName("여행 기간으로 총 여행일을 가져온다.")

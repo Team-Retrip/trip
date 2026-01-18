@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_PASSWORD_MISMATCH;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -39,7 +41,7 @@ public class ParticipantService implements ParticipantManageUseCase {
     private void verifyPassword(String password, TripPassword tripPassword) {
         String passwordHash = tripPassword.getPasswordHash();
         if (!tripPasswordEncoder.matches(password, passwordHash)) {
-            throw new InvalidValueException("여행 비밀번호가 일치하지 않습니다.");
+            throw new InvalidValueException(TRIP_PASSWORD_MISMATCH);
         }
     }
 

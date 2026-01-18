@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
@@ -35,7 +36,7 @@ class ItineraryDetailsTest {
                 = ItineraryDetail.create(2000L, "속초 여행", LocalDateTime.now(), itinerary, locationId);
 
         assertThatThrownBy(() -> itinerary.addItineraryDetail(itineraryDetail))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 
     @DisplayName("같은 시간에 상세 일정이 있으면 안된다.")
@@ -56,6 +57,6 @@ class ItineraryDetailsTest {
                 = ItineraryDetail.create(2000L, "속초 여행", LocalDateTime.now().plusDays(1), itinerary, locationId);
 
         assertThatThrownBy(() -> itinerary.addItineraryDetail(itineraryDetail2))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+                .isExactlyInstanceOf(InvalidValueException.class);
     }
 }
