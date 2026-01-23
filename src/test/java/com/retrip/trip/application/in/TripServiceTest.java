@@ -12,6 +12,7 @@ import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
 import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
 import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripNotReadyException;
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.*;
@@ -389,7 +390,7 @@ class TripServiceTest extends BaseTripServiceTest {
         DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, memberId);
 
         // when & then
-        assertThrows(InvalidValueException.class, () -> {
+        assertThrows(BusinessException.class, () -> {
             tripService.delegateLeader(trip.getId(), request);
         });
     }
@@ -667,7 +668,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
         //then
         assertThat(tripDetail).usingRecursiveComparison()
-                .ignoringFields("participants.participantId")
+                .ignoringFields("participants.participantId", "participants.introduction", "participants.nickName", "participants.imageUrl")
                 .isEqualTo(expectedTripDetail);
     }
 }

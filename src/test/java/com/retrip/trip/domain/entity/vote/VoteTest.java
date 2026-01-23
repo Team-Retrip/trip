@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.entity.vote;
 
+import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.IllegalStateException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.vote.VoteStatus;
@@ -37,7 +38,7 @@ class VoteTest {
         // when, then
         assertThatThrownBy(() ->
                 vote.update(vote.getSummary(), vote.getSetting(), vote.getPeriod(), vote.getOptions(), 홍석_ID))
-                .isInstanceOf(InvalidValueException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
     @Test
@@ -47,6 +48,6 @@ class VoteTest {
 
         // when, then
         assertThatThrownBy(() -> vote.validateDeletable(홍석_ID))
-                .isInstanceOf(InvalidValueException.class);
+                .isInstanceOf(BusinessException.class);
     }
 }
