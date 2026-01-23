@@ -56,7 +56,8 @@ public enum ErrorCode {
     ITINERARY_DATE_MISMATCH(BAD_REQUEST, "Trip-040", "일정과 상세 일정 일자가 다릅니다."),
     ITINERARY_TIME_DUPLICATED(BAD_REQUEST, "Trip-041", "해당 시간에는 이미 상세 일정이 있습니다."),
     TRIP_PASSWORD_MISMATCH(BAD_REQUEST, "Trip-042", "여행 비밀번호가 일치하지 않습니다."),
-    VOTE_MODIFY_FORBIDDEN(FORBIDDEN, "Trip-043", "투표를 만든 사람이 아니면 수정, 종료, 삭제 할 수 없습니다.")
+    VOTE_MODIFY_FORBIDDEN(BAD_REQUEST, "Trip-043", "투표를 만든 사람이 아니면 수정, 종료, 삭제 할 수 없습니다."),
+    EXTENSION_NOT_FOUND(BAD_REQUEST, "Trip-044", "지원하지 않는 이미지 확장자입니다."),
     ;
 
     private final HttpStatus status;
