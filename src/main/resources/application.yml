@@ -6,7 +6,8 @@ spring:
       enabled: true
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:tcp://localhost/~/trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
+    url: jdbc:h2:mem:trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
+#    url: jdbc:h2:tcp://localhost/~/trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
     username: sa
     password:
 
@@ -45,4 +46,12 @@ jwt:
     KucWwwIDAQAB
     -----END PUBLIC KEY-----
 
+cloud:
+  aws:
+    region: ap-northeast-2
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+  s3:
+    bucket: retrip-media
 

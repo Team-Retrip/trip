@@ -41,6 +41,9 @@ public record TripCreateResponse(
         @Schema(description = "여행 카테고리")
         String category,
 
+        @Schema(description = "여행 대표 이미지 url")
+        String imageUrl,
+
         @Schema(description = "여행 일정 리스트")
         List<ItineraryCreateResponse> itineraries
 ) {
@@ -56,6 +59,7 @@ public record TripCreateResponse(
                 trip.getTripParticipants().getMaxParticipants(),
                 trip.getHashTags().getValues().stream().map(TripHashTag::getName).toList(),
                 trip.getCategory().getViewName(),
+                trip.getImageUrl(),
                 trip.getItineraries() == null ? new ArrayList<>() :
                         trip.getItineraries().getValues().stream()
                                 .map(i -> new ItineraryCreateResponse(i.getId(), i.getName(), i.getDate()))

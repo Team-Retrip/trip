@@ -32,6 +32,21 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+        String pathLowercase = path.toLowerCase();
+
+        if (path.equals("/") ||
+                pathLowercase.contains("swagger") ||
+                pathLowercase.contains("api-docs") ||
+                pathLowercase.contains("actuator") ||
+                pathLowercase.contains("robots.txt") ||
+                pathLowercase.contains("status-check") ||
+                pathLowercase.contains("images") ||
+                pathLowercase.contains("/h2-console")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = resolveToken(request);
 
         if (StringUtils.hasText(token)) {
