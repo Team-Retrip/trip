@@ -35,7 +35,6 @@ public class ImageController {
 
     private final ImageManageUseCase imageManageUseCase;
 
-    @ApiErrorCodeExamples({TRIP_DAY_MUST_BE_POSITIVE, INVALID_MAX_PARTICIPANTS_VALUE, INVALID_HASHTAG_LENGTH, PRIVATE_TRIP_PASSWORD_REQUIRED, TRIP_PASSWORD_INVALID})
     @PostMapping("/presigned-url")
     public ApiResponse<PresignedUrlCreateResponse> createImagePresignedUrl(
             @WithUserContext UserContext userContext,

@@ -45,7 +45,9 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'software.amazon.awssdk:s3:2.17.41' // Amazon S3 SDK
+//    implementation 'software.amazon.awssdk:sqs:2.16.0'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
 }
