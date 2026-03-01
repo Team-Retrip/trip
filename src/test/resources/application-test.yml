@@ -1,27 +1,21 @@
 spring:
   application:
     name: trip
-  h2:
-    console:
-      enabled: true
   datasource:
     driver-class-name: org.h2.Driver
-#    url: jdbc:h2:mem:trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
     url: jdbc:h2:tcp://localhost/~/trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
+#    url: jdbc:h2:mem:trip;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;MODE=MySQL
     username: sa
     password:
-
   jpa:
+    hibernate:
+      ddl-auto: create-drop
     properties:
       hibernate:
         show_sql: true
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
-        default_batch_fetch_size: 100
-    hibernate:
-      ddl-auto: create-drop
     open-in-view: false
-    defer-datasource-initialization: true
 
 logging:
   level:
@@ -45,13 +39,3 @@ jwt:
     u59J3+ToLRrIqIszRZqmasrWTL2/ihPO76PSTIMAsJMScjAwjUXA47YOOy6Vkzy8r3bPTYHp5C1N
     KucWwwIDAQAB
     -----END PUBLIC KEY-----
-
-cloud:
-  aws:
-    region: ap-northeast-2
-    credentials:
-      access-key: ${AWS_ACCESS_KEY_ID}
-      secret-key: ${AWS_SECRET_ACCESS_KEY}
-  s3:
-    bucket: retrip-media
-

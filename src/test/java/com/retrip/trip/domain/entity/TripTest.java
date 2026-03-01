@@ -1,6 +1,7 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
+import com.retrip.trip.domain.vo.HashTagInfo;
 import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
@@ -25,12 +26,16 @@ class TripTest {
     UUID memberId = UUID.fromString("c076d246-7e6d-4191-bf5c-310aebf4c003");
     UUID destinationId = UUID.fromString("13c8ab91-76bc-4f70-93e9-89f1a65dc64a");
 
+    List<UUID> destinationIds = List.of(destinationId);
+    List<HashTagInfo> hashTags = List.of(new HashTagInfo("속초 여행", 1));
+    List<HashTagInfo> testHashTags = List.of(new HashTagInfo("Test Tag", 1));
+
     @DisplayName("제목, 설명, 여행지, 기간, 공개 여부, 참가인원수,카테고리, 해시태그를 입력해 여행을 생성할 수 있다.")
     @Test
     void create() {
         assertThatCode(() -> Trip.create(
                 memberId,
-                destinationId,
+                destinationIds,
                 new TripTitle("속초 여행 멤버 구함"),
                 "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
@@ -39,7 +44,7 @@ class TripTest {
                         LocalDate.now().plusDays(5)),
                 true,
                 4,
-                List.of("속초 여행"),
+                hashTags,
                 TripCategory.DOMESTIC,
                 TripStatus.RECRUITING)).doesNotThrowAnyException();
     }
@@ -49,7 +54,7 @@ class TripTest {
     void createWithItinerary() {
         assertThatCode(() -> Trip.createWithItineraries(
                 memberId,
-                destinationId,
+                destinationIds,
                 new TripTitle("속초 여행 멤버 구함"),
                 "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
@@ -58,7 +63,7 @@ class TripTest {
                         LocalDate.now().plusDays(5)),
                 true,
                 4,
-                List.of("속초 여행"),
+                hashTags,
                 TripCategory.DOMESTIC,
                 TripStatus.RECRUITING
         )).doesNotThrowAnyException();
@@ -69,7 +74,7 @@ class TripTest {
         // given
         Trip trip = Trip.create(
                 memberId,
-                destinationId,
+                destinationIds,
                 new TripTitle("속초 여행 멤버 구함"),
                 "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
@@ -78,7 +83,7 @@ class TripTest {
                         LocalDate.now().plusDays(5)),
                 true,
                 4,
-                List.of("속초 여행"),
+                hashTags,
                 TripCategory.DOMESTIC,
                 TripStatus.RECRUITING);
 
@@ -98,14 +103,14 @@ class TripTest {
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(6));
         Trip trip = Trip.create(
                 memberId,
-                UUID.randomUUID(),
+                destinationIds,
                 new TripTitle("속초 여행 멤버 구함"),
                 "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
                 4,
-                List.of("Test Tag"),
+                testHashTags,
                 TripCategory.DOMESTIC,
                 TripStatus.RECRUITING);
         //when
@@ -125,14 +130,14 @@ class TripTest {
         TripPeriod period = new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(6));
         Trip trip = Trip.create(
                 UUID.randomUUID(),
-                UUID.randomUUID(),
+                destinationIds,
                 new TripTitle("속초 여행 멤버 구함"),
                 "https://image.url",
                 new TripDescription("속초 여행은 이렇게이렇게 갈겁니다~"),
                 period,
                 true,
                 4,
-                List.of("Test Tag"),
+                testHashTags,
                 TripCategory.DOMESTIC,
                 TripStatus.RECRUITING);
         trip.addParticipant(TripParticipant.createTripParticipant(memberId, trip));
