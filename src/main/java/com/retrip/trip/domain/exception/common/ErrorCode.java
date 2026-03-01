@@ -15,7 +15,7 @@ public enum ErrorCode {
     ILLEGAL_ARGUMENT(BAD_REQUEST, "Common-006", "Illegal argument"),
 
     TRIP_NOT_FOUND(BAD_REQUEST, "Trip-001", "트립 엔티티를 찾을 수 없습니다."),
-    PERIOD_UPDATE_FAIL(INTERNAL_SERVER_ERROR, "Trip-002", "여행 일정을 변경할 수 없습니다."),
+    PERIOD_UPDATE_FAIL(BAD_REQUEST, "Trip-002", "여행 일정을 변경할 수 없습니다."),
     NOT_TRIP_LEADER(BAD_REQUEST, "Trip-003", "여행 리더가 아니면 접근할 수 없습니다."),
     TRIP_INVITATION_DUPLICATE(BAD_REQUEST, "Trip-004", "사용자를 여행에 중복 초대할 수 없습니다."),
     MEMBER_IS_NOT_LEADER(BAD_REQUEST, "Trip-005", "여행 리더가 아니면 접근할 수 없습니다."),
@@ -39,8 +39,8 @@ public enum ErrorCode {
     TRIP_PASSWORD_INVALID(BAD_REQUEST, "Trip-023", "비공개 여행 비밀번호의 길이가 적절하지 않습니다."),
     TRIP_DEMAND_NOT_ALLOWED(BAD_REQUEST, "Trip-024", "이미 참여를 요청했거나 참여 중인 여행이므로 참여 요청을 다시 할 수 없습니다."),
     TRIP_DEMAND_STATUS_NOT_PENDING(BAD_REQUEST, "Trip-025", "현재 참여 요청 상태가 ‘대기’가 아니므로 해당 요청을 수행할 수 없습니다."),
-    INVALID_MAX_PARTICIPANTS_VALUE(BAD_REQUEST,"Trip-026","최대 참여 인원은 1명 이상이어야 합니다."),
-    MAX_PARTICIPANTS_LESS_THAN_CURRENT(BAD_REQUEST,"Trip-027","현재 참여 인원보다 적은 수로 변경할 수 없습니다."),
+    INVALID_MAX_PARTICIPANTS_VALUE(BAD_REQUEST, "Trip-026", "최대 참여 인원은 1명 이상이어야 합니다."),
+    MAX_PARTICIPANTS_LESS_THAN_CURRENT(BAD_REQUEST, "Trip-027", "현재 참여 인원보다 적은 수로 변경할 수 없습니다."),
     INVALID_HASHTAG_LENGTH(BAD_REQUEST, "Trip-028", "HashTag는 1~10자 사이여야 합니다."),
     PRIVATE_TRIP_PASSWORD_REQUIRED(BAD_REQUEST, "Trip-029", "비공개 여행은 비밀번호를 반드시 입력해야 합니다."),
     TRIP_DAY_MUST_BE_POSITIVE(BAD_REQUEST, "Trip-030", "여행 일차는 1보다 작을 수 없습니다."),
@@ -58,6 +58,7 @@ public enum ErrorCode {
     TRIP_PASSWORD_MISMATCH(BAD_REQUEST, "Trip-042", "여행 비밀번호가 일치하지 않습니다."),
     VOTE_MODIFY_FORBIDDEN(BAD_REQUEST, "Trip-043", "투표를 만든 사람이 아니면 수정, 종료, 삭제 할 수 없습니다."),
     EXTENSION_NOT_FOUND(BAD_REQUEST, "Trip-044", "지원하지 않는 이미지 확장자입니다."),
+    TRIP_UPDATE_FAIL(BAD_REQUEST, "Trip-045", "여행을 수정할 수 없습니다."),
     ;
 
     private final HttpStatus status;

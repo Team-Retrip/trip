@@ -1,9 +1,6 @@
 package com.retrip.trip.domain.entity;
 
-import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
-import com.retrip.trip.domain.exception.NotParticipantException;
-import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
-import com.retrip.trip.domain.exception.TripNotReadyException;
+import com.retrip.trip.domain.exception.*;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
@@ -204,5 +201,47 @@ public class Trip extends BaseEntity {
 
     public boolean isNotTripRecruitingStatus() {
         return !TripStatus.RECRUITING.equals(status);
+    }
+
+
+    public void update(
+            UUID memberId,
+            UUID destinationId,
+            TripTitle tripTitle,
+            TripDescription tripDescription,
+            TripHashTags tripHashTags,
+            Integer maxParticipants,
+            String imageUrl,
+            TripCategory category
+    ) {
+        if (!tripParticipants.updatableByLeader(memberId)) {
+            throw new TripUpdateFailedException();
+        }
+
+        if (destinationId != null) {
+            this.destinationId = destinationId;
+        }
+
+        if (tripTitle != null) {
+            this.title = tripTitle;
+        }
+        if (tripDescription != null) {
+            this.description = tripDescription;
+        }
+
+        if (tripHashTags != null) {
+            this.hashTags.getValues().clear();
+            this.hashTags.getValues().addAll(tripHashTags.getValues());
+        }
+
+        if (maxParticipants != null) {
+            this.tripParticipants.updateMaxParticipants(maxParticipants, memberId);
+        }
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+        if (category != null) {
+            this.category = category;
+        }
     }
 }
