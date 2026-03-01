@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 public class TripDescription {
-    private static final int LENGTH_LIMIT = 1000;
+    private static final int LENGTH_LIMIT = 70;
 
     @Column(name = "description", nullable = false, length = LENGTH_LIMIT)
     private final String value;

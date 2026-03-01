@@ -6,6 +6,7 @@ import com.retrip.trip.domain.vo.TripStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,8 +20,8 @@ public record TripResponse(
         @Schema(description = "여행 제목")
         String title,
 
-        @Schema(description = "목적지 ID")
-        UUID destinationId,
+        @Schema(description = "목적지 ID 목록")
+        List<UUID> destinationIds,
 
         @Schema(description = "목적지 명 (예: 파리, 제주)")
         String destinationName, // TODO: 추후 QueryDSL Join으로 데이터 채우기 구현 필요
@@ -47,20 +48,27 @@ public record TripResponse(
         boolean open,
 
         @Schema(description = "HashTag 목록")
-        List<String> hashTags
+        List<HashTagResponse> hashTags
 ) {
+
+    @Schema(description = "해시태그 응답")
+    public record HashTagResponse(
+            @Schema(description = "해시태그 값")
+            String tag,
+
+            @Schema(description = "정렬 순서")
+            int order
+    ) {}
+
     public static List<TripResponse> of(List<Trip> trips, List<TripHashTag> hashTags) {
-        Map<UUID, List<String>> tags = hashTags.stream()
-                .collect(Collectors.groupingBy(
-                        h -> h.getTrip().getId(),
-                        Collectors.mapping(TripHashTag::getName, Collectors.toList())
-                ));
+        Map<UUID, List<TripHashTag>> tagMap = hashTags.stream()
+                .collect(Collectors.groupingBy(h -> h.getTrip().getId()));
 
         return trips.stream()
                 .map(trip -> new TripResponse(
                         trip.getId(),
                         trip.getTitle().getValue(),
-                        trip.getDestinationId(),
+                        trip.getDestinations().getDestinationIds(),
                         "", // destinationName: 현재 Location 정보가 없으므로 빈 값 또는 추후 구현
                         trip.getImageUrl(),
                         trip.getStatus(),
@@ -69,7 +77,10 @@ public record TripResponse(
                         trip.getTripParticipants().getCurrentCount(),
                         trip.getTripParticipants().getMaxParticipants(),
                         trip.isOpen(),
-                        tags.getOrDefault(trip.getId(), List.of())
+                        tagMap.getOrDefault(trip.getId(), List.of()).stream()
+                                .sorted(Comparator.comparingInt(TripHashTag::getTagOrder))
+                                .map(h -> new HashTagResponse(h.getName(), h.getTagOrder()))
+                                .toList()
                 ))
                 .toList();
     }

@@ -31,7 +31,6 @@ public class Trip extends BaseEntity {
     @Id
     @Column(columnDefinition = "varbinary(16)")
     private UUID id;
-    private UUID destinationId;
 
     @Version
     private long version;
@@ -73,22 +72,24 @@ public class Trip extends BaseEntity {
     @Embedded
     private TripHashTags hashTags;
 
+    @Embedded
+    private TripDestinations destinations;
+
     public static Trip create(
             UUID memberId,
-            UUID destinationId,
+            List<UUID> destinationIds,
             TripTitle title,
             String imageUrl,
             TripDescription description,
             TripPeriod period,
             boolean open,
             int maxParticipants,
-            List<String> hashTags,
+            List<HashTagInfo> hashTags,
             TripCategory category,
             TripStatus status
     ) {
         Trip trip = Trip.builder()
                 .id(UUID.randomUUID())
-                .destinationId(destinationId)
                 .title(title)
                 .imageUrl(imageUrl)
                 .description(description)
@@ -97,6 +98,7 @@ public class Trip extends BaseEntity {
                 .category(category)
                 .status(status)
                 .build();
+        trip.destinations = new TripDestinations(trip, destinationIds);
         trip.tripParticipants = new TripParticipants(memberId, trip, maxParticipants);
         trip.hashTags = new TripHashTags(trip, hashTags);
         return trip;
@@ -104,20 +106,19 @@ public class Trip extends BaseEntity {
 
     public static Trip createWithItineraries(
             UUID leaderId,
-            UUID destinationId,
+            List<UUID> destinationIds,
             TripTitle title,
             String imageUrl,
             TripDescription description,
             TripPeriod period,
             boolean open,
             int maxParticipants,
-            List<String> hashTags,
+            List<HashTagInfo> hashTags,
             TripCategory category,
             TripStatus status
     ) {
         Trip trip = Trip.builder()
                 .id(UUID.randomUUID())
-                .destinationId(destinationId)
                 .title(title)
                 .imageUrl(imageUrl)
                 .description(description)
@@ -126,6 +127,7 @@ public class Trip extends BaseEntity {
                 .category(category)
                 .status(status)
                 .build();
+        trip.destinations = new TripDestinations(trip, destinationIds);
         trip.itineraries = new Itineraries(trip, period);
         trip.tripParticipants = new TripParticipants(leaderId, trip, maxParticipants);
         trip.hashTags = new TripHashTags(trip, hashTags);

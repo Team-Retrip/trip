@@ -14,8 +14,8 @@ public record TripCreateResponse(
         @Schema(description = "여행 ID", example = "550e8400-e29b-41d4-a716-446655440000")
         UUID id,
 
-        @Schema(description = "여행 목적지 ID", example = "550e8400-e29b-41d4-a716-446655440001")
-        UUID destinationId,
+        @Schema(description = "여행 목적지 ID 목록")
+        List<UUID> destinationIds,
 
         @Schema(description = "여행 제목", example = "파리 여행")
         String title,
@@ -35,8 +35,8 @@ public record TripCreateResponse(
         @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
 
-        @Schema(description = "여행 카테고리")
-        List<String> hashTags,
+        @Schema(description = "HashTag 목록")
+        List<HashTagResponse> hashTags,
 
         @Schema(description = "여행 카테고리")
         String category,
@@ -50,14 +50,16 @@ public record TripCreateResponse(
     public static TripCreateResponse of(Trip trip) {
         return new TripCreateResponse(
                 trip.getId(),
-                trip.getDestinationId(),
+                trip.getDestinations().getDestinationIds(),
                 trip.getTitle().getValue(),
                 trip.getDescription().getValue(),
                 trip.getPeriod().getStart(),
                 trip.getPeriod().getEnd(),
                 trip.isOpen(),
                 trip.getTripParticipants().getMaxParticipants(),
-                trip.getHashTags().getValues().stream().map(TripHashTag::getName).toList(),
+                trip.getHashTags().getValues().stream()
+                        .map(h -> new HashTagResponse(h.getName(), h.getTagOrder()))
+                        .toList(),
                 trip.getCategory().getViewName(),
                 trip.getImageUrl(),
                 trip.getItineraries() == null ? new ArrayList<>() :
@@ -66,6 +68,15 @@ public record TripCreateResponse(
                                 .toList()
         );
     }
+
+    @Schema(description = "해시태그 Response")
+    public record HashTagResponse(
+            @Schema(description = "해시태그")
+            String tag,
+
+            @Schema(description = "정렬 순서")
+            int order
+    ) {}
 
     @Schema(description = "여행 일정 Response")
     private record ItineraryCreateResponse(

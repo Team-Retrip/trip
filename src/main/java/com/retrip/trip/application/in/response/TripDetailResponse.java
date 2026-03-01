@@ -67,11 +67,11 @@ public record TripDetailResponse(
         )
         String tripStatusName,
 
-        @Schema(
-                description = "여행 목적지",
-                example = "부산 해운대"
-        )
-        String tripLocation,
+        @Schema(description = "여행 목적지 명 목록(아직 빈값 내려갈 예정)")
+        List<String> destinationNames,
+
+        @Schema(description = "여행 목적지 ID 목록")
+        List<UUID> destinationIds,
 
         @Schema(
                 description = "여행 대표 이미지 URL",
@@ -85,15 +85,20 @@ public record TripDetailResponse(
         )
         String description,
 
-        @Schema(
-                description = "여행 해시태그 목록",
-                example = "[\"힐링\", \"바다\", \"맛집투어\"]"
-        )
-        List<String> hashTags,
+        @Schema(description = "여행 해시태그 목록")
+        List<HashTagResponse> hashTags,
 
         @Schema(description = "여행 참가자 목록")
         List<TripParticipantResponse> participants
 ) {
+    @Schema(description = "해시태그 응답")
+    public record HashTagResponse(
+            @Schema(description = "해시태그 값", example = "맛집투어")
+            String tag,
+
+            @Schema(description = "정렬 순서", example = "1")
+            int order
+    ) {}
 
     public static TripDetailResponse of(UUID memberId, Trip trip) {
         return TripDetailResponse.builder()
@@ -106,10 +111,13 @@ public record TripDetailResponse(
                 .maxParticipantCount(trip.getTripParticipants().getMaxParticipants())
                 .tripStatus(trip.getStatus())
                 .tripStatusName(trip.getStatus().getViewName())
-                .tripLocation("") // TODO : Location 구현 시 채울 예정
+                .destinationNames(List.of()) // TODO : Location 구현 시 채울 예정
+                .destinationIds(trip.getDestinations().getDestinationIds())
                 .imageUrl(trip.getImageUrl())
                 .description(trip.getDescription().getValue())
-                .hashTags(trip.getHashTags().getHashTagNames())
+                .hashTags(trip.getHashTags().getValues().stream()
+                        .map(h -> new HashTagResponse(h.getName(), h.getTagOrder()))
+                        .toList())
                 .participants(TripParticipantResponse.toList(trip.getTripParticipants().getValues()))
                 .build();
     }
