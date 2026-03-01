@@ -62,6 +62,19 @@ public class TripController {
     }
 
     @Operation(
+            summary = "여행 수정",
+            description = "여행을 수정하는 API"
+    )
+    @PutMapping("/{tripId}")
+    public ApiResponse<TripUpdateResponse> updateTrip(
+            @WithUserContext UserContext userContext,
+            @PathVariable UUID tripId,
+            @RequestBody TripUpdateRequest request) {
+        TripUpdateResponse trip = tripManageUseCase.updateTrip(userContext.memberId(), tripId, request);
+        return ApiResponse.ok(trip);
+    }
+
+    @Operation(
             summary = "일정이 포함된 여행 생성",
             description = "일정이 포함된 여행을 생성하는 API -> 이거는 사용하는지 확인해봐야함 일정을 별도로 생기는거로 바뀌었던 거 같아서"
     )
@@ -79,7 +92,7 @@ public class TripController {
             description = "여행 공개 여부를 변경하는 API"
     )
     @ApiErrorCodeExamples({TRIP_NOT_FOUND, PRIVATE_TRIP_PASSWORD_REQUIRED, TRIP_PASSWORD_INVALID})
-    @PutMapping("/{tripId}")
+    @PutMapping("/open/{tripId}")
     public ApiResponse<TripUpdateVisibilityResponse> updateTripVisibility(
             @PathVariable UUID tripId, @RequestBody TripUpdateVisibilityRequest request) {
         TripUpdateVisibilityResponse trip = tripManageUseCase.updateTripVisibility(tripId, request);

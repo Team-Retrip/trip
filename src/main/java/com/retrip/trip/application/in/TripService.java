@@ -4,17 +4,15 @@ import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
-import com.retrip.trip.application.out.repository.*;
-import com.retrip.trip.domain.entity.Itinerary;
-import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripConfirmationDemand;
+import com.retrip.trip.application.out.repository.TripConfirmationDemandRepository;
+import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
+import com.retrip.trip.application.out.repository.TripQueryRepository;
+import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.*;
 import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
-import com.retrip.trip.domain.vo.TripPassword;
-import com.retrip.trip.domain.vo.TripPeriod;
-import com.retrip.trip.domain.vo.TripStatus;
+import com.retrip.trip.domain.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -57,6 +55,31 @@ public class TripService
     }
 
     @Override
+    public TripUpdateResponse updateTrip(UUID memberId, UUID tripId, TripUpdateRequest request) {
+        Trip trip = findTrip(tripId);
+
+        TripTitle tripTitle = request.toTripTitle();
+        TripDescription tripDescription = request.toTripDescription();
+        TripPeriod tripPeriod = request.toTripPeriod();
+        TripHashTags tripHashTags = request.toHashTags(trip);
+
+        //List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItinerariesIds());
+        trip.update(
+                memberId,
+                request.locationId(),
+                tripTitle,
+                tripDescription,
+                tripHashTags,
+                request.maxParticipants(),
+                request.imageUrl(),
+                request.category()
+        );
+        trip.updatePeriod(tripPeriod, memberId);
+
+        return TripUpdateResponse.of(trip);
+    }
+
+    @Override
     public TripUpdateVisibilityResponse updateTripVisibility(UUID tripId, TripUpdateVisibilityRequest request) {
         Trip trip = findTrip(tripId);
         assignPasswordIfNotOpen(trip, request.password());
@@ -70,7 +93,7 @@ public class TripService
         Page<Trip> tripsPage = tripQueryRepository.findTrips(page);
         List<Trip> trips = tripsPage.getContent();
         List<TripHashTag> hashTags = tripQueryRepository.findHashTags(trips);
-        
+
         return new PageImpl<>(TripResponse.of(trips, hashTags), page, tripsPage.getTotalElements());
     }
 
