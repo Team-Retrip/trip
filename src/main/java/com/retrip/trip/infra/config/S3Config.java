@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
+@Profile("!test")
 @RequiredArgsConstructor
 public class S3Config {
     @Value("${cloud.aws.region:ap-northeast-2}")

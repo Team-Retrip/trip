@@ -1,6 +1,7 @@
 package com.retrip.trip.application.in.request;
 
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.vo.HashTagInfo;
 import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPeriod;
@@ -17,9 +18,9 @@ import java.util.UUID;
 @Schema(description = "여행 생성 Request")
 public record TripCreateRequest(
 
-        @Schema(description = "여행 위치 ID", example = "550e8400-e29b-41d4-a716-446655440001")
+        @Schema(description = "여행 위치 ID 목록")
         @NotNull
-        UUID locationId,
+        List<UUID> locationIds,
 
         @Schema(description = "여행 제목", example = "유럽 배낭여행")
         @NotNull
@@ -48,24 +49,40 @@ public record TripCreateRequest(
         @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
 
-        @Schema(description = "HashTag")
-        List<String> hashTags,
+        @Schema(description = "HashTag 목록")
+        List<HashTagInput> hashTags,
 
         @Schema(description = "여행 카테고리")
         TripCategory category
 
 ) {
+    @Schema(description = "해시태그 입력")
+    public record HashTagInput(
+            @Schema(description = "해시태그 값", example = "10대")
+            String tag,
+
+            @Schema(description = "정렬 순서", example = "1")
+            int order
+    ) {}
+
+    private List<HashTagInfo> toHashTagInfos() {
+        if (hashTags == null) return List.of();
+        return hashTags.stream()
+                .map(h -> new HashTagInfo(h.tag(), h.order()))
+                .toList();
+    }
+
     public Trip to(UUID memberId) {
         return Trip.create(
                 memberId,
-                locationId,
+                locationIds,
                 new TripTitle(title),
                 imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
-                hashTags,
+                toHashTagInfos(),
                 category,
                 TripStatus.RECRUITING
         );
@@ -74,14 +91,14 @@ public record TripCreateRequest(
     public Trip toWithItineraries(UUID memberId) {
         return Trip.createWithItineraries(
                 memberId,
-                locationId,
+                locationIds,
                 new TripTitle(title),
                 imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
                 open,
                 maxParticipants,
-                hashTags,
+                toHashTagInfos(),
                 category,
                 TripStatus.RECRUITING
         );

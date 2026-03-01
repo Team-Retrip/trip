@@ -25,7 +25,7 @@ import static java.util.Locale.ENGLISH;
 public class ImageService implements ImageManageUseCase {
 
     private static final String IMAGE_DOMAIN_URL = "https://retrip-media.s3.ap-northeast-2.amazonaws.com";
-    private static final String FORDER_NAME = "media"; // 기존 오타 유지
+    private static final String FORDER_NAME = "media";
     private static final Duration PRESIGN_DURATION = Duration.ofMinutes(5);
 
     @Value("${cloud.s3.bucket}")

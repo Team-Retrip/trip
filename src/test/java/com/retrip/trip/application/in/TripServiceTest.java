@@ -61,9 +61,15 @@ class TripServiceTest extends BaseTripServiceTest {
 
     @Test
     void 여행을_생성_한다() {
-        TripCreateRequest request =
-                new TripCreateRequest(
-                        locationId,
+        // given
+        List<UUID> locationIds = List.of(locationId, UUID.randomUUID());
+        List<TripCreateRequest.HashTagInput> hashTags = List.of(
+                new TripCreateRequest.HashTagInput("남자", 1),
+                new TripCreateRequest.HashTagInput("20대", 2)
+        );
+
+        TripCreateRequest request = new TripCreateRequest(
+                        locationIds,
                         "속초 여행 멤버 구함",
                         "https://k.kakaocdn.net/dn/image.jpg",
                         "속초 여행은 이렇게이렇게 갈겁니다~",
@@ -72,12 +78,120 @@ class TripServiceTest extends BaseTripServiceTest {
                         true,
                         "a".repeat(PASSWORD_MIN_LENGTH + 1),
                         4,
-                        List.of("속초 여행", "MZ"),
+                        hashTags,
                         TripCategory.DOMESTIC);
+
+        // then
         TripCreateResponse response = tripService.createTrip(memberId, request);
+
+        // when
         assertThat(response.id()).isNotNull();
-        assertThat(response.destinationId()).isEqualTo(locationId);
-        assertThat(response.hashTags()).contains("속초 여행", "MZ");
+        assertThat(response.destinationIds()).hasSize(2);
+        assertThat(response.destinationIds()).contains(locationId);
+        assertThat(response.hashTags()).hasSize(2);
+        assertThat(response.hashTags().get(0).tag()).isEqualTo("남자");
+        assertThat(response.hashTags().get(0).order()).isEqualTo(1);
+        assertThat(response.hashTags().get(1).tag()).isEqualTo("20대");
+        assertThat(response.hashTags().get(1).order()).isEqualTo(2);
+    }
+
+    @Test
+    void 여행_생성시_여행지를_다수_등록할_수_있다() {
+        UUID destinationId1 = UUID.randomUUID();
+        UUID destinationId2 = UUID.randomUUID();
+        UUID destinationId3 = UUID.randomUUID();
+
+        TripCreateRequest request = new TripCreateRequest(
+                List.of(destinationId1, destinationId2, destinationId3),
+                "유럽 여행",
+                null,
+                "유럽 3개국 여행",
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(10),
+                true,
+                null,
+                4,
+                List.of(new TripCreateRequest.HashTagInput("남자", 1)),
+                TripCategory.OVERSEAS);
+
+        TripCreateResponse response = tripService.createTrip(memberId, request);
+
+        assertThat(response.destinationIds()).hasSize(3);
+        assertThat(response.destinationIds()).containsExactlyInAnyOrder(destinationId1, destinationId2, destinationId3);
+    }
+
+    @Test
+    void 여행_생성시_해시태그_순서가_보장된다() {
+        List<TripCreateRequest.HashTagInput> hashTags = List.of(
+                new TripCreateRequest.HashTagInput("세번째", 3),
+                new TripCreateRequest.HashTagInput("첫번째", 1),
+                new TripCreateRequest.HashTagInput("두번째", 2)
+        );
+
+        TripCreateRequest request = new TripCreateRequest(
+                List.of(UUID.randomUUID()),
+                "순서 테스트",
+                null,
+                "해시태그 순서 테스트",
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(3),
+                true,
+                null,
+                4,
+                hashTags,
+                TripCategory.DOMESTIC);
+
+        TripCreateResponse response = tripService.createTrip(memberId, request);
+
+        assertThat(response.hashTags().get(0).tag()).isEqualTo("첫번째");
+        assertThat(response.hashTags().get(1).tag()).isEqualTo("두번째");
+        assertThat(response.hashTags().get(2).tag()).isEqualTo("세번째");
+    }
+
+    @Test
+    void 여행_생성시_소개글이_70자를_초과하면_실패한다() {
+        String longDescription = "a".repeat(71);
+
+        TripCreateRequest request = new TripCreateRequest(
+                List.of(UUID.randomUUID()),
+                "테스트 여행",
+                null,
+                longDescription,
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(3),
+                true,
+                null,
+                4,
+                List.of(new TripCreateRequest.HashTagInput("태그", 1)),
+                TripCategory.DOMESTIC);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            tripService.createTrip(memberId, request);
+        });
+    }
+
+    @Test
+    void 여행_생성시_해시태그가_10자를_초과하면_실패한다() {
+        List<TripCreateRequest.HashTagInput> hashTags = List.of(
+                new TripCreateRequest.HashTagInput("a".repeat(11), 1)
+        );
+
+        TripCreateRequest request = new TripCreateRequest(
+                List.of(UUID.randomUUID()),
+                "테스트 여행",
+                null,
+                "설명",
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(3),
+                true,
+                null,
+                4,
+                hashTags,
+                TripCategory.DOMESTIC);
+
+        assertThrows(BusinessException.class, () -> {
+            tripService.createTrip(memberId, request);
+        });
     }
 
     @Test
@@ -90,7 +204,13 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(trips.getTotalElements()).isEqualTo(3);
         assertThat(trips.getPageable().getOffset()).isEqualTo(0);
         assertThat(trips.getPageable().getPageSize()).isEqualTo(2);
-        assertThat(trips.getContent().getFirst().hashTags()).contains("test", "Test 해시 코드");
+
+        List<TripResponse.HashTagResponse> hashTags = trips.getContent().getFirst().hashTags();
+        assertThat(hashTags).hasSize(2);
+        assertThat(hashTags.get(0).tag()).isEqualTo("남자");
+        assertThat(hashTags.get(0).order()).isEqualTo(1);
+        assertThat(hashTags.get(1).tag()).isEqualTo("20대");
+        assertThat(hashTags.get(1).order()).isEqualTo(2);
     }
 
 
@@ -655,16 +775,19 @@ class TripServiceTest extends BaseTripServiceTest {
                         4,
                         TripStatus.RECRUITING,
                         TripStatus.RECRUITING.getViewName(),
-                        "",
+                        List.of(),
+                        trip.getDestinations().getDestinationIds(),
                         TEST_IMAGE_URL,
                         "여행 설명",
-                        List.of("test", "Test 해시 코드"),
+                        List.of(
+                                new TripDetailResponse.HashTagResponse("남자", 1),
+                                new TripDetailResponse.HashTagResponse("20대", 2)
+                        ),
                         List.of(
                                 new TripParticipantResponse(UUID.randomUUID(), memberId, "안녕하세요 테스트 입니다", "홍길동", TEST_IMAGE_URL, ParticipantRole.LEADER),
                                 new TripParticipantResponse(UUID.randomUUID(), 정수_ID, "안녕하세요 박정수 입니다", "홍길동", TEST_IMAGE_URL, ParticipantRole.PARTICIPANT)
                         )
                 );
-
 
         //then
         assertThat(tripDetail).usingRecursiveComparison()
