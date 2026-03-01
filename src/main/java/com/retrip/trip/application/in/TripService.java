@@ -59,17 +59,18 @@ public class TripService
         Trip trip = findTrip(tripId);
 
         TripTitle tripTitle = request.toTripTitle();
+        TripDestinations destinations = request.toTripDestinations(trip);
         TripDescription tripDescription = request.toTripDescription();
         TripPeriod tripPeriod = request.toTripPeriod();
-        TripHashTags tripHashTags = request.toHashTags(trip);
+        TripHashTags hashTags = request.toHashTags(trip);
 
         //List<Itinerary> itineraries = tripItineraryQueryRepository.findByIdsWithItineraryDetails(trip.getItinerariesIds());
         trip.update(
                 memberId,
-                request.locationId(),
+                destinations,
                 tripTitle,
                 tripDescription,
-                tripHashTags,
+                hashTags,
                 request.maxParticipants(),
                 request.imageUrl(),
                 request.category()
