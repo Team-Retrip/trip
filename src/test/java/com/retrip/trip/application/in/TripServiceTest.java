@@ -149,8 +149,8 @@ class TripServiceTest extends BaseTripServiceTest {
     }
 
     @Test
-    void 여행_생성시_소개글이_70자를_초과하면_실패한다() {
-        String longDescription = "a".repeat(71);
+    void 여행_생성시_소개글이_250자를_초과하면_실패한다() {
+        String longDescription = "a".repeat(251);
 
         TripCreateRequest request = new TripCreateRequest(
                 List.of(UUID.randomUUID()),
