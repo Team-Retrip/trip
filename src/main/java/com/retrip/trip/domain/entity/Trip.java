@@ -208,7 +208,7 @@ public class Trip extends BaseEntity {
 
     public void update(
             UUID memberId,
-            UUID destinationId,
+            TripDestinations destinations,
             TripTitle tripTitle,
             TripDescription tripDescription,
             TripHashTags tripHashTags,
@@ -220,8 +220,8 @@ public class Trip extends BaseEntity {
             throw new TripUpdateFailedException();
         }
 
-        if (destinationId != null) {
-            this.destinationId = destinationId;
+        if (destinations != null) {
+            this.destinations.update(destinations.getValues());
         }
 
         if (tripTitle != null) {
@@ -232,8 +232,7 @@ public class Trip extends BaseEntity {
         }
 
         if (tripHashTags != null) {
-            this.hashTags.getValues().clear();
-            this.hashTags.getValues().addAll(tripHashTags.getValues());
+            this.hashTags.update(tripHashTags.getValues());
         }
 
         if (maxParticipants != null) {

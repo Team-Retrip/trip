@@ -5,9 +5,11 @@ import static lombok.AccessLevel.PROTECTED;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,5 +31,10 @@ public class TripDestinations {
         return values.stream()
                 .map(TripDestination::getDestinationId)
                 .toList();
+    }
+
+    public void update(List<TripDestination> tripDestinations) {
+        this.values.clear();
+        this.values.addAll(tripDestinations);
     }
 }

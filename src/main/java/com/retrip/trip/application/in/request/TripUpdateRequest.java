@@ -1,6 +1,7 @@
 package com.retrip.trip.application.in.request;
 
 import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripDestinations;
 import com.retrip.trip.domain.entity.TripHashTags;
 import com.retrip.trip.domain.vo.*;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +23,7 @@ public record TripUpdateRequest(
 
         @Schema(description = "여행 위치 ID", example = "550e8400-e29b-41d4-a716-446655440001")
         @NotNull
-        UUID locationId,
+        List<UUID> destinationIds,
 
         @Schema(description = "여행 시작 날짜", example = "2025-06-15")
         @FutureOrPresent
@@ -35,8 +36,8 @@ public record TripUpdateRequest(
         @Schema(description = "여행 최대 참가 인원")
         Integer maxParticipants,
 
-        @Schema(description = "HashTag")
-        List<String> hashTags,
+        @Schema(description = "HashTags")
+        List<HashTagInput> hashTags,
 
         @Schema(description = "여행 대표 이미지 URL")
         String imageUrl,
@@ -44,6 +45,23 @@ public record TripUpdateRequest(
         @Schema(description = "여행 카테고리")
         TripCategory category
 ) {
+    @Schema(description = "해시태그 입력")
+    public record HashTagInput(
+            @Schema(description = "해시태그 값", example = "10대")
+            String tag,
+
+            @Schema(description = "정렬 순서", example = "1")
+            int order
+    ) {
+    }
+
+    public TripDestinations toTripDestinations(Trip trip) {
+        if (destinationIds == null || destinationIds.isEmpty()) {
+            return null;
+        }
+        return new TripDestinations(trip, destinationIds);
+    }
+
     public TripTitle toTripTitle() {
         if (title != null) {
             return new TripTitle(title);
@@ -66,9 +84,10 @@ public record TripUpdateRequest(
     }
 
     public TripHashTags toHashTags(Trip trip) {
-        if (hashTags != null) {
-            return new TripHashTags(trip, hashTags);
-        }
-        return null;
+        if (hashTags == null || hashTags.isEmpty()) return null;
+        return new TripHashTags(trip, hashTags.stream()
+                .map(h -> new HashTagInfo(h.tag(), h.order()))
+                .toList());
     }
+
 }

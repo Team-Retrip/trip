@@ -10,9 +10,9 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.OneToMany;
 
 import jakarta.persistence.OrderBy;
+
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -50,5 +50,10 @@ public class TripHashTags {
         return this.values.stream()
                 .map(TripHashTag::getName)
                 .collect(Collectors.toList());
+    }
+
+    public void update(List<TripHashTag> tripHashTags) {
+        this.values.clear();
+        this.values.addAll(tripHashTags);
     }
 }
