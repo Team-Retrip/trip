@@ -16,6 +16,9 @@ public enum ImageFileExtension {
     JPEG,
     JPG,
     PNG,
+    HEIC,
+    HEIF,
+    WEBP
     ;
 
     @JsonCreator
