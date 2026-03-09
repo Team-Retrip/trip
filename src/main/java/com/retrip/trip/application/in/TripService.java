@@ -90,8 +90,8 @@ public class TripService
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TripResponse> getTrips(Pageable page) {
-        Page<Trip> tripsPage = tripQueryRepository.findTrips(page);
+    public Page<TripResponse> getTrips(TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page) {
+        Page<Trip> tripsPage = tripQueryRepository.findTrips(tripStatus, genders, ages, page);
         List<Trip> trips = tripsPage.getContent();
         List<TripHashTag> hashTags = tripQueryRepository.findHashTags(trips);
 
@@ -122,8 +122,8 @@ public class TripService
 
     @Transactional(readOnly = true)
     @Override
-    public Page<MyTripResponse> getMyTrips(UUID memberId, TripStatus tripStatus, Pageable page) {
-        return tripQueryRepository.findMyTrips(memberId, tripStatus, page);
+    public Page<MyTripResponse> getMyTrips(UUID memberId, TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page) {
+        return tripQueryRepository.findMyTrips(memberId, tripStatus, genders, ages, page);
     }
 
     @Override

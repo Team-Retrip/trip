@@ -7,10 +7,11 @@ import com.retrip.trip.domain.vo.TripStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface GetTripUseCase {
-    Page<TripResponse> getTrips(Pageable page);
+    Page<TripResponse> getTrips(TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page);
     TripDetailResponse getTripDetail(UUID memberId, UUID tripId);
-    Page<MyTripResponse> getMyTrips(UUID memberId, TripStatus tripStatus, Pageable page);
+    Page<MyTripResponse> getMyTrips(UUID memberId, TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page);
 }

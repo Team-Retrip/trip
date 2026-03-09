@@ -11,6 +11,8 @@ import com.retrip.trip.domain.vo.TripCategory;
 import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -105,8 +107,16 @@ public class TripController {
     )
     @GetMapping
     public ApiResponse<Page<TripResponse>> getTrips(
+            @Parameter(description = "여행 상태 필터")
+            @RequestParam(required = false) TripStatus tripStatus,
+            @Parameter(description = "성별 필터 (복수 선택 가능)",
+                    schema = @Schema(type = "array", allowableValues = {"남자", "여자", "혼성"}))
+            @RequestParam(required = false) List<String> genders,
+            @Parameter(description = "연령대 필터 (복수 선택 가능)",
+                    schema = @Schema(type = "array", allowableValues = {"10대", "20대", "30대", "40대", "50대", "60대이상", "상관없음"}))
+            @RequestParam(required = false) List<String> ages,
             @PageableDefault(size = 10, page = 0) Pageable page) {
-        Page<TripResponse> trips = getTripUseCase.getTrips(page);
+        Page<TripResponse> trips = getTripUseCase.getTrips(tripStatus, genders, ages, page);
         return ApiResponse.ok(trips);
     }
 
@@ -136,13 +146,18 @@ public class TripController {
 
     @Operation(
             summary = "나의 여행 목록 조회",
-            description = "나의 여행 목록 조회는 tripStatus = null, 보관함(종료된여행)을 클릭시 tripStatus = COMPLETED"
+            description = "나의 여행 목록 조회는"
     )
     @GetMapping("/my")
     public ApiResponse<Page<MyTripResponse>> getMyTrips(@WithUserContext UserContext userContext,
-                                                        @RequestParam TripStatus tripStatus,
+                                                        @Parameter(description = "여행 상태 필터 (null: 완료 제외 전체, COMPLETED: 보관함)")
+                                                        @RequestParam(required = false) TripStatus tripStatus,
+                                                        @Parameter(description = "성별 필터 (복수 선택 가능)", example = "[\"남자\", \"여자\", \"혼성\"]", schema = @Schema(type = "array", allowableValues = {"남자", "여자", "혼성"}))
+                                                        @RequestParam(required = false) List<String> genders,
+                                                        @Parameter(description = "연령대 필터 (복수 선택 가능)", example = "[\"20대\", \"30대\"]", schema = @Schema(type = "array", allowableValues = {"10대", "20대", "30대", "40대", "50대", "60대 이상", "상관없음"}))
+                                                        @RequestParam(required = false) List<String> ages,
                                                         @PageableDefault(size = 10, page = 0) Pageable page) {
-        Page<MyTripResponse> trips = getTripUseCase.getMyTrips(userContext.memberId(), tripStatus, page);
+        Page<MyTripResponse> trips = getTripUseCase.getMyTrips(userContext.memberId(), tripStatus, genders, ages, page);
         return ApiResponse.ok(trips);
     }
 

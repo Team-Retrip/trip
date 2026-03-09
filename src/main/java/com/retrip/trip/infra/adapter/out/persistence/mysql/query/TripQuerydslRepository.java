@@ -2,11 +2,11 @@ package com.retrip.trip.infra.adapter.out.persistence.mysql.query;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.response.MyTripResponse;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
+import com.retrip.trip.domain.entity.QTripHashTag;
 import com.retrip.trip.domain.entity.QTripParticipant;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripHashTag;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static com.retrip.trip.domain.entity.QItinerary.itinerary;
 import static com.retrip.trip.domain.entity.QTrip.trip;
@@ -34,18 +35,26 @@ public class TripQuerydslRepository implements TripQueryRepository {
     private final JPAQueryFactory query;
 
     @Override
-    public Page<Trip> findTrips(Pageable page) {
-        List<Trip> content = query
-                .selectFrom(trip)
+    public Page<Trip> findTrips(TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page) {
+        BooleanExpression tagFilter = hashTagFilter(genders, ages);
+
+        JPAQuery<Trip> contentQuery = query.selectFrom(trip);
+        JPAQuery<Long> countQuery = query.select(trip.countDistinct()).from(trip);
+
+        if (tagFilter != null) {
+            contentQuery.leftJoin(trip.hashTags.values, tripHashTag).where(tagFilter);
+            countQuery.leftJoin(trip.hashTags.values, tripHashTag).where(tagFilter);
+        }
+
+        List<Trip> content = contentQuery
+                .where(tripStatusCondition(tripStatus))
+                .distinct()
+                .orderBy(trip.createdAt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
-                .orderBy(trip.createdAt.desc())
                 .fetch();
 
-        JPAQuery<Long> countQuery = query
-                .select(trip.count())
-                .from(trip);
-
+        countQuery.where(tripStatusCondition(tripStatus));
         return PageableExecutionUtils.getPage(content, page, countQuery::fetchOne);
     }
 
@@ -73,9 +82,14 @@ public class TripQuerydslRepository implements TripQueryRepository {
     }
 
     @Override
-    public Page<MyTripResponse> findMyTrips(UUID memberId, TripStatus tripStatus, Pageable page) {
+    public Page<MyTripResponse> findMyTrips(UUID memberId,
+                                            TripStatus tripStatus,
+                                            List<String> genders,
+                                            List<String> ages,
+                                            Pageable page) {
         QTripParticipant me = new QTripParticipant("me");
         QTripParticipant participant = new QTripParticipant("participant");
+        QTripHashTag hashTag = QTripHashTag.tripHashTag;
 
         List<MyTripResponse> content =
                 query
@@ -84,7 +98,7 @@ public class TripQuerydslRepository implements TripQueryRepository {
                                         MyTripResponse.class,
                                         trip.id,
                                         trip.title.value,
-                                        Expressions.nullExpression(String.class), // imageUrl (추후 확장)
+                                        trip.imageUrl,
                                         trip.status,
                                         participant.id.count().intValue(),
                                         trip.tripParticipants.maxParticipants,
@@ -98,8 +112,11 @@ public class TripQuerydslRepository implements TripQueryRepository {
                         .join(trip.tripParticipants.values, me).on(me.memberId.eq(memberId), me.status.eq(ACTIVE))
                         // 전체 참가자 집계용
                         .join(trip.tripParticipants.values, participant).on(participant.status.eq(ACTIVE))
+                        // 해시태그 필터링을 위한 조인
+                        .leftJoin(trip.hashTags.values, hashTag)
                         .where(
-                                tripStatusCondition(tripStatus)
+                                tripStatusCondition(tripStatus),
+                                hashTagFilter(genders, ages)
                         )
                         .groupBy(
                                 trip.id,
@@ -122,5 +139,16 @@ public class TripQuerydslRepository implements TripQueryRepository {
             return trip.status.ne(TripStatus.COMPLETED);
         }
         return trip.status.eq(tripStatus);
+    }
+
+    private BooleanExpression hashTagFilter(List<String> genders, List<String> ages) {
+        List<String> allTags = Stream.of(
+                        Optional.ofNullable(genders).orElse(List.of()),
+                        Optional.ofNullable(ages).orElse(List.of())
+                )
+                .flatMap(List::stream)
+                .toList();
+
+        return allTags.isEmpty() ? null : QTripHashTag.tripHashTag.name.in(allTags);
     }
 }

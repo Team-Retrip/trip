@@ -36,6 +36,32 @@ class TripServiceTest extends BaseTripServiceTest {
 
     private static final String TEST_IMAGE_URL = "https://test-image.com/default.jpg";
 
+    private Trip createTestTripWithParticipantsAndHashTags(TripStatus status, List<HashTagInfo> hashTags) {
+        Trip trip = createTestTripWithHashTags("테스트 여행", "여행 설명", TripCategory.DOMESTIC, status, hashTags);
+        trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
+        tripRepository.save(trip);
+        return trip;
+    }
+
+    private Trip createTestTripWithHashTags(String title, String description, TripCategory category, TripStatus status, List<HashTagInfo> hashTags) {
+        TripPeriod period = new TripPeriod(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
+        Trip trip = Trip.create(
+                memberId,
+                List.of(UUID.randomUUID()),
+                new TripTitle(title),
+                "https://test-image.com/default.jpg",
+                new TripDescription(description),
+                period,
+                true,
+                4,
+                hashTags,
+                category,
+                TripStatus.RECRUITING
+        );
+        ReflectionTestUtils.setField(trip, "status", status);
+        return tripRepository.save(trip);
+    }
+
     private Trip createTestTripWithParticipants(TripStatus status) {
         Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC, status);
         trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
@@ -200,7 +226,7 @@ class TripServiceTest extends BaseTripServiceTest {
         tripRepository.save(createTestTrip("대구 여행 멤버 구함", "대구 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
         tripRepository.save(createTestTrip("부산 여행 멤버 구함", "부산 여행은 이렇게이렇게 갈겁니다~", TripCategory.DOMESTIC, TripStatus.RECRUITING));
 
-        Page<TripResponse> trips = tripService.getTrips(PageRequest.of(0, 2));
+        Page<TripResponse> trips = tripService.getTrips(null, null, null, PageRequest.of(0, 2));
         assertThat(trips.getTotalElements()).isEqualTo(3);
         assertThat(trips.getPageable().getOffset()).isEqualTo(0);
         assertThat(trips.getPageable().getPageSize()).isEqualTo(2);
@@ -211,6 +237,106 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(hashTags.get(0).order()).isEqualTo(1);
         assertThat(hashTags.get(1).tag()).isEqualTo("20대");
         assertThat(hashTags.get(1).order()).isEqualTo(2);
+    }
+
+    @Test
+    void 여행_목록을_상태_필터로_조회한다() {
+        // given
+        tripRepository.save(createTestTrip("모집중 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING));
+        tripRepository.save(createTestTrip("진행중 여행", "설명", TripCategory.DOMESTIC, TripStatus.IN_PROGRESS));
+        tripRepository.save(createTestTrip("완료 여행", "설명", TripCategory.DOMESTIC, TripStatus.COMPLETED));
+
+        // when
+        Page<TripResponse> trips = tripService.getTrips(TripStatus.RECRUITING, null, null, PageRequest.of(0, 10));
+
+        // then
+        assertThat(trips.getTotalElements()).isEqualTo(1);
+        assertThat(trips.getContent().getFirst().title()).isEqualTo("모집중 여행");
+    }
+
+    @Test
+    void 여행_목록을_성별_필터로_조회한다() {
+        // given
+        tripRepository.save(createTestTripWithHashTags("남자 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))));
+        tripRepository.save(createTestTripWithHashTags("여자 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))));
+        tripRepository.save(createTestTripWithHashTags("혼성 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("혼성", 1), new HashTagInfo("20대", 2))));
+
+        // when
+        Page<TripResponse> trips = tripService.getTrips(null, List.of("남자"), null, PageRequest.of(0, 10));
+
+        // then
+        assertThat(trips.getTotalElements()).isEqualTo(1);
+        assertThat(trips.getContent().getFirst().title()).isEqualTo("남자 여행");
+    }
+
+    @Test
+    void 여행_목록을_나이_필터로_조회한다() {
+        // given
+        tripRepository.save(createTestTripWithHashTags("20대 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))));
+        tripRepository.save(createTestTripWithHashTags("30대 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))));
+
+        // when
+        Page<TripResponse> trips = tripService.getTrips(null, null, List.of("20대"), PageRequest.of(0, 10));
+
+        // then
+        assertThat(trips.getTotalElements()).isEqualTo(1);
+        assertThat(trips.getContent().getFirst().title()).isEqualTo("20대 여행");
+    }
+
+    @Test
+    void 여행_목록을_복수_필터로_조회한다() {
+        // given
+        tripRepository.save(createTestTripWithHashTags("남자 20대", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))));
+        tripRepository.save(createTestTripWithHashTags("여자 30대", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))));
+        tripRepository.save(createTestTripWithHashTags("혼성 40대", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("혼성", 1), new HashTagInfo("40대", 2))));
+
+        // when
+        Page<TripResponse> trips = tripService.getTrips(null, List.of("남자", "여자"), List.of("30대"), PageRequest.of(0, 10));
+
+        // then
+        assertThat(trips.getTotalElements()).isEqualTo(2);
+        List<String> titles = trips.getContent().stream().map(TripResponse::title).toList();
+        assertThat(titles).containsExactlyInAnyOrder("남자 20대", "여자 30대");
+    }
+
+    @Test
+    void 여행_목록을_상태와_해시태그_필터를_함께_조회한다() {
+        // given
+        tripRepository.save(createTestTripWithHashTags("모집중 남자", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))));
+        tripRepository.save(createTestTripWithHashTags("완료 남자", "설명", TripCategory.DOMESTIC, TripStatus.COMPLETED,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("30대", 2))));
+        tripRepository.save(createTestTripWithHashTags("모집중 여자", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("20대", 2))));
+
+        // when
+        Page<TripResponse> trips = tripService.getTrips(TripStatus.RECRUITING, List.of("남자"), null, PageRequest.of(0, 10));
+
+        // then
+        assertThat(trips.getTotalElements()).isEqualTo(1);
+        assertThat(trips.getContent().getFirst().title()).isEqualTo("모집중 남자");
+    }
+
+    @Test
+    void 여행_목록_필터_조건에_맞는_여행이_없으면_빈_목록을_반환한다() {
+        // given
+        tripRepository.save(createTestTripWithHashTags("남자 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))));
+
+        // when
+        Page<TripResponse> trips = tripService.getTrips(null, List.of("여자"), List.of("60대이상"), PageRequest.of(0, 10));
+
+        // then
+        assertThat(trips.getTotalElements()).isEqualTo(0);
+        assertThat(trips.getContent()).isEmpty();
     }
 
 
@@ -538,7 +664,7 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip 정수_joinedTrip4 = createTestTripWithParticipants(TripStatus.COMPLETED);
 
         // when
-        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, null, PageRequest.of(0, 10));
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, null, null, null, PageRequest.of(0, 10));
         List<UUID> tripIds = myTrips.getContent()
                 .stream()
                 .map(MyTripResponse::id)
@@ -566,7 +692,7 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip 정수_joinedTrip4 = createTestTripWithParticipants(TripStatus.COMPLETED);
 
         // when
-        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, TripStatus.COMPLETED, PageRequest.of(0, 10));
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, TripStatus.COMPLETED, null, null, PageRequest.of(0, 10));
         List<UUID> tripIds = myTrips.getContent()
                 .stream()
                 .map(MyTripResponse::id)
@@ -582,6 +708,186 @@ class TripServiceTest extends BaseTripServiceTest {
                         정수_joinedTrip3.getId(),
                         정수_joinedTrip4.getId()
                 );
+    }
+
+    @Test
+    void 나의_여행_목록을_성별_필터로_조회한다() {
+        // given
+        Trip 남자여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+        Trip 여자여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))
+        );
+        Trip 혼성여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("혼성", 1), new HashTagInfo("20대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, List.of("남자"), null, PageRequest.of(0, 10));
+
+        // then
+        assertThat(myTrips.getContent()).hasSize(1);
+        assertThat(myTrips.getContent().get(0).id()).isEqualTo(남자여행.getId());
+    }
+
+    @Test
+    void 나의_여행_목록을_나이_필터로_조회한다() {
+        // given
+        Trip 이십대여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+        Trip 삼십대여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, null, List.of("20대"), PageRequest.of(0, 10));
+
+        // then
+        assertThat(myTrips.getContent()).hasSize(1);
+        assertThat(myTrips.getContent().get(0).id()).isEqualTo(이십대여행.getId());
+    }
+
+    @Test
+    void 나의_여행_목록을_성별과_나이_필터로_조회한다() {
+        // given
+        Trip 남자_20대 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+        Trip 여자_30대 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))
+        );
+        Trip 남자_30대 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("30대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, List.of("남자"), List.of("20대"), PageRequest.of(0, 10));
+
+        // then
+        List<UUID> tripIds = myTrips.getContent().stream()
+                .map(MyTripResponse::id)
+                .toList();
+
+        assertThat(tripIds).containsExactlyInAnyOrder(
+                남자_20대.getId(),
+                남자_30대.getId()
+        );
+    }
+
+    @Test
+    void 나의_여행_목록을_복수_성별_필터로_조회한다() {
+        // given
+        Trip 남자여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+        Trip 여자여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))
+        );
+        Trip 혼성여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("혼성", 1), new HashTagInfo("20대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, List.of("남자", "혼성"), null, PageRequest.of(0, 10));
+
+        // then
+        List<UUID> tripIds = myTrips.getContent().stream()
+                .map(MyTripResponse::id)
+                .toList();
+
+        assertThat(tripIds).containsExactlyInAnyOrder(
+                남자여행.getId(),
+                혼성여행.getId()
+        );
+    }
+
+    @Test
+    void 나의_여행_목록을_복수_나이_필터로_조회한다() {
+        // given
+        Trip 이십대여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+        Trip 삼십대여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("30대", 2))
+        );
+        Trip 사십대여행 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("혼성", 1), new HashTagInfo("40대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, null, List.of("20대", "30대"), PageRequest.of(0, 10));
+
+        // then
+        List<UUID> tripIds = myTrips.getContent().stream()
+                .map(MyTripResponse::id)
+                .toList();
+
+        assertThat(tripIds).containsExactlyInAnyOrder(
+                이십대여행.getId(),
+                삼십대여행.getId()
+        );
+    }
+
+    @Test
+    void 나의_여행_목록을_상태와_성별_필터를_함께_조회한다() {
+        // given
+        Trip 모집중_남자 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+        Trip 완료_남자 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.COMPLETED,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("30대", 2))
+        );
+        Trip 모집중_여자 = createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("여자", 1), new HashTagInfo("20대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, List.of("남자"), null, PageRequest.of(0, 10));
+
+        // then - COMPLETED는 기본 조회에서 제외되므로 모집중_남자만
+        assertThat(myTrips.getContent()).hasSize(1);
+        assertThat(myTrips.getContent().get(0).id()).isEqualTo(모집중_남자.getId());
+    }
+
+    @Test
+    void 필터_조건에_맞는_여행이_없으면_빈_목록을_반환한다() {
+        // given
+        createTestTripWithParticipantsAndHashTags(
+                TripStatus.RECRUITING,
+                List.of(new HashTagInfo("남자", 1), new HashTagInfo("20대", 2))
+        );
+
+        // when
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(
+                정수_ID, null, List.of("여자"), List.of("60대이상"), PageRequest.of(0, 10));
+
+        // then
+        assertThat(myTrips.getContent()).isEmpty();
     }
 
     @Test

@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TripQueryRepository {
-    Page<Trip> findTrips(Pageable page);
+    Page<Trip> findTrips(TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page);
 
-    Page<MyTripResponse> findMyTrips(UUID memberId, TripStatus tripStatus, Pageable page);
+    Page<MyTripResponse> findMyTrips(UUID memberId, TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page);
 
     Optional<Trip> findByIdWithItineraries(UUID tripId);
 
