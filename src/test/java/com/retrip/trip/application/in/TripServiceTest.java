@@ -247,7 +247,7 @@ class TripServiceTest extends BaseTripServiceTest {
         tripRepository.save(createTestTrip("완료 여행", "설명", TripCategory.DOMESTIC, TripStatus.COMPLETED));
 
         // when
-        Page<TripResponse> trips = tripService.getTrips(TripStatus.RECRUITING, null, null, PageRequest.of(0, 10));
+        Page<TripResponse> trips = tripService.getTrips(List.of(TripStatus.RECRUITING), null, null, PageRequest.of(0, 10));
 
         // then
         assertThat(trips.getTotalElements()).isEqualTo(1);
@@ -318,7 +318,7 @@ class TripServiceTest extends BaseTripServiceTest {
                 List.of(new HashTagInfo("여자", 1), new HashTagInfo("20대", 2))));
 
         // when
-        Page<TripResponse> trips = tripService.getTrips(TripStatus.RECRUITING, List.of("남자"), null, PageRequest.of(0, 10));
+        Page<TripResponse> trips = tripService.getTrips(List.of(TripStatus.RECRUITING), List.of("남자"), null, PageRequest.of(0, 10));
 
         // then
         assertThat(trips.getTotalElements()).isEqualTo(1);
@@ -672,14 +672,15 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // then
         assertThat(myTrips).isNotNull();
-        assertThat(myTrips.getTotalElements()).isEqualTo(3);
-        assertThat(myTrips.getContent()).hasSize(3);
+        assertThat(myTrips.getTotalElements()).isEqualTo(4);
+        assertThat(myTrips.getContent()).hasSize(4);
 
         assertThat(tripIds)
                 .containsExactlyInAnyOrder(
                         정수_joinedTrip1.getId(),
                         정수_joinedTrip2.getId(),
-                        정수_joinedTrip3.getId()
+                        정수_joinedTrip3.getId(),
+                        정수_joinedTrip4.getId()
                 );
     }
 
@@ -692,7 +693,7 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip 정수_joinedTrip4 = createTestTripWithParticipants(TripStatus.COMPLETED);
 
         // when
-        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, TripStatus.COMPLETED, null, null, PageRequest.of(0, 10));
+        Page<MyTripResponse> myTrips = tripService.getMyTrips(정수_ID, List.of(TripStatus.COMPLETED), null, null, PageRequest.of(0, 10));
         List<UUID> tripIds = myTrips.getContent()
                 .stream()
                 .map(MyTripResponse::id)
@@ -867,7 +868,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // when
         Page<MyTripResponse> myTrips = tripService.getMyTrips(
-                정수_ID, null, List.of("남자"), null, PageRequest.of(0, 10));
+                정수_ID, List.of(TripStatus.RECRUITING), List.of("남자"), null, PageRequest.of(0, 10));
 
         // then - COMPLETED는 기본 조회에서 제외되므로 모집중_남자만
         assertThat(myTrips.getContent()).hasSize(1);

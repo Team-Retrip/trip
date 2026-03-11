@@ -35,7 +35,7 @@ public class TripQuerydslRepository implements TripQueryRepository {
     private final JPAQueryFactory query;
 
     @Override
-    public Page<Trip> findTrips(TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page) {
+    public Page<Trip> findTrips(List<TripStatus> tripStatuses, List<String> genders, List<String> ages, Pageable page) {
         BooleanExpression tagFilter = hashTagFilter(genders, ages);
 
         JPAQuery<Trip> contentQuery = query.selectFrom(trip);
@@ -47,14 +47,14 @@ public class TripQuerydslRepository implements TripQueryRepository {
         }
 
         List<Trip> content = contentQuery
-                .where(tripStatusCondition(tripStatus))
+                .where(tripStatusCondition(tripStatuses))
                 .distinct()
                 .orderBy(trip.createdAt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
 
-        countQuery.where(tripStatusCondition(tripStatus));
+        countQuery.where(tripStatusCondition(tripStatuses));
         return PageableExecutionUtils.getPage(content, page, countQuery::fetchOne);
     }
 
@@ -83,7 +83,7 @@ public class TripQuerydslRepository implements TripQueryRepository {
 
     @Override
     public Page<MyTripResponse> findMyTrips(UUID memberId,
-                                            TripStatus tripStatus,
+                                            List<TripStatus> tripStatuses,
                                             List<String> genders,
                                             List<String> ages,
                                             Pageable page) {
@@ -115,7 +115,7 @@ public class TripQuerydslRepository implements TripQueryRepository {
                         // 해시태그 필터링을 위한 조인
                         .leftJoin(trip.hashTags.values, hashTag)
                         .where(
-                                tripStatusCondition(tripStatus),
+                                tripStatusCondition(tripStatuses),
                                 hashTagFilter(genders, ages)
                         )
                         .groupBy(
@@ -134,11 +134,15 @@ public class TripQuerydslRepository implements TripQueryRepository {
         return checkEndPage(page, content);
     }
 
-    private BooleanExpression tripStatusCondition(TripStatus tripStatus) {
-        if (tripStatus == null) {
-            return trip.status.ne(TripStatus.COMPLETED);
+    private BooleanExpression tripStatusCondition(List<TripStatus> tripStatuses) {
+        //TODO: 정책 확인해봐야함
+//        if (tripStatuses == null || tripStatuses.isEmpty()) {
+//            return trip.status.ne(TripStatus.COMPLETED);
+//        }
+        if (tripStatuses == null || tripStatuses.isEmpty()) {
+            return null;
         }
-        return trip.status.eq(tripStatus);
+        return trip.status.in(tripStatuses);
     }
 
     private BooleanExpression hashTagFilter(List<String> genders, List<String> ages) {

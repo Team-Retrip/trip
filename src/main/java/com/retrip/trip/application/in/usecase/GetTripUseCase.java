@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface GetTripUseCase {
-    Page<TripResponse> getTrips(TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page);
+    Page<TripResponse> getTrips(List<TripStatus> tripStatuses, List<String> genders, List<String> ages, Pageable page);
     TripDetailResponse getTripDetail(UUID memberId, UUID tripId);
-    Page<MyTripResponse> getMyTrips(UUID memberId, TripStatus tripStatus, List<String> genders, List<String> ages, Pageable page);
+    Page<MyTripResponse> getMyTrips(UUID memberId, List<TripStatus> tripStatuses, List<String> genders, List<String> ages, Pageable page);
 }
