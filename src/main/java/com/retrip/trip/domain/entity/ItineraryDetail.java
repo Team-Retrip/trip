@@ -2,8 +2,7 @@ package com.retrip.trip.domain.entity;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import com.retrip.trip.domain.vo.ItineraryDetailDescription;
-import com.retrip.trip.domain.vo.ItineraryDetailPrice;
+import com.retrip.trip.domain.vo.ItineraryDetailMemo;
 import com.retrip.trip.domain.vo.ItineraryDetailTime;
 import jakarta.persistence.*;
 
@@ -22,11 +21,13 @@ public class ItineraryDetail extends BaseEntity {
     private UUID id;
 
     @Embedded
-    private ItineraryDetailPrice price;
-    @Embedded
-    private ItineraryDetailDescription description;
+    private ItineraryDetailMemo memo;
+
     @Embedded
     private ItineraryDetailTime time;
+
+    private int sortOrder;
+
     private UUID locationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,25 +38,39 @@ public class ItineraryDetail extends BaseEntity {
             foreignKey = @ForeignKey(name = "fk_itinerary_detail_to_itinerary"))
     private Itinerary itinerary;
 
-    private ItineraryDetail(Long price, String description, LocalDateTime time, Itinerary itinerary, UUID locationId) {
+    private ItineraryDetail(String memo, LocalDateTime time, Itinerary itinerary, UUID locationId, int sortOrder) {
         this.id = UUID.randomUUID();
-        this.price = new ItineraryDetailPrice(price);
-        this.description = new ItineraryDetailDescription(description);
+        this.memo = new ItineraryDetailMemo(memo);
         this.time = new ItineraryDetailTime(time);
         this.locationId = locationId;
         this.itinerary = itinerary;
+        this.sortOrder = sortOrder;
     }
 
-    public static ItineraryDetail create(
-            Long price, String description, LocalDateTime time, Itinerary itinerary, UUID locationId) {
-        return new ItineraryDetail(price, description, time, itinerary, locationId);
+    public static ItineraryDetail create(String memo, LocalDateTime time, Itinerary itinerary, UUID locationId, int sortOrder) {
+        return new ItineraryDetail(memo, time, itinerary, locationId, sortOrder);
     }
 
-    public void update(ItineraryDetail itineraryDetail) {
-        this.price = itineraryDetail.getPrice();
-        this.description = itineraryDetail.getDescription();
-        this.time = itineraryDetail.getTime();
-        this.itinerary = itineraryDetail.getItinerary();
-        this.locationId = itineraryDetail.getLocationId();
+    public void update(String memo, LocalDateTime time, UUID locationId) {
+        if (memo != null) this.memo = new ItineraryDetailMemo(memo);
+        if (time != null) this.time = new ItineraryDetailTime(time);
+        if (locationId != null) this.locationId = locationId;
+    }
+
+    public void moveTo(Itinerary target, int newSortOrder) {
+        this.itinerary = target;
+        this.sortOrder = newSortOrder;
+    }
+
+    public void updateSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public String getMemoValue() {
+        return memo != null ? memo.getValue() : null;
+    }
+
+    public LocalDateTime getTimeValue() {
+        return time != null ? time.getValue() : null;
     }
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -73,10 +75,34 @@ public class Itinerary extends BaseEntity {
         if (Objects.isNull(this.itineraryDetails)) {
             this.itineraryDetails = new ItineraryDetails();
         }
-        this.getItineraryDetails().addItineraryDetail(itineraryDetail, this.date);
+        this.itineraryDetails.addItineraryDetail(itineraryDetail);
     }
 
-    public void updateItineraryDetail(ItineraryDetail itineraryDetail, UUID updateId) {
-        this.getItineraryDetails().updateItineraryDetail(itineraryDetail, this.date, updateId);
+    public List<ItineraryDetail> addItineraryDetails(List<ItineraryDetail> details) {
+        if (Objects.isNull(this.itineraryDetails)) {
+            this.itineraryDetails = new ItineraryDetails();
+        }
+        this.itineraryDetails.addAll(details);
+        return details;
+    }
+
+    public void updateItineraryDetail(UUID detailId, String memo, LocalDateTime time, UUID locationId) {
+        this.itineraryDetails.updateItineraryDetail(detailId, memo, time, locationId);
+    }
+
+    public void reorderItineraryDetails(List<UUID> orderedIds) {
+        this.itineraryDetails.reorder(orderedIds);
+    }
+
+    public ItineraryDetail removeDetailForMove(UUID detailId) {
+        return this.itineraryDetails.removeForMove(detailId);
+    }
+
+    public void acceptMovedDetail(ItineraryDetail detail, int targetSortOrder) {
+        if (Objects.isNull(this.itineraryDetails)) {
+            this.itineraryDetails = new ItineraryDetails();
+        }
+        detail.moveTo(this, targetSortOrder);
+        this.itineraryDetails.insertAtOrder(detail, targetSortOrder);
     }
 }

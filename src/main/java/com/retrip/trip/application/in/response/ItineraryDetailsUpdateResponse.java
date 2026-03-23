@@ -11,25 +11,30 @@ public record ItineraryDetailsUpdateResponse(
         @Schema(description = "일정 세부사항 ID")
         UUID id,
 
+        @Schema(description = "위치 ID")
+        UUID locationId,
+
         @Schema(description = "일정 시간")
         LocalDateTime time,
 
-        @Schema(description = "일정 설명")
-        String description,
+        @Schema(description = "메모")
+        String memo,
 
-        @Schema(description = "예상 비용")
-        Long price,
+        @Schema(description = "정렬 순서")
+        int sortOrder,
 
-        @Schema(description = "위치 ID")
-        UUID locationId
+        @Schema(description = "장소명 (TODO: map service API 연동 후 locationId로 조회)")
+        String locationName
 ) {
-    public static ItineraryDetailsUpdateResponse of(ItineraryDetail itineraryDetail) {
+    public static ItineraryDetailsUpdateResponse of(ItineraryDetail detail) {
+        // TODO: map service API 호출하여 locationId → locationName 조회
         return new ItineraryDetailsUpdateResponse(
-                itineraryDetail.getId(),
-                itineraryDetail.getTime().getValue(),
-                itineraryDetail.getDescription().getValue(),
-                itineraryDetail.getPrice().getValue(),
-                itineraryDetail.getLocationId()
+                detail.getId(),
+                detail.getLocationId(),
+                detail.getTimeValue(),
+                detail.getMemoValue(),
+                detail.getSortOrder(),
+                null
         );
     }
 }
