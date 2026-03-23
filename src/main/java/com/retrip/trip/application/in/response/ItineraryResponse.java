@@ -18,24 +18,27 @@ public record ItineraryResponse(
         @Schema(description = "일정 이름")
         String name,
 
-        @Schema(description = "일정 세부사항 목록")
-        List<ItineraryDetailResponse> itineraryDetailResponse
+        @Schema(description = "일정 세부사항 목록 (sortOrder 오름차순)")
+        List<ItineraryDetailResponse> itineraryDetails
 ) {
     @Schema(description = "일정 세부사항 Response")
     public record ItineraryDetailResponse(
             @Schema(description = "세부사항 ID")
             UUID id,
 
-            @Schema(description = "세부사항 설명")
-            String description,
+            @Schema(description = "위치 ID")
+            UUID locationId,
+
+            @Schema(description = "장소명 (TODO: map service API 연동 후 locationId로 조회)")
+            String locationName,
 
             @Schema(description = "일정 시간")
             LocalDateTime time,
 
-            @Schema(description = "예상 비용")
-            Long price,
+            @Schema(description = "메모")
+            String memo,
 
-            @Schema(description = "위치 ID")
-            UUID locationId
+            @Schema(description = "정렬 순서")
+            int sortOrder
     ) {}
 }

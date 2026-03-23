@@ -107,10 +107,10 @@ class TripServiceTest extends BaseTripServiceTest {
                         hashTags,
                         TripCategory.DOMESTIC);
 
-        // then
+        // when
         TripCreateResponse response = tripService.createTrip(memberId, request);
 
-        // when
+        // then
         assertThat(response.id()).isNotNull();
         assertThat(response.destinationIds()).hasSize(2);
         assertThat(response.destinationIds()).contains(locationId);

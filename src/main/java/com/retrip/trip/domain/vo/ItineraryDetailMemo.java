@@ -11,14 +11,14 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-public class ItineraryDetailDescription {
+public class ItineraryDetailMemo {
 
-  private static final int MAX_SIZE = 100;
+  private static final int MAX_SIZE = 200;
 
-  @Column(name = "description", length = MAX_SIZE)
+  @Column(name = "memo", length = MAX_SIZE)
   private String value;
 
-  public ItineraryDetailDescription(String value) {
+  public ItineraryDetailMemo(String value) {
     validate(value);
     this.value = value;
   }
