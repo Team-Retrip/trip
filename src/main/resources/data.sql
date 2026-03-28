@@ -20,19 +20,19 @@ INSERT INTO itinerary (id, trip_id, name, date, created_at)
 VALUES (x'22222222222222222222222222222224', x'11111111111111111111111111111112', '3일차 서초 정복', '2026-03-03', now());
 
 -- 4. Itinerary Detail (상세 일정)
-INSERT INTO itinerary_detail (id, itinerary_id, description, time, sort_order, created_at)
+INSERT INTO itinerary_detail (id, itinerary_id, memo, time, sort_order, created_at)
 VALUES (random_uuid(), x'22222222222222222222222222222222', '점심 식사 (마라탕)', '2026-03-01 12:00:00', 0, now());
 
 -- 5. Trip Hash Tag (해시태그)
-INSERT INTO trip_hash_tag (id, trip_id, name, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111111', '도쿄여행', now());
-INSERT INTO trip_hash_tag (id, trip_id, name, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111111', '먹짱', now());
+INSERT INTO trip_hash_tag (id, trip_id, name, tag_order, created_at)
+VALUES (random_uuid(), x'11111111111111111111111111111111', '도쿄여행', 1, now());
+INSERT INTO trip_hash_tag (id, trip_id, name, tag_order, created_at)
+VALUES (random_uuid(), x'11111111111111111111111111111111', '먹짱', 2, now());
 
-INSERT INTO trip_hash_tag (id, trip_id, name, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111112', '서울여행', now());
-INSERT INTO trip_hash_tag (id, trip_id, name, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111112', '먹방', now());
+INSERT INTO trip_hash_tag (id, trip_id, name, tag_order, created_at)
+VALUES (random_uuid(), x'11111111111111111111111111111112', '서울여행', 1, now());
+INSERT INTO trip_hash_tag (id, trip_id, name, tag_order, created_at)
+VALUES (random_uuid(), x'11111111111111111111111111111112', '먹방', 2, now());
 
 -- 6. Participant (참가자 - Member ID는 임의 지정)
 INSERT INTO participant (id, trip_id, member_id, created_at)
@@ -44,13 +44,15 @@ VALUES (random_uuid(), x'11111111111111111111111111111111', x'999999999999999999
 
 -- 방장(HOST) 데이터
 INSERT INTO trip_participant (id, trip_id, member_id, status, role, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111111', x'99999999999999999999999999999993', 1, 'HOST', now());
+VALUES (random_uuid(), x'11111111111111111111111111111111', x'99999999999999999999999999999993', 1, 'LEADER', now());
 
 -- 일반 참여자(MEMBER) 데이터 (Member ID를 다르게 설정)
 INSERT INTO trip_participant (id, trip_id, member_id, status, role, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111112', x'99999999999999999999999999999991', 1, 'HOST', now());
+VALUES (random_uuid(), x'11111111111111111111111111111112', x'99999999999999999999999999999991', 1, 'LEADER',
+        now());
 INSERT INTO trip_participant (id, trip_id, member_id, status, role, created_at)
-VALUES (random_uuid(), x'11111111111111111111111111111112', x'99999999999999999999999999999992', 1, 'MEMBER', now());
+VALUES (random_uuid(), x'11111111111111111111111111111112', x'99999999999999999999999999999992', 1, 'PARTICIPANT',
+        now());
 
 -- 7. Vote (투표 생성)
 INSERT INTO vote (id, trip_id, title, description, status, version, max_selections, anonymous, allow_add_option,

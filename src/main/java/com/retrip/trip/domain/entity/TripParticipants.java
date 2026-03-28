@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.entity;
 
+import com.retrip.trip.domain.entity.participant.Participant;
 import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
 import com.retrip.trip.domain.exception.NotParticipantException;
 import com.retrip.trip.domain.exception.TripFullException;
@@ -115,13 +116,13 @@ public class TripParticipants {
         boolean isAllExist = values.stream()
                 .anyMatch(m -> memberIds.contains(m.getMemberId()));
 
-        if(!isAllExist) {
+        if (!isAllExist) {
             throw new BusinessException(TRIP_MEMBER_NOT_IN_TRIP);
         }
     }
 
     public void validateTripLeader(UUID loginMemberId) {
-        if(!requireLeader(loginMemberId)) {
+        if (!requireLeader(loginMemberId)) {
             throw new BusinessException(NOT_TRIP_LEADER);
         }
     }
@@ -180,6 +181,18 @@ public class TripParticipants {
 
     public boolean isFull() {
         return this.values.size() >= this.maxParticipants;
+    }
+
+    public Optional<TripParticipant> getLeader() {
+        return this.values.stream()
+                .filter(TripParticipant::isLeader)
+                .findFirst();
+    }
+
+    public List<TripParticipant> getParticipants() {
+        return this.values.stream()
+                .filter(m -> !m.isLeader())
+                .toList();
     }
 }
 

@@ -37,7 +37,7 @@ public class DemandController {
             @WithUserContext UserContext userContext,
             @PathVariable("tripId") UUID tripId,
             @RequestBody TripDemandRequest request) {
-        DemandResponse response = demandManageUseCase.demand(userContext.memberId(), tripId, request);
+        DemandResponse response = demandManageUseCase.demand(userContext, tripId, request);
         return ApiResponse.ok(response);
     }
 

@@ -3,6 +3,7 @@ package com.retrip.trip.application.in.base;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.service.DemandService;
 import com.retrip.trip.application.in.service.InvitationService;
+import com.retrip.trip.application.out.client.AlarmApiClient;
 import com.retrip.trip.application.out.repository.DemandRepository;
 import com.retrip.trip.application.out.repository.InvitationRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
@@ -22,8 +23,11 @@ public abstract class BaseDemandServiceTest extends BaseServiceTest {
     protected JPAQueryFactory jpaQueryFactory;
     protected DemandService demandService;
 
+    @Autowired
+    protected AlarmApiClient alarmApiClient;
+
     @BeforeEach
     void setUp() {
-        demandService = new DemandService(tripRepository, demandRepository, demandPolicy);
+        demandService = new DemandService(tripRepository, demandRepository, demandPolicy, alarmApiClient);
     }
 }

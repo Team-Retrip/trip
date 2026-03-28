@@ -5,6 +5,9 @@ import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.vo.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -244,5 +247,13 @@ public class Trip extends BaseEntity {
         if (category != null) {
             this.category = category;
         }
+    }
+
+    public Optional<TripParticipant> getLeader() {
+        return this.tripParticipants.getLeader();
+    }
+
+    public List<TripParticipant> getParticipants() {
+        return this.tripParticipants.getParticipants();
     }
 }
