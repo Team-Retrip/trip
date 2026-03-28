@@ -40,11 +40,11 @@ public record TripCreateRequest(
         @FutureOrPresent
         LocalDate end,
 
-        @Schema(description = "여행 공개 여부")
-        boolean open,
-
-        @Schema(description = "여행 참여 비밀번호")
-        String password,
+//        @Schema(description = "여행 공개 여부")
+//        boolean open,
+//
+//        @Schema(description = "여행 참여 비밀번호")
+//        String password,
 
         @Schema(description = "여행 최대 참가 인원")
         int maxParticipants,
@@ -80,7 +80,7 @@ public record TripCreateRequest(
                 imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
-                open,
+                true,
                 maxParticipants,
                 toHashTagInfos(),
                 category,
@@ -96,7 +96,7 @@ public record TripCreateRequest(
                 imageUrl,
                 new TripDescription(description),
                 new TripPeriod(start, end),
-                open,
+                true,
                 maxParticipants,
                 toHashTagInfos(),
                 category,

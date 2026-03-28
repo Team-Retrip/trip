@@ -41,7 +41,6 @@ public class TripService
     @Override
     public TripCreateResponse createTrip(UUID memberId, TripCreateRequest request) {
         Trip trip = request.to(memberId);
-        assignPasswordIfNotOpen(trip, request.password());
         Trip savedTrip = tripRepository.save(trip);
         return TripCreateResponse.of(savedTrip);
     }
@@ -49,7 +48,6 @@ public class TripService
     @Override
     public TripCreateResponse createTripWithItineraries(UUID memberId, TripCreateRequest request) {
         Trip trip = request.toWithItineraries(memberId);
-        assignPasswordIfNotOpen(trip, request.password());
         Trip savedTrip = tripRepository.save(trip);
         return TripCreateResponse.of(savedTrip);
     }
@@ -188,7 +186,7 @@ public class TripService
         if (trip.isOpen()) {
             return;
         }
-        String trimPassword = password.trim();
+        String trimPassword = (password != null) ? password.trim() : "";
         if (!StringUtils.hasText(trimPassword)) {
             throw new InvalidValueException(PRIVATE_TRIP_PASSWORD_REQUIRED);
         }

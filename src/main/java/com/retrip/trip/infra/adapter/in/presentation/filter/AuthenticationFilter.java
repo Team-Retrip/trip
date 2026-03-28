@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
         String path = request.getRequestURI();
         String pathLowercase = path.toLowerCase();
 
@@ -39,7 +41,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 pathLowercase.contains("actuator") ||
                 pathLowercase.contains("robots.txt") ||
                 pathLowercase.contains("status-check") ||
-                pathLowercase.contains("trips") ||
                 pathLowercase.contains("images") ||
                 pathLowercase.contains("/h2-console")) {
             filterChain.doFilter(request, response);
@@ -47,40 +48,36 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = resolveToken(request);
-        if (token == null || token.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+
+        if (StringUtils.hasText(token)) {
+            try {
+                Claims claims = getClaims(token);
+
+                String subject = claims.getSubject();
+                UUID memberId = UUID.fromString(subject);
+
+                UserContext userContext = new UserContext(
+                        memberId,
+                        claims.get("nickname", String.class),
+                        claims.get("email", String.class),
+                        claims.get("name", String.class),
+                        null,
+                        0
+                );
+
+                request.setAttribute("userContext", userContext);
+
+            } catch (Exception e) {
+                log.warn("Invalid Token: {}", e.getMessage());
+            }
         }
 
-        try {
-            Claims claims = getClaims(token);
-
-            String subject = claims.getSubject();
-            UUID memberId = UUID.fromString(subject);
-
-            UserContext userContext = new UserContext(
-                    memberId,
-                    claims.get("nickname", String.class),
-                    claims.get("email", String.class),
-                    claims.get("name", String.class),
-                    null,
-                    0
-            );
-
-            request.setAttribute("userContext", userContext);
-
-            filterChain.doFilter(request, response);
-
-        } catch (Exception e) {
-            log.error("Token validation failed: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-        }
+        filterChain.doFilter(request, response);
     }
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
