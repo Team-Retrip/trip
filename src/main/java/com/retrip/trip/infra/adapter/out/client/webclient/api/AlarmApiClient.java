@@ -5,7 +5,7 @@ import com.retrip.trip.infra.adapter.out.client.webclient.api.response.CreateAla
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.PostExchange;
 
-public interface AlarmApi {
+public interface AlarmApiClient {
     @PostExchange("/alarms/send")
     CreateAlarmsResponse sendAlarms(@RequestBody CreateAlarmsRequest request);
 }

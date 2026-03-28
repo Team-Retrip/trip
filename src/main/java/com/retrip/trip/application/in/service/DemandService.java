@@ -7,8 +7,8 @@ import com.retrip.trip.application.in.response.demand.DemandRejectResponse;
 import com.retrip.trip.application.in.response.demand.DemandResponse;
 import com.retrip.trip.application.in.response.demand.DemandsResponse;
 import com.retrip.trip.application.in.usecase.DemandManageUseCase;
-import com.retrip.trip.application.out.client.AlarmApiClient;
-import com.retrip.trip.application.out.client.model.CallAlarmType;
+import com.retrip.trip.application.out.gateway.AlarmGateway;
+import com.retrip.trip.application.out.gateway.model.CallAlarmType;
 import com.retrip.trip.application.out.repository.DemandRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
@@ -18,7 +18,6 @@ import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.DemandPolicy;
-import com.retrip.trip.infra.adapter.out.client.webclient.api.response.CreateAlarmsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,7 @@ public class DemandService implements DemandManageUseCase {
     private final TripRepository tripRepository;
     private final DemandRepository demandRepository;
     private final DemandPolicy demandPolicy;
-    private final AlarmApiClient alarmApiClient;
+    private final AlarmGateway alarmGateway;
 
     @Override
     public DemandResponse demand(UserContext context, UUID tripId, TripDemandRequest request) {
@@ -53,7 +52,7 @@ public class DemandService implements DemandManageUseCase {
                 "tripName", trip.getTitle()
         );
 
-        alarmApiClient.sendAlarms(context.memberId(), List.of(leader.getMemberId()), parameters, CallAlarmType.DEMAND);
+        alarmGateway.sendAlarms(context.memberId(), List.of(leader.getMemberId()), parameters, CallAlarmType.DEMAND);
 
         return DemandResponse.of(savedDemand.getId(), savedDemand.getTripId(), savedDemand.getMemberId(), savedDemand.getMessage(), savedDemand.getStatus());
     }

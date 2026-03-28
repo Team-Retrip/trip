@@ -1,4 +1,4 @@
-package com.retrip.trip.application.out.client.model;
+package com.retrip.trip.application.out.gateway.model;
 
 public enum CallAlarmType {
     DEMAND,

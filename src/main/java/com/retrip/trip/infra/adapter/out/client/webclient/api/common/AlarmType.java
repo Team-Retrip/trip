@@ -1,6 +1,6 @@
 package com.retrip.trip.infra.adapter.out.client.webclient.api.common;
 
-import com.retrip.trip.application.out.client.model.CallAlarmType;
+import com.retrip.trip.application.out.gateway.model.CallAlarmType;
 
 public enum AlarmType {
     DEMAND,
