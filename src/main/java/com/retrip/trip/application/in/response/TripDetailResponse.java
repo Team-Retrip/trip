@@ -63,7 +63,7 @@ public record TripDetailResponse(
 
         @Schema(
                 description = "여행 상태 표시명",
-                example = "모집 중"
+                example = "모집중"
         )
         String tripStatusName,
 

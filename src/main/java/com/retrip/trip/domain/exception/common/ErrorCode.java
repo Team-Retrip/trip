@@ -22,7 +22,7 @@ public enum ErrorCode {
     TRIP_MEMBER_NOT_IN_TRIP(BAD_REQUEST, "Trip-006", "강퇴 대상 멤버가 해당 여행에 포함되어 있지 않습니다."),
     TRIP_MEMBER_BANNED_CANNOT_APPLY(HttpStatus.BAD_REQUEST, "TRIP-007", "강퇴된 사용자는 해당 여행에 참가 신청할 수 없습니다."),
     LEADER_CANNOT_LEAVE(BAD_REQUEST, "Trip-008", "리더는 여행을 나갈 수 없습니다. 먼저 리더를 위임해야 합니다."),
-    TRIP_NOT_READY(BAD_REQUEST, "Trip-009", "여행이 준비 상태일 때만 나갈 수 있습니다."),
+    TRIP_NOT_READY(BAD_REQUEST, "Trip-009", "여행이 시작되기 전에만 수행할 수 있습니다."),
     NOT_PARTICIPANT(BAD_REQUEST, "Trip-010", "여행 참여자가 아닙니다."),
     TRIP_FULL(BAD_REQUEST, "Trip-011", "여행 참가 인원이 가득 찼습니다."),
     INVALID_MAX_PARTICIPANTS(BAD_REQUEST, "Trip-012", "최대 참여 인원 변경이 불가능합니다."),

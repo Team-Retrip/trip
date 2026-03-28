@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_READY_STATUS;
-import static com.retrip.trip.domain.vo.TripStatus.BEFORE_TRIP;
+import static com.retrip.trip.domain.vo.TripStatus.IN_PROGRESS;
 import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -173,14 +173,14 @@ public class Trip extends BaseEntity {
     }
 
     public void delegateLeader(UUID currentLeaderId, UUID newLeaderId) {
-        if (this.status != TripStatus.BEFORE_TRIP) {
+        if (!this.status.canDelegateLeader()) {
             throw new TripNotReadyException();
         }
         tripParticipants.delegateLeader(currentLeaderId, newLeaderId);
     }
 
-    public void changeStatusToConfirming() {
-        this.status = BEFORE_TRIP;
+    public void changeStatusToInProgress() {
+        this.status = IN_PROGRESS;
     }
 
     public void changeStatusToRecruitmentClosed() {

@@ -9,11 +9,10 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum TripStatus {
 
-    RECRUITING("RECRUITING", "모집 중"),
-    RECRUITMENT_CLOSED("RECRUITMENT_CLOSED", "모집 완료"),
-    BEFORE_TRIP("BEFORE_TRIP", "여행 전"),
-    IN_PROGRESS("IN_PROGRESS", "여행 중"),
-    COMPLETED("COMPLETED", "여행 후")
+    RECRUITING("RECRUITING", "모집중"),
+    RECRUITMENT_CLOSED("RECRUITMENT_CLOSED", "모집완료"),
+    IN_PROGRESS("IN_PROGRESS", "여행중"),
+    COMPLETED("COMPLETED", "여행후")
     ;
 
     private final String code;
@@ -32,6 +31,10 @@ public enum TripStatus {
     }
 
     public boolean canLeave() {
-        return this == RECRUITING || this == RECRUITMENT_CLOSED || this == BEFORE_TRIP;
+        return this == RECRUITING || this == RECRUITMENT_CLOSED;
+    }
+
+    public boolean canDelegateLeader() {
+        return this == RECRUITING || this == RECRUITMENT_CLOSED;
     }
 }

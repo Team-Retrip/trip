@@ -35,7 +35,7 @@ public class TripService
     private final TripRepository tripRepository;
     private final TripQueryRepository tripQueryRepository;
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
-    private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
+//    private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
     private final TripPasswordEncoder tripPasswordEncoder;
 
     @Override
@@ -145,44 +145,44 @@ public class TripService
         return DelegateLeaderResponse.of(trip, request.newLeaderId());
     }
 
-    @Override
-    public void demandTripConfirmation(UUID loginMemberId, UUID tripId, TripConfirmationDemandRequest request) {
-        Trip trip = findTrip(tripId);
-
-        TripConfirmationDemand confirmationDemand = TripConfirmationDemand.create(loginMemberId, trip, request.startDate(), request.endDate());
-        confirmationDemand.addTripMember(loginMemberId);
-
-        tripConfirmationDemandRepository.save(confirmationDemand);
+//    @Override
+//    public void demandTripConfirmation(UUID loginMemberId, UUID tripId, TripConfirmationDemandRequest request) {
+//        Trip trip = findTrip(tripId);
+//
+//        TripConfirmationDemand confirmationDemand = TripConfirmationDemand.create(loginMemberId, trip, request.startDate(), request.endDate());
+//        confirmationDemand.addTripMember(loginMemberId);
+//
+//        tripConfirmationDemandRepository.save(confirmationDemand);
         //TODO: 알림 보내야함
-    }
+//    }
 
-    @Override
-    public void demandAgainTripConfirmation(UUID loginMemberId, UUID tripId, UUID confirmationDemandId, TripConfirmationDemandRequest request) {
-        TripConfirmationDemand savedDemand = findTripConfirmationDemandById(confirmationDemandId);
-        savedDemand.demandAgain(loginMemberId, request.startDate(), request.endDate());
-        //TODO: 알림 보내야함
-    }
+//    @Override
+//    public void demandAgainTripConfirmation(UUID loginMemberId, UUID tripId, UUID confirmationDemandId, TripConfirmationDemandRequest request) {
+//        TripConfirmationDemand savedDemand = findTripConfirmationDemandById(confirmationDemandId);
+//        savedDemand.demandAgain(loginMemberId, request.startDate(), request.endDate());
+//        TODO: 알림 보내야함
+//    }
 
-    @Override
-    public ConfirmationDemandAcceptResponse acceptConfirmationDemand(UUID loginMemberId, UUID tripId, UUID confirmationDemandId) {
-        TripConfirmationDemand demand = findTripConfirmationDemandById(confirmationDemandId);
-        demand.accept(loginMemberId);
+//    @Override
+//    public ConfirmationDemandAcceptResponse acceptConfirmationDemand(UUID loginMemberId, UUID tripId, UUID confirmationDemandId) {
+//        TripConfirmationDemand demand = findTripConfirmationDemandById(confirmationDemandId);
+//        demand.accept(loginMemberId);
         //TODO: 여행 방장에게 알림 보내야함
 
-        return ConfirmationDemandAcceptResponse.of(demand.getTrip());
-    }
+//        return ConfirmationDemandAcceptResponse.of(demand.getTrip());
+//    }
 
-    @Override
-    public void rejectConfirmationDemand(UUID loginMemberId, UUID tripId, UUID confirmationDemandId) {
-        TripConfirmationDemand demand = findTripConfirmationDemandById(confirmationDemandId);
-        demand.reject(loginMemberId);
-        //TODO: 여행 방장에게 알림 보내야함
-    }
+//    @Override
+//    public void rejectConfirmationDemand(UUID loginMemberId, UUID tripId, UUID confirmationDemandId) {
+//        TripConfirmationDemand demand = findTripConfirmationDemandById(confirmationDemandId);
+//        demand.reject(loginMemberId);
+//        TODO: 여행 방장에게 알림 보내야함
+//    }
 
-    private TripConfirmationDemand findTripConfirmationDemandById(UUID confirmationDemandId) {
-        return tripConfirmationDemandRepository.findById(confirmationDemandId)
-                .orElseThrow(() -> new BusinessException(PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND));
-    }
+//    private TripConfirmationDemand findTripConfirmationDemandById(UUID confirmationDemandId) {
+//        return tripConfirmationDemandRepository.findById(confirmationDemandId)
+//                .orElseThrow(() -> new BusinessException(PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND));
+//    }
 
     private void assignPasswordIfNotOpen(Trip trip, String password) {
         if (trip.isOpen()) {

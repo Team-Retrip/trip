@@ -37,7 +37,7 @@ public class TripController {
     private final TripPeriodUseCase tripPeriodUseCase;
     private final LeaveTripUseCase leaveTripUseCase;
     private final DelegateLeaderUseCase delegateLeaderUseCase;
-    private final TripConfirmationUseCase tripConfirmationUseCase;
+//    private final TripConfirmationUseCase tripConfirmationUseCase;
 
     @Operation(
             summary = "여행 카테고리 목록 조회",
@@ -108,7 +108,7 @@ public class TripController {
     @GetMapping
     public ApiResponse<Page<TripResponse>> getTrips(
             @Parameter(description = "여행 상태 필터 (복수 선택 가능)",
-                    schema = @Schema(type = "array", allowableValues = {"RECRUITING", "RECRUITMENT_CLOSED", "BEFORE_TRIP", "IN_PROGRESS", "COMPLETED"}))
+                    schema = @Schema(type = "array", allowableValues = {"RECRUITING", "RECRUITMENT_CLOSED", "IN_PROGRESS", "COMPLETED"}))
             @RequestParam(required = false) List<TripStatus> tripStatuses,
             @Parameter(description = "성별 필터 (복수 선택 가능)",
                     schema = @Schema(type = "array", allowableValues = {"남자", "여자", "혼성"}))
@@ -152,7 +152,7 @@ public class TripController {
     @GetMapping("/my")
     public ApiResponse<Page<MyTripResponse>> getMyTrips(@WithUserContext UserContext userContext,
                                                         @Parameter(description = "여행 상태 필터 (복수 선택 가능)",
-                                                                schema = @Schema(type = "array", allowableValues = {"RECRUITING", "RECRUITMENT_CLOSED", "BEFORE_TRIP", "IN_PROGRESS", "COMPLETED"}))
+                                                                schema = @Schema(type = "array", allowableValues = {"RECRUITING", "RECRUITMENT_CLOSED", "IN_PROGRESS", "COMPLETED"}))
                                                         @RequestParam(required = false) List<TripStatus> tripStatuses,
                                                         @Parameter(description = "성별 필터 (복수 선택 가능)", example = "[\"남자\", \"여자\", \"혼성\"]", schema = @Schema(type = "array", allowableValues = {"남자", "여자", "혼성"}))
                                                         @RequestParam(required = false) List<String> genders,
@@ -202,56 +202,56 @@ public class TripController {
         return ApiResponse.noContent();
     }
 
-    @Operation(
-            summary = "여행 확정 요청",
-            description = "리더가 여행 확정 요청을 하는 API"
-    )
-    @ApiErrorCodeExamples({TRIP_NOT_FOUND, NOT_TRIP_LEADER, NOT_TRIP_READY_STATUS, NOT_FOUND_PARTICIPANTS, TRIP_CONFIRMATION_START_AFTER_END, TRIP_CONFIRMATION_PERIOD_OUT_OF_RANGE})
-    @PostMapping("/{tripId}/confirm/demand")
-    public ResponseEntity<?> demandTripConfirmation(@WithUserContext UserContext userContext,
-                                                    @PathVariable UUID tripId,
-                                                    @RequestBody TripConfirmationDemandRequest request) {
-        tripConfirmationUseCase.demandTripConfirmation(userContext.memberId(), tripId, request);
-        return ResponseEntity.noContent().build();
-    }
+//    @Operation(
+//            summary = "여행 확정 요청",
+//            description = "리더가 여행 확정 요청을 하는 API"
+//    )
+//    @ApiErrorCodeExamples({TRIP_NOT_FOUND, NOT_TRIP_LEADER, NOT_TRIP_READY_STATUS, NOT_FOUND_PARTICIPANTS, TRIP_CONFIRMATION_START_AFTER_END, TRIP_CONFIRMATION_PERIOD_OUT_OF_RANGE})
+//    @PostMapping("/{tripId}/confirm/demand")
+//    public ResponseEntity<?> demandTripConfirmation(@WithUserContext UserContext userContext,
+//                                                    @PathVariable UUID tripId,
+//                                                    @RequestBody TripConfirmationDemandRequest request) {
+//        tripConfirmationUseCase.demandTripConfirmation(userContext.memberId(), tripId, request);
+//        return ResponseEntity.noContent().build();
+//    }
 
-    @Operation(
-            summary = "여행 확정 재요청",
-            description = "리더가 여행 확정 재요청을 하는 API"
-    )
-    @ApiErrorCodeExamples({PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND, NOT_TRIP_LEADER, NOT_TRIP_READY_STATUS, NOT_FOUND_PARTICIPANTS, TRIP_CONFIRMATION_START_AFTER_END, TRIP_CONFIRMATION_PERIOD_OUT_OF_RANGE})
-    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/re-demand")
-    public ResponseEntity<?> demandAgainTripConfirmation(@WithUserContext UserContext userContext,
-                                                         @PathVariable UUID tripId,
-                                                         @PathVariable UUID confirmationDemandId,
-                                                         @RequestBody TripConfirmationDemandRequest request) {
-        tripConfirmationUseCase.demandAgainTripConfirmation(userContext.memberId(), tripId, confirmationDemandId, request);
-        return ResponseEntity.noContent().build();
-    }
+//    @Operation(
+//            summary = "여행 확정 재요청",
+//            description = "리더가 여행 확정 재요청을 하는 API"
+//    )
+//    @ApiErrorCodeExamples({PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND, NOT_TRIP_LEADER, NOT_TRIP_READY_STATUS, NOT_FOUND_PARTICIPANTS, TRIP_CONFIRMATION_START_AFTER_END, TRIP_CONFIRMATION_PERIOD_OUT_OF_RANGE})
+//    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/re-demand")
+//    public ResponseEntity<?> demandAgainTripConfirmation(@WithUserContext UserContext userContext,
+//                                                         @PathVariable UUID tripId,
+//                                                         @PathVariable UUID confirmationDemandId,
+//                                                         @RequestBody TripConfirmationDemandRequest request) {
+//        tripConfirmationUseCase.demandAgainTripConfirmation(userContext.memberId(), tripId, confirmationDemandId, request);
+//        return ResponseEntity.noContent().build();
+//    }
 
-    @Operation(
-            summary = "여행 확정 요청 수락",
-            description = "여행 확정 요청을 수락하는 API"
-    )
-    @ApiErrorCodeExamples({PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND, TARGET_ENTITY_NOT_FOUND})
-    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/accept")
-    public ResponseEntity<?> acceptConfirmationRequest(@WithUserContext UserContext userContext,
-                                                       @PathVariable UUID tripId,
-                                                       @PathVariable UUID confirmationDemandId) {
-        ConfirmationDemandAcceptResponse response = tripConfirmationUseCase.acceptConfirmationDemand(userContext.memberId(), tripId, confirmationDemandId);
-        return ResponseEntity.ok(response);
-    }
+//    @Operation(
+//            summary = "여행 확정 요청 수락",
+//            description = "여행 확정 요청을 수락하는 API"
+//    )
+//    @ApiErrorCodeExamples({PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND, TARGET_ENTITY_NOT_FOUND})
+//    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/accept")
+//    public ResponseEntity<?> acceptConfirmationRequest(@WithUserContext UserContext userContext,
+//                                                       @PathVariable UUID tripId,
+//                                                       @PathVariable UUID confirmationDemandId) {
+//        ConfirmationDemandAcceptResponse response = tripConfirmationUseCase.acceptConfirmationDemand(userContext.memberId(), tripId, confirmationDemandId);
+//        return ResponseEntity.ok(response);
+//    }
 
-    @Operation(
-            summary = "여행 확정 요청 거절",
-            description = "여행 확정 요청을 거절하는 API"
-    )
-    @ApiErrorCodeExamples({PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND, TARGET_ENTITY_NOT_FOUND})
-    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/reject")
-    public ResponseEntity<?> rejectConfirmationRequest(@WithUserContext UserContext userContext,
-                                                       @PathVariable UUID tripId,
-                                                       @PathVariable UUID confirmationDemandId) {
-        tripConfirmationUseCase.rejectConfirmationDemand(userContext.memberId(), tripId, confirmationDemandId);
-        return ResponseEntity.noContent().build();
-    }
+//    @Operation(
+//            summary = "여행 확정 요청 거절",
+//            description = "여행 확정 요청을 거절하는 API"
+//    )
+//    @ApiErrorCodeExamples({PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND, TARGET_ENTITY_NOT_FOUND})
+//    @PutMapping("/{tripId}/confirm/{confirmationDemandId}/reject")
+//    public ResponseEntity<?> rejectConfirmationRequest(@WithUserContext UserContext userContext,
+//                                                       @PathVariable UUID tripId,
+//                                                       @PathVariable UUID confirmationDemandId) {
+//        tripConfirmationUseCase.rejectConfirmationDemand(userContext.memberId(), tripId, confirmationDemandId);
+//        return ResponseEntity.noContent().build();
+//    }
 }

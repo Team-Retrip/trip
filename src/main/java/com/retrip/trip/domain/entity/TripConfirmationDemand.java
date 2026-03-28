@@ -98,7 +98,7 @@ public class TripConfirmationDemand extends BaseEntity {
     public void accept(UUID loginMemberId) {
         replies.accept(loginMemberId);
         if(isAllAccepted()) {
-            this.trip.changeStatusToConfirming();
+            this.trip.changeStatusToInProgress();
         }
     }
 
