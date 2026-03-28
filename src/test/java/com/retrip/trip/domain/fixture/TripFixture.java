@@ -106,7 +106,7 @@ public class TripFixture {
                 DEFAULT_HASH_TAGS,
                 category,
                 TripStatus.RECRUITING);
-        ReflectionTestUtils.setField(trip, "status", TripStatus.BEFORE_TRIP);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.RECRUITMENT_CLOSED);
         return trip;
     }
 

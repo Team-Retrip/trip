@@ -54,7 +54,6 @@ class InvitationPolicyTest {
 
     @ParameterizedTest
     @EnumSource(mode = INCLUDE, names = {
-            "BEFORE_TRIP",
             "IN_PROGRESS",
             "COMPLETED"
     })

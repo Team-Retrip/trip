@@ -49,7 +49,7 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
         tripService = new TripService(
                 tripRepository, tripQueryRepository, tripItineraryQueryRepository,
-                tripConfirmationDemandRepository, tripPasswordEncoder
+                tripPasswordEncoder
         );
     }
 }
