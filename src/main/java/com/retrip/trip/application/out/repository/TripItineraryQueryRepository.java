@@ -14,5 +14,5 @@ public interface TripItineraryQueryRepository {
 
     Optional<Itinerary> findByIdWithItineraryDetails(UUID itineraryId);
 
-    List<ItineraryResponse> findItineraries(UUID tripId);
+    List<Itinerary> findItineraries(UUID tripId);
 }

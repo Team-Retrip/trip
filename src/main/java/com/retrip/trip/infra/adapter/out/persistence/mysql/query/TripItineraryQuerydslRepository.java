@@ -58,7 +58,7 @@ public class TripItineraryQuerydslRepository implements TripItineraryQueryReposi
     }
 
     @Override
-    public List<ItineraryResponse> findItineraries(UUID tripId) {
+    public List<Itinerary> findItineraries(UUID tripId) {
         List<Itinerary> result = query.selectDistinct(itinerary)
                 .from(itinerary)
                 .leftJoin(itinerary.itineraryDetails.values, itineraryDetail)
@@ -66,26 +66,7 @@ public class TripItineraryQuerydslRepository implements TripItineraryQueryReposi
                 .orderBy(itinerary.date.asc())
                 .fetch();
 
-        return result.stream()
-                .map(i -> new ItineraryResponse(
-                        i.getId(),
-                        i.getDate(),
-                        i.getName(),
-                        i.getItineraryDetails() != null
-                                ? i.getItineraryDetails().getValues().stream()
-                                        .sorted(Comparator.comparingInt(d -> d.getSortOrder()))
-                                        .map(d -> new ItineraryResponse.ItineraryDetailResponse(
-                                                d.getId(),
-                                                d.getLocationId(),
-                                                null, // TODO: map service API 호출하여 locationId → locationName 조회
-                                                d.getTimeValue(),
-                                                d.getMemoValue(),
-                                                d.getSortOrder()
-                                        ))
-                                        .toList()
-                                : new ArrayList<>()
-                ))
-                .toList();
+
     }
 
     private static BooleanExpression itineraryEq(UUID itineraryId) {
