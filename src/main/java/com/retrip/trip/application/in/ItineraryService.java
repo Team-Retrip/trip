@@ -6,18 +6,20 @@ import com.retrip.trip.application.in.response.ItineraryDetailsUpdateResponse;
 import com.retrip.trip.application.in.response.ItineraryResponse;
 import com.retrip.trip.application.in.usecase.GetItinerariesUseCase;
 import com.retrip.trip.application.in.usecase.ManageItineraryDetailsUseCase;
+import com.retrip.trip.application.out.gateway.MapGateway;
+import com.retrip.trip.application.out.gateway.model.LocationDetail;
 import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.ItineraryDetail;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
+
+import java.util.*;
+
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.ITINERARY_NOT_FOUND;
 
@@ -26,6 +28,8 @@ import static com.retrip.trip.domain.exception.common.ErrorCode.ITINERARY_NOT_FO
 @Service
 public class ItineraryService implements ManageItineraryDetailsUseCase, GetItinerariesUseCase {
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
+
+    private final MapGateway mapGateway;
 
     @Override
     public ItineraryDetailsCreateResponse createItineraryDetails(UUID tripId,
@@ -107,28 +111,40 @@ public class ItineraryService implements ManageItineraryDetailsUseCase, GetItine
                 .flatMap(m -> m.getItineraryDetails().getValues().stream())
                 .map(ItineraryDetail::getLocationId)
                 .toList();
+        Map<UUID, LocationDetail> locationDetailMap = Optional.ofNullable(mapGateway.findAll(locationIds))
+                .orElseGet(List::of)
+                .stream()
+                .collect(Collectors.toMap(LocationDetail::locationDetailId, ld -> ld));
 
-        List<ItineraryResponse> itineraryResponse = itineraries.stream()
+        return itineraries.stream()
                 .map(i -> new ItineraryResponse(
                         i.getId(),
                         i.getDate(),
                         i.getName(),
                         i.getItineraryDetails() != null
                                 ? i.getItineraryDetails().getValues().stream()
-                                .sorted(Comparator.comparingInt(d -> d.getSortOrder()))
-                                .map(d -> new ItineraryResponse.ItineraryDetailResponse(
-                                        d.getId(),
-                                        d.getLocationId(),
-                                        null, // TODO: map service API 호출하여 locationId → locationName 조회
-                                        d.getTimeValue(),
-                                        d.getMemoValue(),
-                                        d.getSortOrder()
-                                ))
+                                .sorted(Comparator.comparingInt(ItineraryDetail::getSortOrder))
+                                .map(d -> {
+                                    LocationDetail detail = locationDetailMap.get(d.getLocationId());
+
+                                    String locationName = (detail != null) ? detail.name() : "";
+                                    var category = (detail != null)
+                                            ? ItineraryResponse.ItineraryDetailResponse.LocationDetailCategory.of(detail.category())
+                                            : ItineraryResponse.ItineraryDetailResponse.LocationDetailCategory.UNKNOWN;
+                                    return new ItineraryResponse.ItineraryDetailResponse(
+                                            d.getId(),
+                                            d.getLocationId(),
+                                            locationName,
+                                            category,
+                                            d.getTimeValue(),
+                                            d.getMemoValue(),
+                                            d.getSortOrder()
+                                    );
+                                })
                                 .toList()
                                 : new ArrayList<>()
                 ))
                 .toList();
-        return itineraryResponse;
     }
 
     private Itinerary findItineraryWithDetails(UUID itineraryId) {

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,9 @@ public record ItineraryResponse(
             @Schema(description = "장소명 (TODO: map service API 연동 후 locationId로 조회)")
             String locationName,
 
+            @Schema(description = "여행 Category")
+            LocationDetailCategory category,
+
             @Schema(description = "일정 시간")
             LocalDateTime time,
 
@@ -40,5 +44,27 @@ public record ItineraryResponse(
 
             @Schema(description = "정렬 순서")
             int sortOrder
-    ) {}
+    ) {
+        public enum LocationDetailCategory {
+            UNKNOWN,
+            RESTAURANT,
+            CAFE,
+            SHOPPING,
+            LEISURE,
+            LANDMARK,
+            PARK,
+            ZOO,
+            SEA,
+            TRANSPORT,
+            ACCOMMODATION,
+            FLIGHT,
+            ETC;
+
+            public static LocationDetailCategory of(String value) {
+                return Arrays.stream(LocationDetailCategory.values())
+                        .filter(ldc -> ldc.name().equals(value))
+                        .findFirst().orElse(LocationDetailCategory.UNKNOWN);
+            }
+        }
+    }
 }

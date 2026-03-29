@@ -59,14 +59,12 @@ public class TripItineraryQuerydslRepository implements TripItineraryQueryReposi
 
     @Override
     public List<Itinerary> findItineraries(UUID tripId) {
-        List<Itinerary> result = query.selectDistinct(itinerary)
+        return query.selectDistinct(itinerary)
                 .from(itinerary)
                 .leftJoin(itinerary.itineraryDetails.values, itineraryDetail)
                 .where(itinerary.trip.id.eq(tripId))
                 .orderBy(itinerary.date.asc())
                 .fetch();
-
-
     }
 
     private static BooleanExpression itineraryEq(UUID itineraryId) {
