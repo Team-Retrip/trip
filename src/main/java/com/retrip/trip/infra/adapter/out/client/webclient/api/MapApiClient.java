@@ -12,5 +12,5 @@ import org.springframework.web.service.annotation.GetExchange;
 
 public interface MapApiClient {
     @GetExchange("/location-details")
-    LocationDetailsResponse findAll(@RequestParam("locationDetailIds") List<UUID> locationDetailIds);
+    LocationDetailsResponse<List<LocationDetailsResponse.LocationDetailResponse>> findAll(@RequestParam("locationDetailIds") List<UUID> locationDetailIds);
 }

@@ -35,7 +35,7 @@ public class MapWebClientGateway implements MapGateway {
         if (locationDetailIds == null) {
             return null;
         }
-        LocationDetailsResponse response = mapApiClient.findAll(locationDetailIds);
+        LocationDetailsResponse<List<LocationDetailsResponse.LocationDetailResponse>> response = mapApiClient.findAll(locationDetailIds);
         return response.responses().stream().map(r ->
                 new LocationDetail(
                         r.id(),

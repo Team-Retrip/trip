@@ -3,8 +3,11 @@ package com.retrip.trip.infra.adapter.out.client.webclient.api.response;
 import java.util.List;
 import java.util.UUID;
 
-public record LocationDetailsResponse(
-        List<LocationDetailResponse> responses
+public record LocationDetailsResponse<T>(
+        Boolean success,
+        Integer status,
+        String message,
+        T responses
 ) {
     public record LocationDetailResponse(
             UUID id,
