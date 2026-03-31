@@ -10,6 +10,9 @@ spring:
     hibernate:
       ddl-auto: update
 
+jwt:
+  public-key: ${JWT_PUBLIC_KEY}
+
 cloud:
   aws:
     region: ap-northeast-2
