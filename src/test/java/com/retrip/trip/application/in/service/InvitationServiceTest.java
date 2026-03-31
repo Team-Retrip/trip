@@ -27,9 +27,8 @@ class InvitationServiceTest extends BaseInvitationServiceTest {
         Trip trip = createTrip(TRIP_ID);
         tripRepository.save(trip);
 
-        TripInvitationsCreateRequest request = new TripInvitationsCreateRequest(
-                LEADER_ID, List.of(정수_ID, 홍석_ID, 준호_ID));
-        InvitationsCreateResponse response = invitationService.createInvitations(TRIP_ID, request);
+        TripInvitationsCreateRequest request = new TripInvitationsCreateRequest(List.of(정수_ID, 홍석_ID, 준호_ID));
+        InvitationsCreateResponse response = invitationService.createInvitations(TRIP_ID, LEADER_ID, request);
         assertThat(response.tripId()).isEqualTo(TRIP_ID);
         assertThat(response.invitations().size()).isEqualTo(3);
     }
@@ -40,14 +39,13 @@ class InvitationServiceTest extends BaseInvitationServiceTest {
         Trip trip = createTrip(TRIP_ID);
         tripRepository.save(trip);
 
-        TripInvitationsCreateRequest request = new TripInvitationsCreateRequest(
-                LEADER_ID, List.of(정수_ID, 홍석_ID, 준호_ID));
-        invitationService.createInvitations(TRIP_ID, request);
+        TripInvitationsCreateRequest request = new TripInvitationsCreateRequest(List.of(정수_ID, 홍석_ID, 준호_ID));
+        invitationService.createInvitations(TRIP_ID, LEADER_ID, request);
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
         Page<InvitationsResponse> invitations =
-                invitationService.getTripInvitations(TRIP_ID, LEADER_ID, INVITED.name(), pageable, DATE, "desc");
+                invitationService.getTripInvitations(TRIP_ID, LEADER_ID, pageable, DATE, "desc");
 
         // then
         assertThat(invitations.getTotalElements()).isEqualTo(3);
@@ -63,15 +61,15 @@ class InvitationServiceTest extends BaseInvitationServiceTest {
         UUID tripId3 = UUID.randomUUID();
         tripRepository.save(createTrip(tripId3));
 
-        invitationService.createInvitations(tripId1, new TripInvitationsCreateRequest(LEADER_ID, List.of(홍석_ID)));
-        invitationService.createInvitations(tripId2, new TripInvitationsCreateRequest(LEADER_ID, List.of(홍석_ID)));
-        invitationService.createInvitations(tripId3, new TripInvitationsCreateRequest(LEADER_ID, List.of(홍석_ID)));
+        invitationService.createInvitations(tripId1, LEADER_ID, new TripInvitationsCreateRequest(List.of(홍석_ID)));
+        invitationService.createInvitations(tripId2, LEADER_ID, new TripInvitationsCreateRequest(List.of(홍석_ID)));
+        invitationService.createInvitations(tripId3, LEADER_ID, new TripInvitationsCreateRequest(List.of(홍석_ID)));
 
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
         Page<MemberInvitationResponse> invitations =
-                invitationService.getMemberInvitations(홍석_ID, INVITED.name(), pageable, DATE, "desc");
+                invitationService.getMemberInvitations(홍석_ID, pageable, DATE, "desc");
 
         // then
         assertThat(invitations.getTotalElements()).isEqualTo(3);
@@ -91,5 +89,30 @@ class InvitationServiceTest extends BaseInvitationServiceTest {
 
         // then
         assertThat(acceptResponse.memberId()).isEqualTo(MEMBER_ID);
+    }
+
+    @Test
+    void 여행_초대_목록에_회원정보_필드가_포함된다() {
+        // given
+        Trip trip = createTrip(TRIP_ID);
+        tripRepository.save(trip);
+
+        TripInvitationsCreateRequest request = new TripInvitationsCreateRequest(List.of(정수_ID));
+        invitationService.createInvitations(TRIP_ID, LEADER_ID, request);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<InvitationsResponse> invitations =
+                invitationService.getTripInvitations(TRIP_ID, LEADER_ID, pageable, DATE, "desc");
+
+        // then
+        assertThat(invitations.getTotalElements()).isEqualTo(1);
+        InvitationsResponse response = invitations.getContent().get(0);
+        assertThat(response.memberId()).isEqualTo(정수_ID);
+        assertThat(response.status()).isEqualTo(INVITED.name());
+        // 회원 정보 필드 (Auth 연동, 스텁에서는 null)
+        assertThat(response.memberName()).isNull();
+        assertThat(response.memberProfileImageUrl()).isNull();
+        assertThat(response.memberBio()).isNull();
     }
 }

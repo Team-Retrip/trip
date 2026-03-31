@@ -4,6 +4,8 @@ import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipants;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.exception.*;
+import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.exception.common.ErrorCode;
 import com.retrip.trip.domain.exception.common.IllegalStateException;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +57,15 @@ public class InvitationPolicy {
     public void canReject(Invitation invitation) {
         if (invitation.cannotReject()) {
             throw new InvitationRejectNotAllowedException();
+        }
+    }
+
+    public void canDelete(Invitation invitation, UUID memberId) {
+        if (!invitation.getMemberId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
+        if (!invitation.canDelete()) {
+            throw new InvitationDeleteNotAllowedException();
         }
     }
 }

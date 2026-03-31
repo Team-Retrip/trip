@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.TripService;
 import com.retrip.trip.application.in.service.DemandService;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
+import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.application.out.repository.*;
 import com.retrip.trip.infra.adapter.out.crypto.TripBcryptTripPasswordEncoder;
 import com.retrip.trip.infra.adapter.out.persistence.mysql.query.TripItineraryQuerydslRepository;
@@ -23,6 +24,9 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     protected DemandRepository demandRepository;
 
     @Autowired
+    protected InvitationRepository invitationRepository;
+
+    @Autowired
     protected EntityManager em;
 
     @Autowired
@@ -30,6 +34,9 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
     @Autowired
     protected JPAQueryFactory jpaQueryFactory;
+
+    @Autowired
+    protected MemberGateway memberGateway;
 
     protected TripService tripService;
     protected DemandService demandService;
@@ -42,6 +49,9 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
     @BeforeEach
     void setUp() {
+        tripRepository.deleteAll();
+        demandRepository.deleteAll();
+
         tripQueryRepository = new TripQuerydslRepository(jpaQueryFactory);
         tripItineraryQueryRepository = new TripItineraryQuerydslRepository(jpaQueryFactory);
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
@@ -49,7 +59,7 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
 
         tripService = new TripService(
                 tripRepository, tripQueryRepository, tripItineraryQueryRepository,
-                tripPasswordEncoder
+                tripPasswordEncoder, memberGateway, demandRepository, invitationRepository
         );
     }
 }

@@ -5,9 +5,9 @@ import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.response.TripDetailResponse.TripParticipantResponse;
 import com.retrip.trip.domain.entity.Trip;
-import com.retrip.trip.domain.entity.TripConfirmationDemand;
-import com.retrip.trip.domain.entity.TripConfirmationReply;
 import com.retrip.trip.domain.entity.TripParticipant;
+import com.retrip.trip.domain.entity.demand.Demand;
+import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.exception.LeaderCannotLeaveException;
 import com.retrip.trip.domain.exception.MemberIsNotLeaderException;
 import com.retrip.trip.domain.exception.NotParticipantException;
@@ -16,7 +16,6 @@ import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.*;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -1026,34 +1025,96 @@ class TripServiceTest extends BaseTripServiceTest {
 
         //when
         TripDetailResponse tripDetail = tripService.getTripDetail(memberId, trip.getId());
-        TripDetailResponse expectedTripDetail =
-                new TripDetailResponse(
-                        trip.getId(),
-                        true,
-                        true,
-                        "테스트 여행",
-                        trip.getCreatedAt(),
-                        2,
-                        4,
-                        TripStatus.RECRUITING,
-                        TripStatus.RECRUITING.getViewName(),
-                        List.of(),
-                        trip.getDestinations().getDestinationIds(),
-                        TEST_IMAGE_URL,
-                        "여행 설명",
-                        List.of(
-                                new TripDetailResponse.HashTagResponse("남자", 1),
-                                new TripDetailResponse.HashTagResponse("20대", 2)
-                        ),
-                        List.of(
-                                new TripParticipantResponse(UUID.randomUUID(), memberId, "안녕하세요 테스트 입니다", "홍길동", TEST_IMAGE_URL, ParticipantRole.LEADER),
-                                new TripParticipantResponse(UUID.randomUUID(), 정수_ID, "안녕하세요 박정수 입니다", "홍길동", TEST_IMAGE_URL, ParticipantRole.PARTICIPANT)
-                        )
-                );
 
         //then
-        assertThat(tripDetail).usingRecursiveComparison()
-                .ignoringFields("participants.participantId", "participants.introduction", "participants.nickName", "participants.imageUrl")
-                .isEqualTo(expectedTripDetail);
+        assertThat(tripDetail.id()).isEqualTo(trip.getId());
+        assertThat(tripDetail.isLeader()).isTrue();
+        assertThat(tripDetail.isParticipant()).isTrue();
+        assertThat(tripDetail.title()).isEqualTo("테스트 여행");
+        assertThat(tripDetail.participantCount()).isEqualTo(2);
+        assertThat(tripDetail.maxParticipantCount()).isEqualTo(4);
+        assertThat(tripDetail.tripStatus()).isEqualTo(TripStatus.RECRUITING);
+        assertThat(tripDetail.hashTags()).containsExactly(
+                new TripDetailResponse.HashTagResponse("남자", 1),
+                new TripDetailResponse.HashTagResponse("20대", 2)
+        );
+        assertThat(tripDetail.participants()).hasSize(2);
+        assertThat(tripDetail.participants().stream().map(TripParticipantResponse::memberId).toList())
+                .containsExactlyInAnyOrder(memberId, 정수_ID);
+        assertThat(tripDetail.participants().stream().map(TripParticipantResponse::role).toList())
+                .containsExactlyInAnyOrder(ParticipantRole.LEADER, ParticipantRole.PARTICIPANT);
+        // Auth 스텁이 빈 리스트 반환하므로 회원 정보 필드는 null
+        assertThat(tripDetail.participants()).allMatch(p -> p.nickName() == null && p.introduction() == null && p.imageUrl() == null);
+    }
+
+    @Test
+    void 여행_상세_조회시_참가자_memberId와_역할이_정확히_반환된다() {
+        //given
+        Trip trip = createTestTripWithParticipants(TripStatus.RECRUITING);
+
+        //when
+        TripDetailResponse tripDetail = tripService.getTripDetail(memberId, trip.getId());
+        TripParticipantResponse leader = tripDetail.participants().stream()
+                .filter(p -> p.role() == ParticipantRole.LEADER)
+                .findFirst().orElseThrow();
+        TripParticipantResponse participant = tripDetail.participants().stream()
+                .filter(p -> p.role() == ParticipantRole.PARTICIPANT)
+                .findFirst().orElseThrow();
+
+        //then
+        assertThat(leader.memberId()).isEqualTo(memberId);
+        assertThat(participant.memberId()).isEqualTo(정수_ID);
+    }
+
+    @Test
+    void 여행_상세_조회시_참여_신청_대기중이면_isPendingDemand가_true이다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        Demand demand = Demand.create(newMemberId, trip.getId(), "같이 여행 가고 싶어요!");
+        demandRepository.save(demand);
+
+        // when
+        TripDetailResponse tripDetail = tripService.getTripDetail(newMemberId, trip.getId());
+
+        // then
+        assertThat(tripDetail.isPendingDemand()).isTrue();
+        assertThat(tripDetail.isInvited()).isFalse();
+        assertThat(tripDetail.pendingInvitationId()).isNull();
+        assertThat(tripDetail.isParticipant()).isFalse();
+        assertThat(tripDetail.isLeader()).isFalse();
+    }
+
+    @Test
+    void 여행_상세_조회시_초대받은_상태이면_isInvited가_true이고_pendingInvitationId가_있다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        Invitation invitation = new Invitation(trip.getId(), newMemberId);
+        invitationRepository.save(invitation);
+
+        // when
+        TripDetailResponse tripDetail = tripService.getTripDetail(newMemberId, trip.getId());
+
+        // then
+        assertThat(tripDetail.isInvited()).isTrue();
+        assertThat(tripDetail.pendingInvitationId()).isEqualTo(invitation.getId());
+        assertThat(tripDetail.isPendingDemand()).isFalse();
+        assertThat(tripDetail.isParticipant()).isFalse();
+        assertThat(tripDetail.isLeader()).isFalse();
+    }
+
+    @Test
+    void 여행_상세_조회시_아무_관계없는_사용자는_상태_필드가_모두_false이다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "여행 설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+
+        // when
+        TripDetailResponse tripDetail = tripService.getTripDetail(newMemberId, trip.getId());
+
+        // then
+        assertThat(tripDetail.isLeader()).isFalse();
+        assertThat(tripDetail.isParticipant()).isFalse();
+        assertThat(tripDetail.isPendingDemand()).isFalse();
+        assertThat(tripDetail.isInvited()).isFalse();
+        assertThat(tripDetail.pendingInvitationId()).isNull();
     }
 }

@@ -21,9 +21,9 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     open-in-view: false
-    defer-datasource-initialization: false
+    defer-datasource-initialization: true
 
 logging:
   level:
@@ -40,12 +40,13 @@ springdoc:
 jwt:
   public-key: |
     -----BEGIN PUBLIC KEY-----
-    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlfO/CoX9EzhskpAKX9ADH0wfEQZP4rAq
-    ptqq80W2YaOHAnXu+oU1UrP0b9ccKKSzMCVDwdmXrecZB0dFLPnoazMEbVOf6MSwrhGfxupPRmmJ
-    sIYgmQwo8/vnjaq/GYFfnHyCy6yKL41G+GZVqgeKdhr+w1jUw4L9Fs0l2J/AYqwTxZOnzxrU5erP
-    GSE5Dd3AwWt/brxuwA7sRfVS3mbbsYyYExjUrEbst8VtF3Pis35T8YfSDKMOUgiDnp30EAdGU1Up
-    u59J3+ToLRrIqIszRZqmasrWTL2/ihPO76PSTIMAsJMScjAwjUXA47YOOy6Vkzy8r3bPTYHp5C1N
-    KucWwwIDAQAB
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxdT/W36UzXw5W50P94Dt
+    w67wdgQ77jkvU+aLYIQICBs1V7fBdQLcwst6QysRV/FgI6octC07n0J7YvjDIbMJ
+    /vSrmpFdZ522oAc346JeGVqXPnOMwnEDErWhb9lEKTMb9/WhQPFSvZuevVYyhHqi
+    boz6Jwlx/rUvFt7LeDkyz/VJo09Y18JZZOOpxMNoi3Ecm6aolOkxAk1ysM7CSpDv
+    KnWaGrTveg70ANydOhl2ZfAInUgj7QMh/e6HziiCdrAThwln0X5cUFBM7yygN175
+    R43InlKs8ufs26+mSPh1fnU7RRkKP5MK6wQTwegkaVhbeypupX+yXYmK/Y0yUL9q
+    KQIDAQAB
     -----END PUBLIC KEY-----
 
 cloud:
@@ -57,3 +58,5 @@ cloud:
   s3:
     bucket: retrip-media
 
+server:
+  port: 18083

@@ -1,7 +1,7 @@
 package com.retrip.trip.application.in.response.demand;
 
+import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.domain.entity.demand.Demand;
-import com.retrip.trip.domain.vo.DemandStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
@@ -23,17 +23,29 @@ public record DemandsResponse(
         String statusCode,
 
         @Schema(description = "신청 상태 명")
-        String statusName
+        String statusName,
+
+        @Schema(description = "신청자 닉네임")
+        String memberName,
+
+        @Schema(description = "신청자 프로필 이미지 URL")
+        String memberProfileImageUrl,
+
+        @Schema(description = "신청자 한줄소개")
+        String memberBio
 ) {
 
-    public static DemandsResponse of(Demand demand) {
+    public static DemandsResponse of(Demand demand, MemberGateway.MemberInfo memberInfo) {
         return new DemandsResponse(
                 demand.getId(),
                 demand.getTripId(),
                 demand.getMemberId(),
                 demand.getMessage(),
                 demand.getStatus().name(),
-                demand.getStatus().getViewName()
+                demand.getStatus().getViewName(),
+                memberInfo != null ? memberInfo.name() : null,
+                memberInfo != null ? memberInfo.profileImageUrl() : null,
+                memberInfo != null ? memberInfo.bio() : null
         );
     }
 }

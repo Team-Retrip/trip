@@ -1,5 +1,6 @@
 package com.retrip.trip.application.in.response;
 
+import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.ParticipantRole;
@@ -7,6 +8,7 @@ import com.retrip.trip.domain.vo.TripStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -30,6 +32,24 @@ public record TripDetailResponse(
                 example = "true"
         )
         Boolean isParticipant,
+
+        @Schema(
+                description = "요청한 회원이 참여 신청 대기 중인지 여부",
+                example = "false"
+        )
+        Boolean isPendingDemand,
+
+        @Schema(
+                description = "요청한 회원이 초대받은 상태인지 여부",
+                example = "false"
+        )
+        Boolean isInvited,
+
+        @Schema(
+                description = "대기 중인 초대장 ID (isInvited=true일 때만 존재)",
+                example = "550e8400-e29b-41d4-a716-446655440000"
+        )
+        UUID pendingInvitationId,
 
         @Schema(
                 description = "여행 제목",
@@ -100,11 +120,15 @@ public record TripDetailResponse(
             int order
     ) {}
 
-    public static TripDetailResponse of(UUID memberId, Trip trip) {
+    public static TripDetailResponse of(UUID memberId, Trip trip, Map<UUID, MemberGateway.MemberInfo> memberInfoMap,
+                                        boolean isPendingDemand, UUID pendingInvitationId) {
         return TripDetailResponse.builder()
                 .id(trip.getId())
                 .isLeader(trip.getTripParticipants().isLeader(memberId))
                 .isParticipant(trip.getTripParticipants().isParticipant(memberId))
+                .isPendingDemand(isPendingDemand)
+                .isInvited(pendingInvitationId != null)
+                .pendingInvitationId(pendingInvitationId)
                 .title(trip.getTitle().getValue())
                 .createdAt(trip.getCreatedAt())
                 .participantCount(trip.getTripParticipants().getCurrentCount())
@@ -118,7 +142,7 @@ public record TripDetailResponse(
                 .hashTags(trip.getHashTags().getValues().stream()
                         .map(h -> new HashTagResponse(h.getName(), h.getTagOrder()))
                         .toList())
-                .participants(TripParticipantResponse.toList(trip.getTripParticipants().getValues()))
+                .participants(TripParticipantResponse.toList(trip.getTripParticipants().getValues(), memberInfoMap))
                 .build();
     }
 
@@ -160,20 +184,19 @@ public record TripDetailResponse(
             )
             ParticipantRole role
     ){
-        public static List<TripParticipantResponse> toList(List<TripParticipant> tripParticipants) {
+        public static List<TripParticipantResponse> toList(List<TripParticipant> tripParticipants, Map<UUID, MemberGateway.MemberInfo> memberInfoMap) {
             return tripParticipants.stream()
-                    .map(TripParticipantResponse::of)
+                    .map(p -> TripParticipantResponse.of(p, memberInfoMap.get(p.getMemberId())))
                     .toList();
         }
 
-        //TODO: 해당 참가자 정보 auth API 에서 따로 가져오도록 수정해야함
-        private static TripParticipantResponse of(TripParticipant participant) {
+        private static TripParticipantResponse of(TripParticipant participant, MemberGateway.MemberInfo memberInfo) {
             return TripParticipantResponse.builder()
                     .participantId(participant.getId())
                     .memberId(participant.getMemberId())
-                    .introduction("안녕하세여")
-                    .nickName("박정수")
-                    .imageUrl("http://~~~")
+                    .introduction(memberInfo != null ? memberInfo.bio() : null)
+                    .nickName(memberInfo != null ? memberInfo.name() : null)
+                    .imageUrl(memberInfo != null ? memberInfo.profileImageUrl() : null)
                     .role(participant.getRole())
                     .build();
         }

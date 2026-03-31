@@ -8,6 +8,7 @@ import com.retrip.trip.application.in.response.demand.DemandResponse;
 import com.retrip.trip.application.in.response.demand.DemandsResponse;
 import com.retrip.trip.application.in.usecase.DemandManageUseCase;
 import com.retrip.trip.application.out.gateway.AlarmGateway;
+import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.application.out.gateway.model.CallAlarmType;
 import com.retrip.trip.application.out.repository.DemandRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.CANNOT_FIND_LEADER;
 import static com.retrip.trip.domain.exception.common.ErrorCode.DEMAND_NOT_FOUND;
@@ -37,22 +39,23 @@ public class DemandService implements DemandManageUseCase {
     private final DemandRepository demandRepository;
     private final DemandPolicy demandPolicy;
     private final AlarmGateway alarmGateway;
+    private final MemberGateway memberGateway;
 
     @Override
-    public DemandResponse demand(UserContext context, UUID tripId, TripDemandRequest request) {
+    public DemandResponse demand(UUID memberId, String nickName, UUID tripId, TripDemandRequest request) {
         Trip trip = findTrip(tripId);
         List<Demand> savedDemands = demandRepository.findAllByTripId(tripId);
-        demandPolicy.canDemand(context.memberId(), trip, savedDemands);
-        Demand savedDemand = demandRepository.save(Demand.create(context.memberId(), tripId, request.message()));
+        demandPolicy.canDemand(memberId, trip, savedDemands);
+        Demand savedDemand = demandRepository.save(Demand.create(memberId, tripId, request.message()));
         TripParticipant leader = trip.getLeader()
                 .orElseThrow(() -> new EntityNotFoundException(CANNOT_FIND_LEADER));
 
         Map<String, Object> parameters = Map.of(
-                "senderName", context.nickName(),
+                "senderName", nickName,
                 "tripName", trip.getTitle()
         );
 
-        alarmGateway.sendAlarms(context.memberId(), List.of(leader.getMemberId()), parameters, CallAlarmType.DEMAND);
+        alarmGateway.sendAlarms(memberId, List.of(leader.getMemberId()), parameters, CallAlarmType.DEMAND);
 
         return DemandResponse.of(savedDemand.getId(), savedDemand.getTripId(), savedDemand.getMemberId(), savedDemand.getMessage(), savedDemand.getStatus());
     }
@@ -86,8 +89,11 @@ public class DemandService implements DemandManageUseCase {
         Trip trip = findTrip(tripId);
         demandPolicy.canViewDemands(memberId, trip);
         List<Demand> demands = demandRepository.findAllByTripId(tripId);
+        List<UUID> demandMemberIds = demands.stream().map(Demand::getMemberId).distinct().toList();
+        Map<UUID, MemberGateway.MemberInfo> memberInfoMap = memberGateway.getMembersByIds(demandMemberIds).stream()
+                .collect(Collectors.toMap(MemberGateway.MemberInfo::id, m -> m));
         return demands.stream()
-                .map(DemandsResponse::of)
+                .map(d -> DemandsResponse.of(d, memberInfoMap.get(d.getMemberId())))
                 .toList();
     }
 

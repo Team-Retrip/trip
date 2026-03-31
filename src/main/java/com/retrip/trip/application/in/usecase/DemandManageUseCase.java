@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DemandManageUseCase {
-    DemandResponse demand(UserContext context, UUID tripId, TripDemandRequest request);
+    DemandResponse demand(UUID memberId, String nickName, UUID tripId, TripDemandRequest request);
 
     DemandApproveResponse approve(UUID memberId, UUID tripId, UUID demandId);
 

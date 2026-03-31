@@ -4,11 +4,15 @@ import com.retrip.trip.application.in.request.*;
 import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.*;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
+import com.retrip.trip.application.out.gateway.MemberGateway;
+import com.retrip.trip.application.out.repository.DemandRepository;
+import com.retrip.trip.application.out.repository.InvitationRepository;
 import com.retrip.trip.application.out.repository.TripConfirmationDemandRepository;
 import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.*;
+import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
@@ -22,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND;
 import static com.retrip.trip.domain.exception.common.ErrorCode.PRIVATE_TRIP_PASSWORD_REQUIRED;
@@ -37,6 +43,9 @@ public class TripService
     private final TripItineraryQueryRepository tripItineraryQueryRepository;
 //    private final TripConfirmationDemandRepository tripConfirmationDemandRepository;
     private final TripPasswordEncoder tripPasswordEncoder;
+    private final MemberGateway memberGateway;
+    private final DemandRepository demandRepository;
+    private final InvitationRepository invitationRepository;
 
     @Override
     public TripCreateResponse createTrip(UUID memberId, TripCreateRequest request) {
@@ -102,8 +111,21 @@ public class TripService
     @Transactional(readOnly = true)
     public TripDetailResponse getTripDetail(UUID memberId, UUID tripId) {
         Trip trip = findTrip(tripId);
-        //TODO: 해당 참가자 정보 auth API 에서 따로 가져오도록 수정해야함
-        return TripDetailResponse.of(memberId, trip);
+        List<UUID> participantMemberIds = trip.getTripParticipants().getValues().stream()
+                .map(TripParticipant::getMemberId)
+                .toList();
+        Map<UUID, MemberGateway.MemberInfo> memberInfoMap = memberGateway.getMembersByIds(participantMemberIds).stream()
+                .collect(Collectors.toMap(MemberGateway.MemberInfo::id, m -> m));
+
+        boolean isPendingDemand = demandRepository
+                .findByTripIdAndMemberIdAndStatus(tripId, memberId, DemandStatus.PENDING)
+                .isPresent();
+        UUID pendingInvitationId = invitationRepository
+                .findByTripIdAndMemberIdAndStatus(tripId, memberId, InvitationStatus.INVITED)
+                .map(Invitation::getId)
+                .orElse(null);
+
+        return TripDetailResponse.of(memberId, trip, memberInfoMap, isPendingDemand, pendingInvitationId);
     }
 
     private Trip findTrip(UUID tripId) {

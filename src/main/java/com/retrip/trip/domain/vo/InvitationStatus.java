@@ -8,7 +8,7 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum InvitationStatus {
-    INVITED("INVITED", "초대"),
+    INVITED("INVITED", "초대완료"),
     ACCEPTED("ACCEPTED", "수락"),
     REJECTED("REJECTED", "거절"),
     EXPIRED("EXPIRED", "만료");

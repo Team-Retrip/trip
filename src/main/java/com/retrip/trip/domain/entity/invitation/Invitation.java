@@ -76,4 +76,8 @@ public class Invitation extends BaseEntity {
     public void reject() {
         this.status = REJECTED;
     }
+
+    public boolean canDelete() {
+        return this.status == REJECTED || this.status == EXPIRED;
+    }
 }

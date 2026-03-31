@@ -52,7 +52,7 @@ class DemandServiceTest extends BaseDemandServiceTest {
         TripDemandRequest request = new TripDemandRequest("참여 요청 메시지");
 
         // when
-        DemandResponse response = demandService.demand(정수_ID, trip.getId(), request);
+        DemandResponse response = demandService.demand(정수_ID, "박정수", trip.getId(), request);
 
         // then
         assertThat(response).isNotNull();
@@ -129,7 +129,7 @@ class DemandServiceTest extends BaseDemandServiceTest {
         TripDemandRequest request = new TripDemandRequest("강퇴당한 후 다시 참여 요청 메시지");
 
         // when && then
-        assertThrows(BusinessException.class, () -> demandService.demand(정수_ID, trip.getId(), request));
+        assertThrows(BusinessException.class, () -> demandService.demand(정수_ID, "박정수", trip.getId(), request));
     }
 
     @Test
@@ -139,7 +139,7 @@ class DemandServiceTest extends BaseDemandServiceTest {
         TripDemandRequest newRequest = new TripDemandRequest("저도 참여하고 싶어요!");
 
         // when & then
-        assertThrows(TripParticipantsIsFullException.class, () -> demandService.demand(지수_ID, trip.getId(), newRequest));
+        assertThrows(TripParticipantsIsFullException.class, () -> demandService.demand(지수_ID, "백지수", trip.getId(), newRequest));
     }
 
     @Test
@@ -168,5 +168,27 @@ class DemandServiceTest extends BaseDemandServiceTest {
         // when, then
         assertThrows(MemberIsNotLeaderException.class,
                 () -> demandService.getDemands(정수_ID, trip.getId()));
+    }
+
+    @Test
+    void 참여요청_목록에_신청자_회원정보_필드가_포함된다() {
+        // given
+        Trip trip = createTestTripWithParticipants();
+        createTestDemand(trip.getId(), "참여 요청 메시지");
+
+        // when
+        List<DemandsResponse> responses = demandService.getDemands(LEADER_ID, trip.getId());
+
+        // then
+        // Auth 스텁이 빈 리스트 반환하므로 memberName 등은 null이지만 필드 자체는 존재해야 함
+        assertThat(responses).hasSize(1);
+        DemandsResponse response = responses.get(0);
+        assertThat(response.memberId()).isEqualTo(정수_ID);
+        assertThat(response.message()).isEqualTo("참여 요청 메시지");
+        assertThat(response.statusCode()).isEqualTo(DemandStatus.PENDING.name());
+        // 회원 정보 필드 (Auth 연동, 스텁에서는 null)
+        assertThat(response.memberName()).isNull();
+        assertThat(response.memberProfileImageUrl()).isNull();
+        assertThat(response.memberBio()).isNull();
     }
 }

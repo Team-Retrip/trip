@@ -59,7 +59,8 @@ public enum ErrorCode {
     VOTE_MODIFY_FORBIDDEN(BAD_REQUEST, "Trip-043", "투표를 만든 사람이 아니면 수정, 종료, 삭제 할 수 없습니다."),
     EXTENSION_NOT_FOUND(BAD_REQUEST, "Trip-044", "지원하지 않는 이미지 확장자입니다."),
     TRIP_UPDATE_FAIL(BAD_REQUEST, "Trip-045", "여행을 수정할 수 없습니다."),
-    CANNOT_FIND_LEADER(INTERNAL_SERVER_ERROR, "Trip-046", "해당 여행은 리더가 없습니다.");
+    CANNOT_FIND_LEADER(INTERNAL_SERVER_ERROR, "Trip-046", "해당 여행은 리더가 없습니다."),
+    INVITATION_CANNOT_DELETE(BAD_REQUEST, "Trip-047", "해당 상태의 초대장은 삭제할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;

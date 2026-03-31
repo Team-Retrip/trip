@@ -21,12 +21,12 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public UserContext resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                        NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-//        UserContext userContext = (UserContext) webRequest.getAttribute(
-//                "userContext",
-//                RequestAttributes.SCOPE_REQUEST
-//        );
+        UserContext userContext = (UserContext) webRequest.getAttribute(
+                "userContext",
+                RequestAttributes.SCOPE_REQUEST
+        );
 
-        UserContext userContext = UserContext.mockOf();
+//        UserContext userContext = UserContext.mockOf();
 
         if (userContext == null) {
             throw new IllegalStateException("UserContext not found in request");

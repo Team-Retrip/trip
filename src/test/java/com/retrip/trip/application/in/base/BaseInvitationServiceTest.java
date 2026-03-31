@@ -2,6 +2,7 @@ package com.retrip.trip.application.in.base;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.retrip.trip.application.in.service.InvitationService;
+import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.application.out.repository.InvitationRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.service.InvitationPolicy;
@@ -20,8 +21,13 @@ public abstract class BaseInvitationServiceTest extends BaseServiceTest {
     protected JPAQueryFactory jpaQueryFactory;
     protected InvitationService invitationService;
 
+    @Autowired
+    protected MemberGateway memberGateway;
+
     @BeforeEach
     void setUp() {
-        invitationService = new InvitationService(tripRepository, invitationRepository, invitationPolicy);
+        invitationRepository.deleteAll();
+        tripRepository.deleteAll();
+        invitationService = new InvitationService(tripRepository, invitationRepository, invitationPolicy, memberGateway);
     }
 }
