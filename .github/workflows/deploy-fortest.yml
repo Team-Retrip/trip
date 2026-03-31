@@ -113,7 +113,7 @@ jobs:
               -e JWT_PUBLIC_KEY="${{ secrets.JWT_PUBLIC_KEY }}" \
               -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e APIS_AUTH_URL=http://[auth컨테이너이름]:18082/ \
+              -e APIS_AUTH_URL=http://auth:18082/ \
               --restart always \
               $IMAGE
 
