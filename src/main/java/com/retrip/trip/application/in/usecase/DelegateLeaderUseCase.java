@@ -5,5 +5,5 @@ import com.retrip.trip.application.in.response.DelegateLeaderResponse;
 import java.util.UUID;
 
 public interface DelegateLeaderUseCase {
-    DelegateLeaderResponse delegateLeader(UUID tripId, DelegateLeaderRequest request);
+    DelegateLeaderResponse delegateLeader(UUID tripId, UUID currentLeaderId, DelegateLeaderRequest request);
 }

@@ -30,34 +30,17 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
-        String pathLowercase = path.toLowerCase();
-
-        if (path.equals("/") ||
-                pathLowercase.contains("swagger") ||
-                pathLowercase.contains("api-docs") ||
-                pathLowercase.contains("actuator") ||
-                pathLowercase.contains("robots.txt") ||
-                pathLowercase.contains("status-check") ||
-//                pathLowercase.contains("trips") ||
-                pathLowercase.contains("images") ||
-                pathLowercase.contains("/h2-console")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String token = resolveToken(request);
+
         if (token == null || token.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            filterChain.doFilter(request, response);
             return;
         }
 
         try {
             Claims claims = getClaims(token);
 
-            String subject = claims.getSubject();
-            UUID memberId = UUID.fromString(subject);
-
+            UUID memberId = UUID.fromString(claims.getSubject());
             UserContext userContext = new UserContext(
                     memberId,
                     claims.get("nickname", String.class),
@@ -68,13 +51,11 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             );
 
             request.setAttribute("userContext", userContext);
-
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
             log.error("Token validation failed: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
         }
     }
 

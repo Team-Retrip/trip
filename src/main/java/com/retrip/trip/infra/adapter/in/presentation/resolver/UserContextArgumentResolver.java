@@ -2,6 +2,8 @@ package com.retrip.trip.infra.adapter.in.presentation.resolver;
 
 import com.retrip.trip.application.in.request.context.UserContext;
 import com.retrip.trip.application.in.request.context.WithUserContext;
+import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.exception.common.ErrorCode;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -26,10 +28,8 @@ public class UserContextArgumentResolver implements HandlerMethodArgumentResolve
                 RequestAttributes.SCOPE_REQUEST
         );
 
-//        UserContext userContext = UserContext.mockOf();
-
         if (userContext == null) {
-            throw new IllegalStateException("UserContext not found in request");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         return userContext;
     }

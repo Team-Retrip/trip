@@ -96,8 +96,9 @@ public class TripController {
     @ApiErrorCodeExamples({TRIP_NOT_FOUND, PRIVATE_TRIP_PASSWORD_REQUIRED, TRIP_PASSWORD_INVALID})
     @PutMapping("/open/{tripId}")
     public ApiResponse<TripUpdateVisibilityResponse> updateTripVisibility(
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId, @RequestBody TripUpdateVisibilityRequest request) {
-        TripUpdateVisibilityResponse trip = tripManageUseCase.updateTripVisibility(tripId, request);
+        TripUpdateVisibilityResponse trip = tripManageUseCase.updateTripVisibility(userContext.memberId(), tripId, request);
         return ApiResponse.created(trip);
     }
 
@@ -183,9 +184,10 @@ public class TripController {
     @ApiErrorCodeExamples({TRIP_NOT_FOUND, TRIP_NOT_READY, MEMBER_IS_NOT_LEADER, CANNOT_DELEGATE_LEADER_TO_SELF, NOT_PARTICIPANT})
     @PutMapping("/{tripId}/delegate-leader")
     public ApiResponse<DelegateLeaderResponse> delegateLeader(
+            @WithUserContext UserContext userContext,
             @PathVariable UUID tripId,
             @RequestBody DelegateLeaderRequest request) {
-        DelegateLeaderResponse response = delegateLeaderUseCase.delegateLeader(tripId, request);
+        DelegateLeaderResponse response = delegateLeaderUseCase.delegateLeader(tripId, userContext.memberId(), request);
         return ApiResponse.ok(response);
     }
 

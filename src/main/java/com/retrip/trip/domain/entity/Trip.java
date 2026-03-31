@@ -200,6 +200,12 @@ public class Trip extends BaseEntity {
         this.tripPassword = password;
     }
 
+    public void validateLeader(UUID memberId) {
+        if (!tripParticipants.requireLeader(memberId)) {
+            throw new MemberIsNotLeaderException();
+        }
+    }
+
     public void updateVisibility(boolean isOpen) {
         this.open = isOpen;
     }

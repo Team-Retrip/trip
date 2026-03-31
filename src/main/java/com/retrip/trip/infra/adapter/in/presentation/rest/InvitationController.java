@@ -36,6 +36,7 @@ public class InvitationController {
     )
     @GetMapping("/{tripId}/invitations/searchable-members")
     public ApiResponse<List<SearchableMemberResponse>> searchableMembers(
+            @WithUserContext UserContext userContext,
             @Parameter(description = "여행 ID", required = true) @PathVariable UUID tripId,
             @Parameter(description = "검색할 회원 이름 (부분 일치)", required = true, example = "박정수") @RequestParam String name) {
         return ApiResponse.ok(invitationManageUseCase.searchableMembers(tripId, name));

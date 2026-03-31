@@ -17,7 +17,7 @@ public interface TripManageUseCase {
 
     TripUpdateResponse updateTrip(UUID memberId, UUID tripId, TripUpdateRequest request);
 
-    TripUpdateVisibilityResponse updateTripVisibility(UUID tripId, TripUpdateVisibilityRequest request);
+    TripUpdateVisibilityResponse updateTripVisibility(UUID memberId, UUID tripId, TripUpdateVisibilityRequest request);
 
     void banMembers(UUID memberId, UUID tripId, List<UUID> memberIds);
 }

@@ -602,10 +602,10 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip trip = createReadyTrip(memberId);
         trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
         tripRepository.save(trip);
-        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, newMemberId);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(newMemberId);
 
         // when
-        tripService.delegateLeader(trip.getId(), request);
+        tripService.delegateLeader(trip.getId(), memberId, request);
 
         // then
         Trip updatedTrip = tripRepository.findById(trip.getId()).get();
@@ -620,11 +620,11 @@ class TripServiceTest extends BaseTripServiceTest {
         Trip trip = createReadyTrip(memberId);
         trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
         tripRepository.save(trip);
-        DelegateLeaderRequest request = new DelegateLeaderRequest(newMemberId, memberId);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId);
 
         // when & then
         assertThrows(MemberIsNotLeaderException.class, () -> {
-            tripService.delegateLeader(trip.getId(), request);
+            tripService.delegateLeader(trip.getId(), newMemberId, request);
         });
     }
 
@@ -633,11 +633,11 @@ class TripServiceTest extends BaseTripServiceTest {
     void delegateLeader_fail_toSelf() {
         // given
         Trip trip = createReadyTrip(memberId);
-        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, memberId);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId);
 
         // when & then
         assertThrows(BusinessException.class, () -> {
-            tripService.delegateLeader(trip.getId(), request);
+            tripService.delegateLeader(trip.getId(), memberId, request);
         });
     }
 
@@ -647,11 +647,11 @@ class TripServiceTest extends BaseTripServiceTest {
         // given
         Trip trip = createReadyTrip(memberId);
         UUID nonParticipantId = UUID.randomUUID();
-        DelegateLeaderRequest request = new DelegateLeaderRequest(memberId, nonParticipantId);
+        DelegateLeaderRequest request = new DelegateLeaderRequest(nonParticipantId);
 
         // when & then
         assertThrows(NotParticipantException.class, () -> {
-            tripService.delegateLeader(trip.getId(), request);
+            tripService.delegateLeader(trip.getId(), memberId, request);
         });
     }
 

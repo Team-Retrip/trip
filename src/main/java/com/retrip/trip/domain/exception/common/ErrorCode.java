@@ -10,6 +10,7 @@ public enum ErrorCode {
     SERVER_ERROR(INTERNAL_SERVER_ERROR, "Common-001", "Server error"),
     INVALID_INPUT_VALUE(BAD_REQUEST, "Common-002", "Invalid input value"),
     HANDLE_ACCESS_DENIED(FORBIDDEN, "Common-003", "Access is denied"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Common-007", "인증이 필요합니다."),
     ENTITY_NOT_FOUND(BAD_REQUEST, "Common-004", "Entity not found"),
     ILLEGAL_STATE(BAD_REQUEST, "Common-005", "Illegal state"),
     ILLEGAL_ARGUMENT(BAD_REQUEST, "Common-006", "Illegal argument"),

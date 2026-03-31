@@ -42,5 +42,4 @@ public class ImageController {
         PresignedUrlCreateResponse response = imageManageUseCase.createImagePresignedUrl(userContext.memberId(), request.extension());
         return ApiResponse.created(response);
     }
-
 }

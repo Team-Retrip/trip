@@ -90,8 +90,9 @@ public class TripService
     }
 
     @Override
-    public TripUpdateVisibilityResponse updateTripVisibility(UUID tripId, TripUpdateVisibilityRequest request) {
+    public TripUpdateVisibilityResponse updateTripVisibility(UUID memberId, UUID tripId, TripUpdateVisibilityRequest request) {
         Trip trip = findTrip(tripId);
+        trip.validateLeader(memberId);
         assignPasswordIfNotOpen(trip, request.password());
         trip.updateVisibility(request.open());
         return TripUpdateVisibilityResponse.of(trip, request.password());
@@ -161,9 +162,9 @@ public class TripService
     }
 
     @Override
-    public DelegateLeaderResponse delegateLeader(UUID tripId, DelegateLeaderRequest request) {
+    public DelegateLeaderResponse delegateLeader(UUID tripId, UUID currentLeaderId, DelegateLeaderRequest request) {
         Trip trip = findTrip(tripId);
-        trip.delegateLeader(request.currentLeaderId(), request.newLeaderId());
+        trip.delegateLeader(currentLeaderId, request.newLeaderId());
         return DelegateLeaderResponse.of(trip, request.newLeaderId());
     }
 
