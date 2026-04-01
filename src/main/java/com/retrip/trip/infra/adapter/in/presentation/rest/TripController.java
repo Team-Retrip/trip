@@ -52,14 +52,14 @@ public class TripController {
 
     @Operation(
             summary = "여행 생성",
-            description = "여행을 생성하는 API"
+            description = "일정이 포함된 여행을 생성하는 API"
     )
-    @ApiErrorCodeExamples({INVALID_MAX_PARTICIPANTS_VALUE, INVALID_HASHTAG_LENGTH, PRIVATE_TRIP_PASSWORD_REQUIRED})
+    @ApiErrorCodeExamples({TRIP_DAY_MUST_BE_POSITIVE, INVALID_MAX_PARTICIPANTS_VALUE, INVALID_HASHTAG_LENGTH, PRIVATE_TRIP_PASSWORD_REQUIRED, TRIP_PASSWORD_INVALID})
     @PostMapping
     public ApiResponse<TripCreateResponse> createTrip(
             @WithUserContext UserContext userContext,
             @RequestBody TripCreateRequest request) {
-        TripCreateResponse trip = tripManageUseCase.createTrip(userContext.memberId(), request);
+        TripCreateResponse trip = tripManageUseCase.createTripWithItineraries(userContext.memberId(), request);
         return ApiResponse.created(trip);
     }
 
@@ -74,19 +74,6 @@ public class TripController {
             @RequestBody TripUpdateRequest request) {
         TripUpdateResponse trip = tripManageUseCase.updateTrip(userContext.memberId(), tripId, request);
         return ApiResponse.ok(trip);
-    }
-
-    @Operation(
-            summary = "일정이 포함된 여행 생성",
-            description = "일정이 포함된 여행을 생성하는 API -> 이거는 사용하는지 확인해봐야함 일정을 별도로 생기는거로 바뀌었던 거 같아서"
-    )
-    @ApiErrorCodeExamples({TRIP_DAY_MUST_BE_POSITIVE, INVALID_MAX_PARTICIPANTS_VALUE, INVALID_HASHTAG_LENGTH, PRIVATE_TRIP_PASSWORD_REQUIRED, TRIP_PASSWORD_INVALID})
-    @PostMapping("/regular")
-    public ApiResponse<TripCreateResponse> createTripWithItineraries(
-            @WithUserContext UserContext userContext,
-            @RequestBody TripCreateRequest request) {
-        TripCreateResponse trip = tripManageUseCase.createTripWithItineraries(userContext.memberId(), request);
-        return ApiResponse.created(trip);
     }
 
     @Operation(

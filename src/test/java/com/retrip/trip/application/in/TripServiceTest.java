@@ -108,7 +108,7 @@ class TripServiceTest extends BaseTripServiceTest {
                         TripCategory.DOMESTIC);
 
         // when
-        TripCreateResponse response = tripService.createTrip(memberId, request);
+        TripCreateResponse response = tripService.createTripWithItineraries(memberId, request);
 
         // then
         assertThat(response.id()).isNotNull();
@@ -140,7 +140,7 @@ class TripServiceTest extends BaseTripServiceTest {
                 List.of(new TripCreateRequest.HashTagInput("남자", 1)),
                 TripCategory.OVERSEAS);
 
-        TripCreateResponse response = tripService.createTrip(memberId, request);
+        TripCreateResponse response = tripService.createTripWithItineraries(memberId, request);
 
         assertThat(response.destinationIds()).hasSize(3);
         assertThat(response.destinationIds()).containsExactlyInAnyOrder(destinationId1, destinationId2, destinationId3);
@@ -167,7 +167,7 @@ class TripServiceTest extends BaseTripServiceTest {
                 hashTags,
                 TripCategory.DOMESTIC);
 
-        TripCreateResponse response = tripService.createTrip(memberId, request);
+        TripCreateResponse response = tripService.createTripWithItineraries(memberId, request);
 
         assertThat(response.hashTags().get(0).tag()).isEqualTo("첫번째");
         assertThat(response.hashTags().get(1).tag()).isEqualTo("두번째");
@@ -192,7 +192,7 @@ class TripServiceTest extends BaseTripServiceTest {
                 TripCategory.DOMESTIC);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            tripService.createTrip(memberId, request);
+            tripService.createTripWithItineraries(memberId, request);
         });
     }
 
@@ -216,7 +216,7 @@ class TripServiceTest extends BaseTripServiceTest {
                 TripCategory.DOMESTIC);
 
         assertThrows(BusinessException.class, () -> {
-            tripService.createTrip(memberId, request);
+            tripService.createTripWithItineraries(memberId, request);
         });
     }
 

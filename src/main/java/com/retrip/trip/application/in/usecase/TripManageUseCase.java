@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TripManageUseCase {
-    TripCreateResponse createTrip(UUID memberId, TripCreateRequest request);
-
     TripCreateResponse createTripWithItineraries(UUID memberId, TripCreateRequest request);
 
     TripUpdateResponse updateTrip(UUID memberId, UUID tripId, TripUpdateRequest request);
