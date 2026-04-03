@@ -6,6 +6,8 @@ import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.TripStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +58,12 @@ public record TripDetailResponse(
                 example = "부산 2박 3일 여행"
         )
         String title,
+
+        @Schema(description = "여행 시작 날짜")
+        LocalDate start,
+
+        @Schema(description = "여행 종료 날짜")
+        LocalDate end,
 
         @Schema(
                 description = "여행 개설 일시",
@@ -130,6 +138,8 @@ public record TripDetailResponse(
                 .isInvited(pendingInvitationId != null)
                 .pendingInvitationId(pendingInvitationId)
                 .title(trip.getTitle().getValue())
+                .start(trip.getPeriod().getStart())
+                .end(trip.getPeriod().getEnd())
                 .createdAt(trip.getCreatedAt())
                 .participantCount(trip.getTripParticipants().getCurrentCount())
                 .maxParticipantCount(trip.getTripParticipants().getMaxParticipants())
