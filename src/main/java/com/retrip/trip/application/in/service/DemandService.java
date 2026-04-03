@@ -50,12 +50,12 @@ public class DemandService implements DemandManageUseCase {
         TripParticipant leader = trip.getLeader()
                 .orElseThrow(() -> new EntityNotFoundException(CANNOT_FIND_LEADER));
 
-        Map<String, Object> parameters = Map.of(
-                "senderName", nickName,
-                "tripName", trip.getTitle()
-        );
+//        Map<String, Object> parameters = Map.of(
+//                "senderName", nickName,
+//                "tripName", trip.getTitle()
+//        );
 
-        alarmGateway.sendAlarms(memberId, List.of(leader.getMemberId()), parameters, CallAlarmType.DEMAND);
+//        alarmGateway.sendAlarms(memberId, List.of(leader.getMemberId()), parameters, CallAlarmType.DEMAND);
 
         return DemandResponse.of(savedDemand.getId(), savedDemand.getTripId(), savedDemand.getMemberId(), savedDemand.getMessage(), savedDemand.getStatus());
     }
