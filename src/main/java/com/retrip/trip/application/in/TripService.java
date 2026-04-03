@@ -30,8 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.PARTICIPATION_CONFIRM_REQUEST_NOT_FOUND;
-import static com.retrip.trip.domain.exception.common.ErrorCode.PRIVATE_TRIP_PASSWORD_REQUIRED;
+import static com.retrip.trip.domain.exception.common.ErrorCode.*;
 
 @RequiredArgsConstructor
 @Transactional
@@ -145,6 +144,13 @@ public class TripService
     public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIds) {
         Trip trip = findTrip(tripId);
         trip.banMembers(loginMemberId, memberIds);
+    }
+
+    @Override
+    public void toggleRecruitmentStatus(UUID memberId, UUID tripId) {
+        Trip trip = findTrip(tripId);
+        trip.validateLeader(memberId);
+        trip.toggleRecruitmentStatus();
     }
 
     @Override

@@ -191,6 +191,18 @@ public class TripController {
         return ApiResponse.noContent();
     }
 
+    @Operation(
+            summary = "여행 모집 상태 토글",
+            description = "모집중 → 모집완료, 모집완료 → 모집중으로 상태를 토글하는 API"
+    )
+    @ApiErrorCodeExamples({TRIP_NOT_FOUND, NOT_TRIP_LEADER, TRIP_NOT_READY})
+    @PatchMapping("/{tripId}/status/toggle")
+    public ApiResponse<?> toggleRecruitmentStatus(@WithUserContext UserContext userContext,
+                                                  @PathVariable("tripId") UUID tripId) {
+        tripManageUseCase.toggleRecruitmentStatus(userContext.memberId(), tripId);
+        return ApiResponse.noContent();
+    }
+
 //    @Operation(
 //            summary = "여행 확정 요청",
 //            description = "리더가 여행 확정 요청을 하는 API"

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.retrip.trip.domain.exception.common.ErrorCode.NOT_TRIP_READY_STATUS;
+import static com.retrip.trip.domain.exception.common.ErrorCode.*;
 import static com.retrip.trip.domain.vo.TripStatus.IN_PROGRESS;
 import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
@@ -261,5 +261,17 @@ public class Trip extends BaseEntity {
 
     public List<TripParticipant> getParticipants() {
         return this.tripParticipants.getParticipants();
+    }
+
+    public void toggleRecruitmentStatus() {
+        if (this.status == TripStatus.RECRUITING) {
+            this.status = TripStatus.RECRUITMENT_CLOSED;
+            return;
+        }
+        if (this.status == TripStatus.RECRUITMENT_CLOSED) {
+            this.status = TripStatus.RECRUITING;
+            return;
+        }
+        throw new BusinessException(TRIP_NOT_READY);
     }
 }

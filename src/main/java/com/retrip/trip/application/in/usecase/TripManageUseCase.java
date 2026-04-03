@@ -18,4 +18,6 @@ public interface TripManageUseCase {
     TripUpdateVisibilityResponse updateTripVisibility(UUID memberId, UUID tripId, TripUpdateVisibilityRequest request);
 
     void banMembers(UUID memberId, UUID tripId, List<UUID> memberIds);
+
+    void toggleRecruitmentStatus(UUID memberId, UUID tripId);
 }

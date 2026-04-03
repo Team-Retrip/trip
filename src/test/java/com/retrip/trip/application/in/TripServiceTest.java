@@ -1117,4 +1117,65 @@ class TripServiceTest extends BaseTripServiceTest {
         assertThat(tripDetail.isInvited()).isFalse();
         assertThat(tripDetail.pendingInvitationId()).isNull();
     }
+
+    @Test
+    void 모집중_여행을_모집완료로_상태_변경한다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+
+        // when
+        tripService.toggleRecruitmentStatus(memberId, trip.getId());
+
+        // then
+        Trip updatedTrip = tripRepository.findById(trip.getId()).orElseThrow();
+        assertThat(updatedTrip.getStatus()).isEqualTo(TripStatus.RECRUITMENT_CLOSED);
+    }
+
+    @Test
+    void 모집완료_여행을_모집중으로_상태_변경한다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITMENT_CLOSED);
+
+        // when
+        tripService.toggleRecruitmentStatus(memberId, trip.getId());
+
+        // then
+        Trip updatedTrip = tripRepository.findById(trip.getId()).orElseThrow();
+        assertThat(updatedTrip.getStatus()).isEqualTo(TripStatus.RECRUITING);
+    }
+
+    @Test
+    void 진행중_여행은_모집_상태를_변경할_수_없다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "설명", TripCategory.DOMESTIC, TripStatus.IN_PROGRESS);
+
+        // when & then
+        assertThrows(BusinessException.class, () -> {
+            tripService.toggleRecruitmentStatus(memberId, trip.getId());
+        });
+    }
+
+    @Test
+    void 완료된_여행은_모집_상태를_변경할_수_없다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "설명", TripCategory.DOMESTIC, TripStatus.COMPLETED);
+
+        // when & then
+        assertThrows(BusinessException.class, () -> {
+            tripService.toggleRecruitmentStatus(memberId, trip.getId());
+        });
+    }
+
+    @Test
+    void 리더가_아닌_멤버는_모집_상태를_변경할_수_없다() {
+        // given
+        Trip trip = createTestTrip("테스트 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(MemberIsNotLeaderException.class, () -> {
+            tripService.toggleRecruitmentStatus(newMemberId, trip.getId());
+        });
+    }
 }
