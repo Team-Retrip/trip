@@ -1,22 +1,53 @@
 package com.retrip.trip.application.in;
 
-import com.retrip.trip.application.in.request.*;
-import com.retrip.trip.application.in.response.*;
-import com.retrip.trip.application.in.usecase.*;
+import static com.retrip.trip.domain.exception.common.ErrorCode.PRIVATE_TRIP_PASSWORD_REQUIRED;
+
+import com.retrip.trip.application.in.request.DelegateLeaderRequest;
+import com.retrip.trip.application.in.request.PeriodUpdateRequest;
+import com.retrip.trip.application.in.request.TripCreateRequest;
+import com.retrip.trip.application.in.request.TripUpdateRequest;
+import com.retrip.trip.application.in.request.TripUpdateVisibilityRequest;
+import com.retrip.trip.application.in.response.DelegateLeaderResponse;
+import com.retrip.trip.application.in.response.MyTripResponse;
+import com.retrip.trip.application.in.response.PeriodUpdateResponse;
+import com.retrip.trip.application.in.response.TripCreateResponse;
+import com.retrip.trip.application.in.response.TripDetailResponse;
+import com.retrip.trip.application.in.response.TripResponse;
+import com.retrip.trip.application.in.response.TripUpdateResponse;
+import com.retrip.trip.application.in.response.TripUpdateVisibilityResponse;
+import com.retrip.trip.application.in.usecase.DelegateLeaderUseCase;
+import com.retrip.trip.application.in.usecase.GetTripUseCase;
+import com.retrip.trip.application.in.usecase.LeaveTripUseCase;
+import com.retrip.trip.application.in.usecase.TripConfirmationUseCase;
+import com.retrip.trip.application.in.usecase.TripManageUseCase;
+import com.retrip.trip.application.in.usecase.TripPeriodUseCase;
 import com.retrip.trip.application.out.crypto.TripPasswordEncoder;
 import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.application.out.repository.DemandRepository;
 import com.retrip.trip.application.out.repository.InvitationRepository;
-import com.retrip.trip.application.out.repository.TripConfirmationDemandRepository;
 import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
-import com.retrip.trip.domain.entity.*;
+import com.retrip.trip.domain.entity.Itinerary;
+import com.retrip.trip.domain.entity.Trip;
+import com.retrip.trip.domain.entity.TripDestinations;
+import com.retrip.trip.domain.entity.TripHashTag;
+import com.retrip.trip.domain.entity.TripHashTags;
+import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.entity.invitation.Invitation;
 import com.retrip.trip.domain.exception.TripNotFoundException;
-import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
-import com.retrip.trip.domain.vo.*;
+import com.retrip.trip.domain.vo.DemandStatus;
+import com.retrip.trip.domain.vo.InvitationStatus;
+import com.retrip.trip.domain.vo.TripDescription;
+import com.retrip.trip.domain.vo.TripPassword;
+import com.retrip.trip.domain.vo.TripPeriod;
+import com.retrip.trip.domain.vo.TripStatus;
+import com.retrip.trip.domain.vo.TripTitle;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,13 +55,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static com.retrip.trip.domain.exception.common.ErrorCode.*;
 
 @RequiredArgsConstructor
 @Transactional
@@ -157,6 +181,7 @@ public class TripService
     public void leaveTrip(UUID tripId, UUID memberId) {
         Trip trip = findTrip(tripId);
         trip.leave(memberId);
+        demandRepository.deleteByMemberId(memberId);
     }
 
     @Override
