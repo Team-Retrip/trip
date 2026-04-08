@@ -97,7 +97,7 @@ public class TripParticipants {
 
     public boolean isParticipant(UUID memberId) {
         return this.values.stream()
-                .anyMatch(m -> memberId.equals(m.getMemberId()));
+                .anyMatch(m -> memberId.equals(m.getMemberId()) && m.getStatus() == ParticipantStatus.ACTIVE);
     }
 
     public void banMembers(UUID loginMemberId, List<UUID> memberIds, Trip trip) {
