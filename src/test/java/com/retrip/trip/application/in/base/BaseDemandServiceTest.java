@@ -5,8 +5,10 @@ import com.retrip.trip.application.in.service.DemandService;
 import com.retrip.trip.application.out.gateway.AlarmGateway;
 import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.application.out.repository.DemandRepository;
+import com.retrip.trip.application.out.repository.MyPageDemandQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.service.DemandPolicy;
+import com.retrip.trip.infra.adapter.out.persistence.mysql.query.MyPageDemandQuerydslRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,6 +22,7 @@ public abstract class BaseDemandServiceTest extends BaseServiceTest {
     @Autowired
     protected JPAQueryFactory jpaQueryFactory;
     protected DemandService demandService;
+    protected MyPageDemandQueryRepository myPageDemandQueryRepository;
 
     @Autowired
     protected AlarmGateway alarmGateway;
@@ -31,6 +34,7 @@ public abstract class BaseDemandServiceTest extends BaseServiceTest {
     void setUp() {
         demandRepository.deleteAll();
         tripRepository.deleteAll();
-        demandService = new DemandService(tripRepository, demandRepository, demandPolicy, alarmGateway, memberGateway);
+        myPageDemandQueryRepository = new MyPageDemandQuerydslRepository(jpaQueryFactory);
+        demandService = new DemandService(tripRepository, demandRepository, myPageDemandQueryRepository, demandPolicy, alarmGateway, memberGateway);
     }
 }

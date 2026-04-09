@@ -8,6 +8,8 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.InvitationManageUseCase;
 import com.retrip.trip.domain.exception.annotation.ApiErrorCodeExample;
 import com.retrip.trip.domain.exception.annotation.ApiErrorCodeExamples;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.infra.adapter.in.presentation.rest.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -74,8 +76,8 @@ public class InvitationController {
     }
 
     @Operation(
-            summary = "받은 초대장 목록 조회 (본인)",
-            description = "로그인한 회원이 받은 모든 초대장 목록을 조회합니다. 상태(대기/수락/거절/만료) 구분 없이 전체 반환됩니다."
+            summary = "받은 초대장 목록 조회 - INVITED 상태 (본인)",
+            description = "로그인한 회원이 받은 초대장 중 수락/거절 대기 중인(INVITED) 목록을 조회합니다."
     )
     @GetMapping("/members/invitations")
     public ApiResponse<Page<MemberInvitationResponse>> getMemberInvitations(
@@ -129,5 +131,24 @@ public class InvitationController {
         MemberInvitationRejectResponse invitation =
                 invitationManageUseCase.rejectMemberInvitations(userContext.memberId(), tripId, invitationId);
         return ApiResponse.ok(invitation);
+    }
+
+    @Operation(
+            summary = "마이페이지 초대함 목록 조회",
+            description = "로그인한 회원이 받은 초대 전체 목록을 조회합니다. 여행 상태, 국내/해외, 기간 필터를 지원합니다."
+    )
+    @GetMapping("/members/my-invitations")
+    public ApiResponse<Page<MyPageInvitationResponse>> getMyPageInvitations(
+            @WithUserContext UserContext userContext,
+            @Parameter(description = "여행 상태 필터 (복수 선택 가능)", example = "RECRUITING")
+            @RequestParam(name = "tripStatus", required = false) List<TripStatus> tripStatuses,
+            @Parameter(description = "여행 카테고리 필터 (DOMESTIC: 국내, OVERSEAS: 해외)", example = "DOMESTIC")
+            @RequestParam(name = "category", required = false) TripCategory category,
+            @Parameter(description = "기간 필터 (RECENT_6_MONTHS 또는 연도 예: 2026)", example = "RECENT_6_MONTHS")
+            @RequestParam(name = "period", required = false) String period,
+            @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        Page<MyPageInvitationResponse> result =
+                invitationManageUseCase.getMyPageInvitations(userContext.memberId(), tripStatuses, category, period, pageable);
+        return ApiResponse.ok(result);
     }
 }

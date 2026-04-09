@@ -1,7 +1,7 @@
 package com.retrip.trip.application.in.service;
 
-import com.retrip.trip.application.in.request.context.UserContext;
 import com.retrip.trip.application.in.request.demand.TripDemandRequest;
+import com.retrip.trip.application.in.response.MyPageDemandResponse;
 import com.retrip.trip.application.in.response.demand.DemandApproveResponse;
 import com.retrip.trip.application.in.response.demand.DemandRejectResponse;
 import com.retrip.trip.application.in.response.demand.DemandResponse;
@@ -9,8 +9,8 @@ import com.retrip.trip.application.in.response.demand.DemandsResponse;
 import com.retrip.trip.application.in.usecase.DemandManageUseCase;
 import com.retrip.trip.application.out.gateway.AlarmGateway;
 import com.retrip.trip.application.out.gateway.MemberGateway;
-import com.retrip.trip.application.out.gateway.model.CallAlarmType;
 import com.retrip.trip.application.out.repository.DemandRepository;
+import com.retrip.trip.application.out.repository.MyPageDemandQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
@@ -19,7 +19,11 @@ import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.DemandPolicy;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,7 @@ import static com.retrip.trip.domain.exception.common.ErrorCode.DEMAND_NOT_FOUND
 public class DemandService implements DemandManageUseCase {
     private final TripRepository tripRepository;
     private final DemandRepository demandRepository;
+    private final MyPageDemandQueryRepository myPageDemandQueryRepository;
     private final DemandPolicy demandPolicy;
     private final AlarmGateway alarmGateway;
     private final MemberGateway memberGateway;
@@ -95,6 +100,23 @@ public class DemandService implements DemandManageUseCase {
         return demands.stream()
                 .map(d -> DemandsResponse.of(d, memberInfoMap.get(d.getMemberId())))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MyPageDemandResponse> getMyPageDemands(
+            UUID memberId, List<TripStatus> tripStatuses, TripCategory category, String period, Pageable pageable) {
+        Page<Demand> demands = myPageDemandQueryRepository.findMyPageDemands(
+                memberId, tripStatuses, category, period, pageable);
+
+        List<UUID> tripIds = demands.getContent().stream()
+                .map(Demand::getTripId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<UUID, Trip> tripMap = tripRepository.findAllById(tripIds).stream()
+                .collect(Collectors.toMap(Trip::getId, t -> t));
+
+        return demands.map(d -> MyPageDemandResponse.of(d, tripMap.get(d.getTripId())));
     }
 
     private Trip findTrip(UUID tripId) {

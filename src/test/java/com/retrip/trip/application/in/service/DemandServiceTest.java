@@ -2,12 +2,14 @@ package com.retrip.trip.application.in.service;
 
 import static com.retrip.trip.domain.fixture.TripFixture.LEADER_ID;
 import static com.retrip.trip.domain.fixture.TripFixture.정수_ID;
+import static com.retrip.trip.domain.fixture.TripFixture.홍석_ID;
 import static com.retrip.trip.domain.fixture.TripFixture.지수_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.retrip.trip.application.in.base.BaseDemandServiceTest;
 import com.retrip.trip.application.in.request.demand.TripDemandRequest;
+import com.retrip.trip.application.in.response.MyPageDemandResponse;
 import com.retrip.trip.application.in.response.demand.DemandApproveResponse;
 import com.retrip.trip.application.in.response.demand.DemandResponse;
 import com.retrip.trip.application.in.response.demand.DemandRejectResponse;
@@ -21,11 +23,15 @@ import com.retrip.trip.domain.exception.common.BusinessException;
 import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.DemandStatus;
 import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 
 class DemandServiceTest extends BaseDemandServiceTest {
@@ -190,5 +196,127 @@ class DemandServiceTest extends BaseDemandServiceTest {
         assertThat(response.memberName()).isNull();
         assertThat(response.memberProfileImageUrl()).isNull();
         assertThat(response.memberBio()).isNull();
+    }
+
+    @Test
+    void 마이페이지_신청함_전체_목록을_조회한다() {
+        // given: 3개 여행에 신청
+        Trip trip1 = createTestTrip("여행1", "설명", TripCategory.DOMESTIC);
+        Trip trip2 = createTestTrip("여행2", "설명", TripCategory.DOMESTIC);
+        Trip trip3 = createTestTrip("여행3", "설명", TripCategory.OVERSEAS);
+        demandRepository.save(Demand.create(홍석_ID, trip1.getId(), "신청1"));
+        demandRepository.save(Demand.create(홍석_ID, trip2.getId(), "신청2"));
+        demandRepository.save(Demand.create(홍석_ID, trip3.getId(), "신청3"));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when: 필터 없이 전체 조회
+        Page<MyPageDemandResponse> result =
+                demandService.getMyPageDemands(홍석_ID, null, null, null, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(3);
+    }
+
+    @Test
+    void 마이페이지_신청함_여행상태로_필터링한다() {
+        // given: RECRUITING 여행 1개, RECRUITMENT_CLOSED 여행 1개에 신청
+        Trip recruitingTrip = createTestTrip("모집중 여행", "설명", TripCategory.DOMESTIC);
+        Trip closedTrip = TripFixture.createReadyTrip(LEADER_ID, "모집완료 여행", "설명", TripCategory.DOMESTIC);
+        tripRepository.save(closedTrip);
+        demandRepository.save(Demand.create(홍석_ID, recruitingTrip.getId(), "신청1"));
+        demandRepository.save(Demand.create(홍석_ID, closedTrip.getId(), "신청2"));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when: RECRUITING 만 필터
+        Page<MyPageDemandResponse> result =
+                demandService.getMyPageDemands(홍석_ID, List.of(TripStatus.RECRUITING), null, null, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).tripStatus()).isEqualTo(TripStatus.RECRUITING.name());
+    }
+
+    @Test
+    void 마이페이지_신청함_국내_해외로_필터링한다() {
+        // given: 국내 여행 1개, 해외 여행 2개에 신청
+        Trip domesticTrip = createTestTrip("국내 여행", "설명", TripCategory.DOMESTIC);
+        Trip overseasTrip1 = createTestTrip("해외 여행1", "설명", TripCategory.OVERSEAS);
+        Trip overseasTrip2 = createTestTrip("해외 여행2", "설명", TripCategory.OVERSEAS);
+        demandRepository.save(Demand.create(홍석_ID, domesticTrip.getId(), "신청1"));
+        demandRepository.save(Demand.create(홍석_ID, overseasTrip1.getId(), "신청2"));
+        demandRepository.save(Demand.create(홍석_ID, overseasTrip2.getId(), "신청3"));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when: 해외만 필터
+        Page<MyPageDemandResponse> result =
+                demandService.getMyPageDemands(홍석_ID, null, TripCategory.OVERSEAS, null, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent()).allMatch(r -> r.tripCategory().equals(TripCategory.OVERSEAS.name()));
+    }
+
+    @Test
+    void 마이페이지_신청함_기간_연도로_필터링한다() {
+        // given: 현재 연도에 신청한 것만 있음
+        Trip trip1 = createTestTrip("여행1", "설명", TripCategory.DOMESTIC);
+        Trip trip2 = createTestTrip("여행2", "설명", TripCategory.DOMESTIC);
+        demandRepository.save(Demand.create(홍석_ID, trip1.getId(), "신청1"));
+        demandRepository.save(Demand.create(홍석_ID, trip2.getId(), "신청2"));
+
+        int currentYear = java.time.LocalDateTime.now().getYear();
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when: 올해 연도로 필터
+        Page<MyPageDemandResponse> result =
+                demandService.getMyPageDemands(홍석_ID, null, null, String.valueOf(currentYear), pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    void 마이페이지_신청함_최근6개월로_필터링한다() {
+        // given: 현재 시점에 생성된 신청 2개 (모두 최근 6개월 이내)
+        Trip trip1 = createTestTrip("여행1", "설명", TripCategory.DOMESTIC);
+        Trip trip2 = createTestTrip("여행2", "설명", TripCategory.DOMESTIC);
+        demandRepository.save(Demand.create(홍석_ID, trip1.getId(), "신청1"));
+        demandRepository.save(Demand.create(홍석_ID, trip2.getId(), "신청2"));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<MyPageDemandResponse> result =
+                demandService.getMyPageDemands(홍석_ID, null, null, "RECENT_6_MONTHS", pageable);
+
+        // then: 모두 최근 6개월 이내이므로 전부 반환
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    void 마이페이지_신청함_여행상태와_카테고리를_복합_필터링한다() {
+        // given
+        Trip domesticRecruiting = createTestTrip("국내 모집중", "설명", TripCategory.DOMESTIC);
+        Trip overseasRecruiting = createTestTrip("해외 모집중", "설명", TripCategory.OVERSEAS);
+        Trip domesticClosed = TripFixture.createReadyTrip(LEADER_ID, "국내 모집완료", "설명", TripCategory.DOMESTIC);
+        tripRepository.save(domesticClosed);
+
+        demandRepository.save(Demand.create(홍석_ID, domesticRecruiting.getId(), "신청1"));
+        demandRepository.save(Demand.create(홍석_ID, overseasRecruiting.getId(), "신청2"));
+        demandRepository.save(Demand.create(홍석_ID, domesticClosed.getId(), "신청3"));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when: 국내 + 모집중
+        Page<MyPageDemandResponse> result =
+                demandService.getMyPageDemands(홍석_ID, List.of(TripStatus.RECRUITING), TripCategory.DOMESTIC, null, pageable);
+
+        // then: 국내 모집중 여행 신청 1개만
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).tripCategory()).isEqualTo(TripCategory.DOMESTIC.name());
+        assertThat(result.getContent().get(0).tripStatus()).isEqualTo(TripStatus.RECRUITING.name());
     }
 }

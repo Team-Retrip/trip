@@ -6,6 +6,7 @@ import com.retrip.trip.application.in.response.*;
 import com.retrip.trip.application.in.usecase.InvitationManageUseCase;
 import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.application.out.repository.InvitationRepository;
+import com.retrip.trip.application.out.repository.MyPageInvitationQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
@@ -15,6 +16,8 @@ import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.EntityNotFoundException;
 import com.retrip.trip.domain.service.InvitationPolicy;
 import com.retrip.trip.domain.vo.InvitationStatus;
+import com.retrip.trip.domain.vo.TripCategory;
+import com.retrip.trip.domain.vo.TripStatus;
 import com.retrip.trip.infra.adapter.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,6 +40,7 @@ import static com.retrip.trip.domain.exception.common.ErrorCode.INVITATION_NOT_F
 public class InvitationService implements InvitationManageUseCase {
     private final TripRepository tripRepository;
     private final InvitationRepository invitationRepository;
+    private final MyPageInvitationQueryRepository myPageInvitationQueryRepository;
     private final InvitationPolicy invitationPolicy;
     private final MemberGateway memberGateway;
 
@@ -71,7 +75,7 @@ public class InvitationService implements InvitationManageUseCase {
     public Page<MemberInvitationResponse> getMemberInvitations(
             UUID memberId, Pageable page, TripInvitationOrder order, String sort) {
         Pageable pageable = PaginationUtils.createPageRequest(page, order.getField(), sort);
-        Page<Invitation> tripInvitations = invitationRepository.findByMemberId(memberId, pageable);
+        Page<Invitation> tripInvitations = invitationRepository.findByMemberIdAndStatus(memberId, InvitationStatus.INVITED, pageable);
 
         List<UUID> tripIds = tripInvitations.getContent().stream()
                 .map(Invitation::getTripId)
@@ -81,6 +85,23 @@ public class InvitationService implements InvitationManageUseCase {
                 .collect(Collectors.toMap(Trip::getId, t -> t));
 
         return tripInvitations.map(inv -> MemberInvitationResponse.of(inv, tripMap.get(inv.getTripId())));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<MyPageInvitationResponse> getMyPageInvitations(
+            UUID memberId, List<TripStatus> tripStatuses, TripCategory category, String period, Pageable pageable) {
+        Page<Invitation> invitations = myPageInvitationQueryRepository.findMyPageInvitations(
+                memberId, tripStatuses, category, period, pageable);
+
+        List<UUID> tripIds = invitations.getContent().stream()
+                .map(Invitation::getTripId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<UUID, Trip> tripMap = tripRepository.findAllById(tripIds).stream()
+                .collect(Collectors.toMap(Trip::getId, t -> t));
+
+        return invitations.map(inv -> MyPageInvitationResponse.of(inv, tripMap.get(inv.getTripId())));
     }
 
     @Override
