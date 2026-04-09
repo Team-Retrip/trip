@@ -22,4 +22,6 @@ public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
     Page<Invitation> findByMemberIdAndStatus(UUID memberId, InvitationStatus status, Pageable pageable);
 
     Optional<Invitation> findByTripIdAndMemberIdAndStatus(UUID tripId, UUID memberId, InvitationStatus status);
+
+    void deleteByTripId(UUID tripId);
 }

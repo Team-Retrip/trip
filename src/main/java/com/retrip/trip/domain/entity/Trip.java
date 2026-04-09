@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.retrip.trip.domain.exception.common.ErrorCode.*;
+import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_CANNOT_DELETE;
 import static com.retrip.trip.domain.vo.TripStatus.IN_PROGRESS;
 import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
@@ -261,6 +262,15 @@ public class Trip extends BaseEntity {
 
     public List<TripParticipant> getParticipants() {
         return this.tripParticipants.getParticipants();
+    }
+
+    public void validateDeletable(UUID memberId) {
+        if (!tripParticipants.requireLeader(memberId)) {
+            throw new MemberIsNotLeaderException();
+        }
+        if (this.status != TripStatus.RECRUITING && this.status != RECRUITMENT_CLOSED) {
+            throw new BusinessException(TRIP_CANNOT_DELETE);
+        }
     }
 
     public void toggleRecruitmentStatus() {

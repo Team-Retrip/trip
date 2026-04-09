@@ -15,4 +15,6 @@ public interface VoteRepository extends JpaRepository<Vote, UUID> {
 
     @Query("SELECT v FROM Vote v WHERE v.status = :status AND v.period.startTIme < :now")
     List<Vote> findClosableVotes(VoteStatus status, Instant now);
+
+    void deleteByTripId(UUID tripId);
 }

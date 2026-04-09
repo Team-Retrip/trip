@@ -28,6 +28,7 @@ import com.retrip.trip.application.out.repository.InvitationRepository;
 import com.retrip.trip.application.out.repository.TripItineraryQueryRepository;
 import com.retrip.trip.application.out.repository.TripQueryRepository;
 import com.retrip.trip.application.out.repository.TripRepository;
+import com.retrip.trip.application.out.repository.VoteRepository;
 import com.retrip.trip.domain.entity.Itinerary;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripDestinations;
@@ -69,6 +70,7 @@ public class TripService
     private final MemberGateway memberGateway;
     private final DemandRepository demandRepository;
     private final InvitationRepository invitationRepository;
+    private final VoteRepository voteRepository;
 
     @Override
     public TripCreateResponse createTripWithItineraries(UUID memberId, TripCreateRequest request) {
@@ -168,6 +170,16 @@ public class TripService
     public void banMembers(UUID loginMemberId, UUID tripId, List<UUID> memberIds) {
         Trip trip = findTrip(tripId);
         trip.banMembers(loginMemberId, memberIds);
+    }
+
+    @Override
+    public void deleteTrip(UUID memberId, UUID tripId) {
+        Trip trip = findTrip(tripId);
+        trip.validateDeletable(memberId);
+        invitationRepository.deleteByTripId(tripId);
+        demandRepository.deleteByTripId(tripId);
+        voteRepository.deleteByTripId(tripId);
+        tripRepository.delete(trip);
     }
 
     @Override

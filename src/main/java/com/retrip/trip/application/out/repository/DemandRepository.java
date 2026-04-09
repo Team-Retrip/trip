@@ -13,4 +13,6 @@ public interface DemandRepository extends JpaRepository<Demand, UUID> {
     Optional<Demand> findByTripIdAndMemberIdAndStatus(UUID tripId, UUID memberId, DemandStatus status);
 
     void deleteByMemberId(UUID memberId);
+
+    void deleteByTripId(UUID tripId);
 }

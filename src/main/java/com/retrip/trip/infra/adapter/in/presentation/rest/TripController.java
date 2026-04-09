@@ -179,6 +179,19 @@ public class TripController {
     }
 
     @Operation(
+            summary = "여행방 삭제",
+            description = "리더가 여행방을 삭제하는 API. 모집중(RECRUITING) 또는 모집완료(RECRUITMENT_CLOSED) 상태일 때만 삭제 가능합니다."
+    )
+    @ApiErrorCodeExamples({TRIP_NOT_FOUND, MEMBER_IS_NOT_LEADER, TRIP_CANNOT_DELETE})
+    @DeleteMapping("/{tripId}")
+    public ApiResponse<Void> deleteTrip(
+            @WithUserContext UserContext userContext,
+            @PathVariable UUID tripId) {
+        tripManageUseCase.deleteTrip(userContext.memberId(), tripId);
+        return ApiResponse.noContent();
+    }
+
+    @Operation(
             summary = "여행 멤버 리스트 강퇴",
             description = "여행 멤버 여러명을 강퇴할 수 있는 API"
     )

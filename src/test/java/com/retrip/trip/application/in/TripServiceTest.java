@@ -1178,4 +1178,88 @@ class TripServiceTest extends BaseTripServiceTest {
             tripService.toggleRecruitmentStatus(newMemberId, trip.getId());
         });
     }
+
+    @Test
+    void 리더가_모집중_여행을_삭제한다() {
+        // given
+        Trip trip = createTestTrip("삭제할 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        tripRepository.save(trip);
+
+        // when
+        tripService.deleteTrip(memberId, trip.getId());
+
+        // then
+        assertThat(tripRepository.findById(trip.getId())).isEmpty();
+    }
+
+    @Test
+    void 리더가_모집완료_여행을_삭제한다() {
+        // given
+        Trip trip = createTestTrip("삭제할 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.RECRUITMENT_CLOSED);
+        tripRepository.save(trip);
+
+        // when
+        tripService.deleteTrip(memberId, trip.getId());
+
+        // then
+        assertThat(tripRepository.findById(trip.getId())).isEmpty();
+    }
+
+    @Test
+    void 여행_삭제시_연관된_초대와_신청도_함께_삭제된다() {
+        // given
+        Trip trip = createTestTrip("삭제할 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        tripRepository.save(trip);
+
+        invitationRepository.save(new com.retrip.trip.domain.entity.invitation.Invitation(trip.getId(), newMemberId));
+        demandRepository.save(com.retrip.trip.domain.entity.demand.Demand.create(newMemberId, trip.getId(), "참여 요청"));
+
+        // when
+        tripService.deleteTrip(memberId, trip.getId());
+
+        // then
+        assertThat(tripRepository.findById(trip.getId())).isEmpty();
+        assertThat(invitationRepository.findByTripId(trip.getId())).isEmpty();
+        assertThat(demandRepository.findAllByTripId(trip.getId())).isEmpty();
+    }
+
+    @Test
+    void 리더가_아니면_여행을_삭제할_수_없다() {
+        // given
+        Trip trip = createTestTrip("삭제 불가 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(MemberIsNotLeaderException.class, () ->
+                tripService.deleteTrip(newMemberId, trip.getId()));
+        assertThat(tripRepository.findById(trip.getId())).isPresent();
+    }
+
+    @Test
+    void 여행중_상태에서는_여행을_삭제할_수_없다() {
+        // given
+        Trip trip = createTestTrip("여행중 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(BusinessException.class, () ->
+                tripService.deleteTrip(memberId, trip.getId()));
+        assertThat(tripRepository.findById(trip.getId())).isPresent();
+    }
+
+    @Test
+    void 여행완료_상태에서는_여행을_삭제할_수_없다() {
+        // given
+        Trip trip = createTestTrip("완료된 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.COMPLETED);
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(BusinessException.class, () ->
+                tripService.deleteTrip(memberId, trip.getId()));
+        assertThat(tripRepository.findById(trip.getId())).isPresent();
+    }
 }

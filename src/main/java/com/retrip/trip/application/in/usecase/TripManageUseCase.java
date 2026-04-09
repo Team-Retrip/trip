@@ -20,4 +20,6 @@ public interface TripManageUseCase {
     void banMembers(UUID memberId, UUID tripId, List<UUID> memberIds);
 
     void toggleRecruitmentStatus(UUID memberId, UUID tripId);
+
+    void deleteTrip(UUID memberId, UUID tripId);
 }
