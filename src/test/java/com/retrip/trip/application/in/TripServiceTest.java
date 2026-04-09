@@ -1207,9 +1207,10 @@ class TripServiceTest extends BaseTripServiceTest {
     }
 
     @Test
-    void 여행_삭제시_연관된_초대와_신청도_함께_삭제된다() {
+    void 여행_삭제시_참가자_초대_신청이_모두_함께_삭제된다() {
         // given
         Trip trip = createTestTrip("삭제할 여행", "설명", TripCategory.DOMESTIC, TripStatus.RECRUITING);
+        trip.addParticipant(TripParticipant.createTripParticipant(newMemberId, trip));
         tripRepository.save(trip);
 
         invitationRepository.save(new com.retrip.trip.domain.entity.invitation.Invitation(trip.getId(), newMemberId));
@@ -1220,6 +1221,7 @@ class TripServiceTest extends BaseTripServiceTest {
 
         // then
         assertThat(tripRepository.findById(trip.getId())).isEmpty();
+        assertThat(tripParticipantRepository.findById(newMemberId)).isEmpty();
         assertThat(invitationRepository.findByTripId(trip.getId())).isEmpty();
         assertThat(demandRepository.findAllByTripId(trip.getId())).isEmpty();
     }

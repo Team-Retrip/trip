@@ -30,6 +30,9 @@ public abstract class BaseTripServiceTest extends BaseServiceTest {
     protected VoteRepository voteRepository;
 
     @Autowired
+    protected TripParticipantRepository tripParticipantRepository;
+
+    @Autowired
     protected EntityManager em;
 
     @Autowired
