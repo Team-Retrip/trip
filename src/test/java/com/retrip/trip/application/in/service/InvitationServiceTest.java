@@ -123,6 +123,53 @@ class InvitationServiceTest extends BaseInvitationServiceTest {
     }
 
     @Test
+    void 사용자_초대_목록_조회시_여행지_정보가_DTO로_반환된다() {
+        // given
+        Trip trip = createTrip(TRIP_ID);
+        tripRepository.save(trip);
+        Invitation inv = new Invitation(TRIP_ID, 홍석_ID);
+        invitationRepository.save(inv);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<MemberInvitationResponse> result =
+                invitationService.getMemberInvitations(홍석_ID, pageable, DATE, "desc");
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        MemberInvitationResponse response = result.getContent().get(0);
+        assertThat(response.destinations()).isNotNull();
+        assertThat(response.destinations()).allSatisfy(d -> {
+            assertThat(d.destinationId()).isNotNull();
+            assertThat(d.destinationName()).isNull(); // 미구현
+        });
+    }
+
+    @Test
+    void 마이페이지_초대함_조회시_여행지_정보가_DTO로_반환된다() {
+        // given
+        Trip trip = TripFixture.createTestTrip(LEADER_ID, "여행", "설명", TripCategory.DOMESTIC);
+        tripRepository.save(trip);
+        invitationRepository.save(new Invitation(trip.getId(), 홍석_ID));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<MyPageInvitationResponse> result =
+                invitationService.getMyPageInvitations(홍석_ID, null, null, null, pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        MyPageInvitationResponse response = result.getContent().get(0);
+        assertThat(response.destinations()).isNotNull();
+        assertThat(response.destinations()).allSatisfy(d -> {
+            assertThat(d.destinationId()).isNotNull();
+            assertThat(d.destinationName()).isNull(); // 미구현
+        });
+    }
+
+    @Test
     void 사용자_초대_목록_조회시_INVITED_상태만_반환된다() {
         // given
         Trip trip = createTrip(TRIP_ID);

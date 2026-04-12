@@ -34,8 +34,8 @@ public record MemberInvitationResponse(
         int maxParticipants,
         @Schema(description = "여행 상태 코드", example = "ONGOING")
         String tripStatus,
-        @Schema(description = "여행지 ID 목록")
-        List<UUID> destinationIds
+        @Schema(description = "여행지 목록")
+        List<DestinationResponse> destinations
 ) {
     public static MemberInvitationResponse of(Invitation invitation, Trip trip) {
         return new MemberInvitationResponse(
@@ -51,7 +51,7 @@ public record MemberInvitationResponse(
                 trip != null ? trip.getTripParticipants().getCurrentCount() : 0,
                 trip != null ? trip.getTripParticipants().getMaxParticipants() : 0,
                 trip != null ? trip.getStatus().name() : null,
-                trip != null ? trip.getDestinations().getDestinationIds() : List.of()
+                trip != null ? DestinationResponse.ofIds(trip.getDestinations().getDestinationIds()) : List.of()
         );
     }
 }

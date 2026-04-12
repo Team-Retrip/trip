@@ -32,8 +32,8 @@ public record MyPageInvitationResponse(
         String tripStatus,
         @Schema(description = "여행 카테고리 코드", example = "DOMESTIC")
         String tripCategory,
-        @Schema(description = "여행지 ID 목록")
-        List<UUID> destinationIds
+        @Schema(description = "여행지 목록")
+        List<DestinationResponse> destinations
 ) {
     public static MyPageInvitationResponse of(Invitation invitation, Trip trip) {
         return new MyPageInvitationResponse(
@@ -48,7 +48,7 @@ public record MyPageInvitationResponse(
                 trip != null ? trip.getTripParticipants().getMaxParticipants() : 0,
                 trip != null ? trip.getStatus().name() : null,
                 trip != null ? trip.getCategory().name() : null,
-                trip != null ? trip.getDestinations().getDestinationIds() : List.of()
+                trip != null ? DestinationResponse.ofIds(trip.getDestinations().getDestinationIds()) : List.of()
         );
     }
 }
