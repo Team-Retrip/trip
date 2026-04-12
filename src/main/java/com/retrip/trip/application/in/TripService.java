@@ -40,6 +40,7 @@ import com.retrip.trip.domain.exception.TripNotFoundException;
 import com.retrip.trip.domain.exception.common.InvalidValueException;
 import com.retrip.trip.domain.vo.DemandStatus;
 import com.retrip.trip.domain.vo.InvitationStatus;
+import com.retrip.trip.domain.vo.ParticipantStatus;
 import com.retrip.trip.domain.vo.TripDescription;
 import com.retrip.trip.domain.vo.TripPassword;
 import com.retrip.trip.domain.vo.TripPeriod;
@@ -130,6 +131,7 @@ public class TripService
     public TripDetailResponse getTripDetail(UUID memberId, UUID tripId) {
         Trip trip = findTrip(tripId);
         List<UUID> participantMemberIds = trip.getTripParticipants().getValues().stream()
+                .filter(p -> p.getStatus() == ParticipantStatus.ACTIVE)
                 .map(TripParticipant::getMemberId)
                 .toList();
         Map<UUID, MemberGateway.MemberInfo> memberInfoMap = memberGateway.getMembersByIds(participantMemberIds).stream()

@@ -4,6 +4,7 @@ import com.retrip.trip.application.out.gateway.MemberGateway;
 import com.retrip.trip.domain.entity.Trip;
 import com.retrip.trip.domain.entity.TripParticipant;
 import com.retrip.trip.domain.vo.ParticipantRole;
+import com.retrip.trip.domain.vo.ParticipantStatus;
 import com.retrip.trip.domain.vo.TripStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
