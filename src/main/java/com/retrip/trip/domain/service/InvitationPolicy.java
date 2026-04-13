@@ -64,8 +64,5 @@ public class InvitationPolicy {
         if (!invitation.getMemberId().equals(memberId)) {
             throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
-        if (!invitation.canDelete()) {
-            throw new InvitationDeleteNotAllowedException();
-        }
     }
 }

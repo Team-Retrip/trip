@@ -92,9 +92,9 @@ public class InvitationController {
 
     @Operation(
             summary = "받은 초대장 삭제",
-            description = "거절되거나 만료된 초대장을 목록에서 삭제합니다. 대기 중이거나 수락된 초대장은 삭제할 수 없습니다."
+            description = "초대장을 목록에서 삭제합니다. 대기 중이거나 수락된 초대장은 삭제할 수 없습니다."
     )
-    @ApiErrorCodeExamples({INVITATION_NOT_FOUND, INVITATION_CANNOT_DELETE, HANDLE_ACCESS_DENIED})
+    @ApiErrorCodeExamples({INVITATION_NOT_FOUND, HANDLE_ACCESS_DENIED})
     @DeleteMapping("/members/invitations/{invitationId}")
     public ApiResponse<Void> deleteMemberInvitation(
             @WithUserContext UserContext userContext,
