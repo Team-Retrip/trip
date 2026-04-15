@@ -62,7 +62,8 @@ public enum ErrorCode {
     TRIP_UPDATE_FAIL(BAD_REQUEST, "Trip-045", "여행을 수정할 수 없습니다."),
     CANNOT_FIND_LEADER(INTERNAL_SERVER_ERROR, "Trip-046", "해당 여행은 리더가 없습니다."),
     INVITATION_CANNOT_DELETE(BAD_REQUEST, "Trip-047", "해당 상태의 초대장은 삭제할 수 없습니다."),
-    TRIP_CANNOT_DELETE(BAD_REQUEST, "Trip-048", "모집중 또는 모집완료 상태의 여행만 삭제할 수 있습니다.");
+    TRIP_CANNOT_DELETE(BAD_REQUEST, "Trip-048", "모집중 또는 모집완료 상태의 여행만 삭제할 수 있습니다."),
+    DEMAND_CANCEL_NOT_ALLOWED(BAD_REQUEST, "Trip-049", "대기 상태의 본인 신청만 취소할 수 있습니다.");
 
     private final HttpStatus status;
     private final String code;

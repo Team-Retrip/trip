@@ -89,6 +89,13 @@ public class DemandService implements DemandManageUseCase {
     }
 
     @Override
+    public void cancelDemand(UUID memberId, UUID demandId) {
+        Demand demand = findDemand(demandId);
+        demandPolicy.canCancel(memberId, demand);
+        demandRepository.delete(demand);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<DemandsResponse> getDemands(UUID memberId, UUID tripId) {
         Trip trip = findTrip(tripId);

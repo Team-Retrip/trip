@@ -87,6 +87,20 @@ public class DemandController {
     }
 
     @Operation(
+            summary = "여행 참가 신청 취소",
+            description = "본인이 신청한 여행 참가 신청을 취소하는 API (대기 상태일 때만 가능)"
+    )
+    @ApiErrorCodeExamples({DEMAND_NOT_FOUND, DEMAND_CANCEL_NOT_ALLOWED})
+    @DeleteMapping("/{tripId}/demand/{demandId}")
+    public ApiResponse<Void> cancelDemand(
+            @WithUserContext UserContext userContext,
+            @PathVariable("tripId") UUID tripId,
+            @PathVariable("demandId") UUID demandId) {
+        demandManageUseCase.cancelDemand(userContext.memberId(), demandId);
+        return ApiResponse.noContent();
+    }
+
+    @Operation(
             summary = "마이페이지 신청함 목록 조회",
             description = "로그인한 회원이 신청한 여행 목록을 조회합니다. 여행 상태, 국내/해외, 기간 필터를 지원합니다."
     )

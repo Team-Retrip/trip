@@ -297,6 +297,49 @@ class DemandServiceTest extends BaseDemandServiceTest {
     }
 
     @Test
+    void 본인이_대기중인_참여요청을_취소하면_삭제된다() {
+        // given
+        Trip trip = createTestTrip("취소 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        Demand demand = createTestDemand(trip.getId(), "취소할 참여 요청");
+
+        // when
+        demandService.cancelDemand(정수_ID, demand.getId());
+
+        // then
+        assertThat(demandRepository.findById(demand.getId())).isEmpty();
+    }
+
+    @Test
+    void 다른_사람의_참여요청은_취소할_수_없다() {
+        // given
+        Trip trip = createTestTrip("취소 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        Demand demand = createTestDemand(trip.getId(), "정수가 신청한 요청");
+
+        // when & then
+        assertThrows(BusinessException.class, () -> demandService.cancelDemand(홍석_ID, demand.getId()));
+    }
+
+    @Test
+    void 승인된_참여요청은_취소할_수_없다() {
+        // given
+        Trip trip = createTestTrip("취소 테스트 여행", "여행 설명", TripCategory.DOMESTIC);
+        Demand demand = createTestDemand(trip.getId(), "이미 승인된 요청");
+        demandService.approve(LEADER_ID, trip.getId(), demand.getId());
+
+        // when & then
+        assertThrows(BusinessException.class, () -> demandService.cancelDemand(정수_ID, demand.getId()));
+    }
+
+    @Test
+    void 존재하지_않는_참여요청은_취소할_수_없다() {
+        // given
+        UUID nonExistentDemandId = UUID.randomUUID();
+
+        // when & then
+        assertThrows(BusinessException.class, () -> demandService.cancelDemand(정수_ID, nonExistentDemandId));
+    }
+
+    @Test
     void 마이페이지_신청함_여행상태와_카테고리를_복합_필터링한다() {
         // given
         Trip domesticRecruiting = createTestTrip("국내 모집중", "설명", TripCategory.DOMESTIC);

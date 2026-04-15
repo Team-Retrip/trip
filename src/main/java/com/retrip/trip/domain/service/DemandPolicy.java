@@ -1,5 +1,6 @@
 package com.retrip.trip.domain.service;
 
+import static com.retrip.trip.domain.exception.common.ErrorCode.DEMAND_CANCEL_NOT_ALLOWED;
 import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_DEMAND_NOT_ALLOWED;
 import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_DEMAND_STATUS_NOT_PENDING;
 import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_MEMBER_BANNED_CANNOT_APPLY;
@@ -72,6 +73,16 @@ public class DemandPolicy {
 
         if (isNotLeader(participants, leaderId)) {
             throw new MemberIsNotLeaderException();
+        }
+    }
+
+    public void canCancel(UUID memberId, Demand demand) {
+        if (demand.isNotOwner(memberId)) {
+            throw new BusinessException(DEMAND_CANCEL_NOT_ALLOWED);
+        }
+
+        if (demand.isNotPendingStatus()) {
+            throw new BusinessException(DEMAND_CANCEL_NOT_ALLOWED);
         }
     }
 

@@ -189,4 +189,34 @@ class DemandPolicyTest {
         // when & then
         demandPolicy.canViewDemands(LEADER_ID, trip);
     }
+
+    @Test
+    void 본인의_대기중인_참여요청은_취소할_수_있다() {
+        // given
+        Demand demand = Demand.create(정수_ID, TRIP_ID, "참여 요청 합니다");
+
+        // when & then
+        demandPolicy.canCancel(정수_ID, demand);
+    }
+
+    @Test
+    void 다른_사람의_참여요청은_취소할_수_없다() {
+        // given
+        Demand demand = Demand.create(정수_ID, TRIP_ID, "참여 요청 합니다");
+
+        // when & then
+        assertThatThrownBy(() -> demandPolicy.canCancel(홍석_ID, demand))
+                .isExactlyInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void PENDING_상태가_아닌_참여요청은_취소할_수_없다() {
+        // given
+        Demand demand = Demand.create(정수_ID, TRIP_ID, "참여 요청 합니다");
+        demand.approve();
+
+        // when & then
+        assertThatThrownBy(() -> demandPolicy.canCancel(정수_ID, demand))
+                .isExactlyInstanceOf(BusinessException.class);
+    }
 }

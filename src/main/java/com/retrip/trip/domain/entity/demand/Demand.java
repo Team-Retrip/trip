@@ -64,4 +64,8 @@ public class Demand extends BaseEntity {
     public boolean isNotPendingStatus() {
         return !DemandStatus.PENDING.equals(this.status);
     }
+
+    public boolean isNotOwner(UUID memberId) {
+        return !this.memberId.equals(memberId);
+    }
 }

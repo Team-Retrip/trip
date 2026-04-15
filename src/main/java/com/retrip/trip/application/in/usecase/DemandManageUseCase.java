@@ -21,6 +21,8 @@ public interface DemandManageUseCase {
 
     DemandRejectResponse reject(UUID memberId, UUID tripId, UUID demandId);
 
+    void cancelDemand(UUID memberId, UUID demandId);
+
     List<DemandsResponse> getDemands(UUID memberId, UUID tripId);
 
     Page<MyPageDemandResponse> getMyPageDemands(
