@@ -206,13 +206,39 @@ public class TripController {
 
     @Operation(
             summary = "여행 모집 상태 토글",
-            description = "모집중 → 모집완료, 모집완료 → 모집중으로 상태를 토글하는 API"
+            description = "모집중 → 모집완료, 모집완료 → 모집중으로 상태를 토글하는 API. 여행 시작일이 지난 경우 모집중으로 되돌릴 수 없습니다."
     )
-    @ApiErrorCodeExamples({TRIP_NOT_FOUND, NOT_TRIP_LEADER, TRIP_NOT_READY})
+    @ApiErrorCodeExamples({TRIP_NOT_FOUND, NOT_TRIP_LEADER, TRIP_NOT_READY, TRIP_ALREADY_STARTED})
     @PatchMapping("/{tripId}/status/toggle")
     public ApiResponse<?> toggleRecruitmentStatus(@WithUserContext UserContext userContext,
                                                   @PathVariable("tripId") UUID tripId) {
         tripManageUseCase.toggleRecruitmentStatus(userContext.memberId(), tripId);
+        return ApiResponse.noContent();
+    }
+
+    @Operation(
+            summary = "[테스트] 여행 상태를 여행중으로 강제 변경",
+            description = "테스트 목적으로 여행 상태를 강제로 IN_PROGRESS(여행중)으로 변경합니다. 모집완료(RECRUITMENT_CLOSED) 상태에서만 가능합니다."
+    )
+    @ApiErrorCodeExamples({TRIP_NOT_FOUND, MEMBER_IS_NOT_LEADER, TRIP_STATUS_CHANGE_NOT_ALLOWED})
+    @PatchMapping("/{tripId}/status/in-progress")
+    public ApiResponse<Void> forceChangeStatusToInProgress(
+            @WithUserContext UserContext userContext,
+            @PathVariable("tripId") UUID tripId) {
+        tripManageUseCase.forceChangeStatusToInProgress(userContext.memberId(), tripId);
+        return ApiResponse.noContent();
+    }
+
+    @Operation(
+            summary = "[테스트] 여행 상태를 여행후로 강제 변경",
+            description = "테스트 목적으로 여행 상태를 강제로 COMPLETED(여행후)으로 변경합니다. 여행중(IN_PROGRESS) 상태에서만 가능합니다."
+    )
+    @ApiErrorCodeExamples({TRIP_NOT_FOUND, MEMBER_IS_NOT_LEADER, TRIP_STATUS_CHANGE_NOT_ALLOWED})
+    @PatchMapping("/{tripId}/status/completed")
+    public ApiResponse<Void> forceChangeStatusToCompleted(
+            @WithUserContext UserContext userContext,
+            @PathVariable("tripId") UUID tripId) {
+        tripManageUseCase.forceChangeStatusToCompleted(userContext.memberId(), tripId);
         return ApiResponse.noContent();
     }
 

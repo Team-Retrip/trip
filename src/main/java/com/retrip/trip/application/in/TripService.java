@@ -192,6 +192,20 @@ public class TripService
     }
 
     @Override
+    public void forceChangeStatusToInProgress(UUID memberId, UUID tripId) {
+        Trip trip = findTrip(tripId);
+        trip.validateLeader(memberId);
+        trip.changeStatusToInProgress();
+    }
+
+    @Override
+    public void forceChangeStatusToCompleted(UUID memberId, UUID tripId) {
+        Trip trip = findTrip(tripId);
+        trip.validateLeader(memberId);
+        trip.changeStatusToCompleted();
+    }
+
+    @Override
     public void leaveTrip(UUID tripId, UUID memberId) {
         Trip trip = findTrip(tripId);
         trip.leave(memberId);

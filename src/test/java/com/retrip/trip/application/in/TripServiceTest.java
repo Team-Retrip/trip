@@ -1264,4 +1264,88 @@ class TripServiceTest extends BaseTripServiceTest {
                 tripService.deleteTrip(memberId, trip.getId()));
         assertThat(tripRepository.findById(trip.getId())).isPresent();
     }
+
+    @Test
+    void 리더가_모집완료_상태를_여행중으로_강제_변경한다() {
+        // given
+        Trip trip = createReadyTrip(memberId); // RECRUITMENT_CLOSED
+
+        // when
+        tripService.forceChangeStatusToInProgress(memberId, trip.getId());
+
+        // then
+        Trip result = tripRepository.findById(trip.getId()).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(TripStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void 리더가_여행중_상태를_여행후로_강제_변경한다() {
+        // given
+        Trip trip = createProgressTrip(memberId); // IN_PROGRESS
+
+        // when
+        tripService.forceChangeStatusToCompleted(memberId, trip.getId());
+
+        // then
+        Trip result = tripRepository.findById(trip.getId()).orElseThrow();
+        assertThat(result.getStatus()).isEqualTo(TripStatus.COMPLETED);
+    }
+
+    @Test
+    void 리더가_아니면_여행중으로_강제_변경할_수_없다() {
+        // given: 정수_ID는 참여자이지만 리더가 아님
+        Trip trip = createReadyTrip(memberId);
+        trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(MemberIsNotLeaderException.class,
+                () -> tripService.forceChangeStatusToInProgress(정수_ID, trip.getId()));
+    }
+
+    @Test
+    void 리더가_아니면_여행후로_강제_변경할_수_없다() {
+        // given: 정수_ID는 참여자이지만 리더가 아님
+        Trip trip = createProgressTrip(memberId);
+        trip.addParticipant(TripParticipant.createTripParticipant(정수_ID, trip));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(MemberIsNotLeaderException.class,
+                () -> tripService.forceChangeStatusToCompleted(정수_ID, trip.getId()));
+    }
+
+    @Test
+    void 모집완료가_아닌_상태에서_여행중으로_강제_변경할_수_없다() {
+        // given: 이미 COMPLETED 상태
+        Trip trip = createProgressTrip(memberId);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.COMPLETED);
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(BusinessException.class,
+                () -> tripService.forceChangeStatusToInProgress(memberId, trip.getId()));
+    }
+
+    @Test
+    void 여행중이_아닌_상태에서_여행후로_강제_변경할_수_없다() {
+        // given: RECRUITMENT_CLOSED 상태
+        Trip trip = createReadyTrip(memberId);
+
+        // when & then
+        assertThrows(BusinessException.class,
+                () -> tripService.forceChangeStatusToCompleted(memberId, trip.getId()));
+    }
+
+    @Test
+    void 여행_시작일이_지난_경우_모집완료에서_모집중으로_토글할_수_없다() {
+        // given
+        Trip trip = createReadyTrip(memberId); // RECRUITMENT_CLOSED, start = now + 1일
+        ReflectionTestUtils.setField(trip.getPeriod(), "start", LocalDate.now().minusDays(1));
+        tripRepository.save(trip);
+
+        // when & then
+        assertThrows(BusinessException.class,
+                () -> tripService.toggleRecruitmentStatus(memberId, trip.getId()));
+    }
 }

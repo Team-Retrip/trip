@@ -17,8 +17,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import java.time.LocalDate;
+
 import static com.retrip.trip.domain.exception.common.ErrorCode.*;
 import static com.retrip.trip.domain.exception.common.ErrorCode.TRIP_CANNOT_DELETE;
+import static com.retrip.trip.domain.vo.TripStatus.*;
 import static com.retrip.trip.domain.vo.TripStatus.IN_PROGRESS;
 import static com.retrip.trip.domain.vo.TripStatus.RECRUITMENT_CLOSED;
 import static lombok.AccessLevel.PROTECTED;
@@ -184,7 +187,17 @@ public class Trip extends BaseEntity {
     }
 
     public void changeStatusToInProgress() {
+        if (this.status != RECRUITMENT_CLOSED && this.status != RECRUITING) {
+            throw new BusinessException(TRIP_STATUS_CHANGE_NOT_ALLOWED);
+        }
         this.status = IN_PROGRESS;
+    }
+
+    public void changeStatusToCompleted() {
+        if (this.status != IN_PROGRESS) {
+            throw new BusinessException(TRIP_STATUS_CHANGE_NOT_ALLOWED);
+        }
+        this.status = COMPLETED;
     }
 
     public void changeStatusToRecruitmentClosed() {
@@ -274,12 +287,15 @@ public class Trip extends BaseEntity {
     }
 
     public void toggleRecruitmentStatus() {
-        if (this.status == TripStatus.RECRUITING) {
-            this.status = TripStatus.RECRUITMENT_CLOSED;
+        if (this.status == RECRUITING) {
+            this.status = RECRUITMENT_CLOSED;
             return;
         }
-        if (this.status == TripStatus.RECRUITMENT_CLOSED) {
-            this.status = TripStatus.RECRUITING;
+        if (this.status == RECRUITMENT_CLOSED) {
+            if (!LocalDate.now().isBefore(this.period.getStart())) {
+                throw new BusinessException(TRIP_ALREADY_STARTED);
+            }
+            this.status = RECRUITING;
             return;
         }
         throw new BusinessException(TRIP_NOT_READY);

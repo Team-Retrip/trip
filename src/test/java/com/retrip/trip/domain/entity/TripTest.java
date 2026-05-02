@@ -1,6 +1,8 @@
 package com.retrip.trip.domain.entity;
 
 import com.retrip.trip.domain.exception.PeriodUpdateFailedException;
+import com.retrip.trip.domain.exception.common.BusinessException;
+import com.retrip.trip.domain.fixture.TripFixture;
 import com.retrip.trip.domain.vo.HashTagInfo;
 import com.retrip.trip.domain.vo.ParticipantRole;
 import com.retrip.trip.domain.vo.TripCategory;
@@ -13,12 +15,16 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static com.retrip.trip.domain.fixture.TripFixture.LEADER_ID;
+import static com.retrip.trip.domain.fixture.TripFixture.TRIP_ID;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -123,6 +129,106 @@ class TripTest {
         assertThat(trip.getPeriod().getEnd()).isEqualTo(updateTripPeriod.getEnd());
         assertThat(trip.getItineraries().getValues().size()).isEqualTo(3);
         assertThat(trip.getItineraries().getValues().get(0).getName()).isEqualTo("day 1");
+    }
+
+    @Test
+    void 모집완료_상태에서_여행중으로_상태를_변경할_수_있다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.RECRUITMENT_CLOSED);
+
+        // when
+        trip.changeStatusToInProgress();
+
+        // then
+        assertThat(trip.getStatus()).isEqualTo(TripStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void 모집중_상태에서_여행중으로_상태를_변경할_수_있다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+
+        // when
+        trip.changeStatusToInProgress();
+
+        // then
+        assertThat(trip.getStatus()).isEqualTo(TripStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void 여행후_상태에서는_여행중으로_변경할_수_없다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.COMPLETED);
+
+        // when & then
+        assertThatThrownBy(trip::changeStatusToInProgress)
+                .isExactlyInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void 여행중_상태에서_여행후로_상태를_변경할_수_있다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.IN_PROGRESS);
+
+        // when
+        trip.changeStatusToCompleted();
+
+        // then
+        assertThat(trip.getStatus()).isEqualTo(TripStatus.COMPLETED);
+    }
+
+    @Test
+    void 여행중이_아닌_상태에서는_여행후로_변경할_수_없다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+        // RECRUITMENT_CLOSED 상태
+
+        // when & then
+        assertThatThrownBy(trip::changeStatusToCompleted)
+                .isExactlyInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void 여행_시작일이_지난_경우_모집완료에서_모집중으로_되돌릴_수_없다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.RECRUITMENT_CLOSED);
+        ReflectionTestUtils.setField(trip.getPeriod(), "start", LocalDate.now().minusDays(1));
+
+        // when & then
+        assertThatThrownBy(trip::toggleRecruitmentStatus)
+                .isExactlyInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void 여행_시작일이_오늘이면_모집완료에서_모집중으로_되돌릴_수_없다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID);
+        ReflectionTestUtils.setField(trip, "status", TripStatus.RECRUITMENT_CLOSED);
+        ReflectionTestUtils.setField(trip.getPeriod(), "start", LocalDate.now());
+
+        // when & then
+        assertThatThrownBy(trip::toggleRecruitmentStatus)
+                .isExactlyInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    void 여행_시작일이_미래이면_모집완료에서_모집중으로_되돌릴_수_있다() {
+        // given
+        Trip trip = TripFixture.createTrip(TRIP_ID); // period.start = now + 1일
+
+        tripManuallyClosedRecruitment(trip);
+
+        // when & then
+        assertThatCode(trip::toggleRecruitmentStatus).doesNotThrowAnyException();
+        assertThat(trip.getStatus()).isEqualTo(TripStatus.RECRUITING);
+    }
+
+    private void tripManuallyClosedRecruitment(Trip trip) {
+        ReflectionTestUtils.setField(trip, "status", TripStatus.RECRUITMENT_CLOSED);
     }
 
     @Test

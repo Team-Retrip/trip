@@ -21,5 +21,9 @@ public interface TripManageUseCase {
 
     void toggleRecruitmentStatus(UUID memberId, UUID tripId);
 
+    void forceChangeStatusToInProgress(UUID memberId, UUID tripId);
+
+    void forceChangeStatusToCompleted(UUID memberId, UUID tripId);
+
     void deleteTrip(UUID memberId, UUID tripId);
 }
